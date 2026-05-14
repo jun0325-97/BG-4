@@ -3,7 +3,7 @@
 export type MemberColor = "red" | "blue" | "green" | "yellow";
 
 // 게임 결과 타입 추가
-export type GameResultType = "winner_only" | "ranked" | "no_result";
+export type GameResultType = "winner_only" | "ranked" | "no_result" | "unknown";
 
 export interface Member {
   id: string;

@@ -70,3 +70,41 @@
     padding: 1rem 1.25rem 2rem;
   }
 }
+
+.bottom-sheet-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem 0;
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1.2rem;
+    background-color: #fff;
+    border: 3px solid #333;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    font-family: inherit;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.1s;
+    box-shadow: 0 4px 0 #333;
+
+    &:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #333;
+    }
+
+    svg {
+      color: #555;
+    }
+
+    // 두 번째 버튼(게임 등록)은 배경색을 살짝 다르게 줘서 포인트를 줄 수도 있어!
+    &:nth-child(2) {
+      background-color: #f0f4ff; // 블루톤
+    }
+  }
+}
