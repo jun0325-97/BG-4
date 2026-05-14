@@ -1,0 +1,94 @@
+// src/pages/Dashboard/components/MemberCards/MemberCards.scss
+
+.member-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 0.75rem;
+  border-radius: 12px;
+  border: 3px solid #333;
+  background: #fff;
+  cursor: pointer;
+  // 키치한 블록 그림자
+  box-shadow: 4px 4px 0 #333;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 #333;
+  }
+
+  // 호버도 살짝
+  @media (hover: hover) {
+    &:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 #333;
+    }
+  }
+
+  // 멤버 색상별 배경 포인트
+  &[data-color="red"] {
+    background: #fff0f0;
+  }
+  &[data-color="blue"] {
+    background: #f0f4ff;
+  }
+  &[data-color="green"] {
+    background: #f0fff4;
+  }
+  &[data-color="yellow"] {
+    background: #fffbf0;
+  }
+
+  &__emoji {
+    font-size: 2rem;
+  }
+
+  &__name {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #333;
+  }
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  &__rate {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    border: 2px solid #333;
+
+    // 색상별 뱃지 색
+    [data-color="red"] & {
+      background: #ff5757;
+      color: #fff;
+    }
+    [data-color="blue"] & {
+      background: #4a90e2;
+      color: #fff;
+    }
+    [data-color="green"] & {
+      background: #27ae60;
+      color: #fff;
+    }
+    [data-color="yellow"] & {
+      background: #f39c12;
+      color: #fff;
+    }
+  }
+}

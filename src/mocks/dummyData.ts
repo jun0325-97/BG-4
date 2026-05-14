@@ -1,20 +1,18 @@
 import { Member, BoardGame, GatheringRecord } from "../types";
 
 export const MEMBERS: Member[] = [
-  { id: "m1", name: "레드", color: "red", title: "분노의 승부사", winRate: 55 },
+  { id: "m1", name: "레드", color: "red", winRate: 55 },
   {
     id: "m2",
     name: "블루",
     color: "blue",
-    title: "냉철한 전략가",
     winRate: 60,
   },
-  { id: "m3", name: "그린", color: "green", title: "평화주의자", winRate: 30 },
+  { id: "m3", name: "그린", color: "green", winRate: 30 },
   {
     id: "m4",
     name: "옐로우",
     color: "yellow",
-    title: "블러핑 중독자",
     winRate: 45,
   },
 ];

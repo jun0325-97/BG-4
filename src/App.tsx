@@ -1,3 +1,5 @@
+// src/App.tsx
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard/Dashboard";
@@ -9,12 +11,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 모든 페이지는 Layout(헤더 포함)으로 감싸지게 돼 */}
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/library" element={<Library />} />
           <Route path="/archive" element={<Archive />} />
-          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/mypage/:memberId" element={<MyPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

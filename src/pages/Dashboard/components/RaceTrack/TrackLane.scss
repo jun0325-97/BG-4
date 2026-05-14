@@ -1,0 +1,177 @@
+// src/pages/Dashboard/components/RaceTrack/TrackLane.scss
+
+// ── 키프레임 모음 ──────────────────────────────
+
+// 1등 통통 튀기
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 6px));
+  }
+}
+
+// 연기 올라오기
+@keyframes smokeRise {
+  0% {
+    opacity: 0.9;
+    transform: translateY(0) scale(0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scale(1.2);
+  }
+}
+
+// ── 레인 베이스 ────────────────────────────────
+
+.track-lane {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+
+  // 1등 레인 살짝 강조
+  &.is-first {
+    .lane-info .member-name {
+      font-size: 1.05rem;
+    }
+    .lane-track {
+      border-color: #f1c40f;
+      background: repeating-linear-gradient(
+        90deg,
+        #fffbea 0px,
+        #fffbea 18px,
+        #fff 18px,
+        #fff 24px
+      );
+    }
+  }
+
+  // 꼴찌 레인 살짝 회색
+  &.is-last {
+    .lane-info .member-name {
+      color: #aaa !important;
+    }
+    .lane-track {
+      border-color: #ddd;
+      opacity: 0.85;
+    }
+  }
+}
+
+// ── 왼쪽 정보 ─────────────────────────────────
+
+.lane-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 80px;
+
+  .rank {
+    font-weight: 900;
+    font-size: 0.9rem;
+    color: #999;
+    min-width: 22px;
+  }
+
+  .member-name {
+    font-weight: 800;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+
+    &[data-color="red"] {
+      color: #ff5757;
+    }
+    &[data-color="blue"] {
+      color: #4a90e2;
+    }
+    &[data-color="green"] {
+      color: #27ae60;
+    }
+    &[data-color="yellow"] {
+      color: #f39c12;
+    }
+  }
+}
+
+// ── 트랙 ──────────────────────────────────────
+
+.lane-track {
+  flex: 1;
+  position: relative;
+  height: 42px;
+  background: repeating-linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f0f0f0 18px,
+    #fff 18px,
+    #fff 24px
+  );
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  overflow: visible; // 연기가 트랙 위로 삐져나와야 하니까
+
+  .car {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.4rem;
+    // 출발 → 도착 트랜지션: 1.2초, 부드러운 감속
+    transition: left 1.2s cubic-bezier(0.33, 1, 0.68, 1);
+    user-select: none;
+    filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.12));
+
+    // 1등: bounce 반복
+    &.car--bounce {
+      animation: bounce 0.7s ease-in-out infinite;
+      animation-delay: 1.5s; // 달려온 후에 튀기 시작
+    }
+  }
+}
+
+// ── 연기 ──────────────────────────────────────
+
+.smoke-container {
+  position: absolute;
+  // 차 이모지 왼쪽 뒷부분 (대략)
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.smoke {
+  position: absolute;
+  font-size: 0.75rem;
+  opacity: 0;
+  animation: smokeRise 1.2s ease-out infinite;
+
+  &--1 {
+    left: -2px;
+    animation-delay: 0s;
+  }
+  &--2 {
+    left: -8px;
+    animation-delay: 0.4s;
+  }
+  &--3 {
+    left: -14px;
+    animation-delay: 0.8s;
+  }
+}
+
+// ── 오른쪽 수치 ───────────────────────────────
+
+.lane-stat {
+  min-width: 45px;
+  text-align: right;
+
+  .win-rate {
+    font-weight: 900;
+    font-size: 1rem;
+    color: #333;
+  }
+}

@@ -1,0 +1,23 @@
+// src/styles/_variables.scss
+
+// 1. 멤버 고유 색상 (기획안 기준)
+$color-red: #ff5757;
+$color-blue: #5271ff;
+$color-green: #7ed957;
+$color-yellow: #ffde59;
+
+// 2. 공통 UI 색상
+$color-background: #fffdf7;
+$color-text-main: #333333;
+$color-text-sub: #888888;
+$color-border: #eeeeee;
+
+// 3. 반응형 중단점 (모바일 최우선)
+$breakpoint-mobile: 768px;
+
+// 4. 믹스인 (반응형을 쉽게 쓰기 위한 마법의 주문)
+@mixin mobile {
+  @media (max-width: #{$breakpoint-mobile}) {
+    @content;
+  }
+}

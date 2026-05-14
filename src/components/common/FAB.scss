@@ -1,0 +1,30 @@
+@use "../../styles/variables" as *;
+
+.global-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: $color-red; // 포인트 컬러 사용
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 1000; // 항상 맨 위에 떠 있게!
+
+  &:hover {
+    transform: translateY(-5px);
+    // background-color: darken($color-red, 10%);
+  }
+
+  @include mobile {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 50px;
+    height: 50px;
+  }
+}
