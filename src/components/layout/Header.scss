@@ -1,0 +1,99 @@
+// src/components/layout/Header.scss
+
+.global-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffde59; // 따뜻하고 귀여운 버터 옐로우
+  color: #ff5757; // 통통 튀는 코랄/레드 포인트
+  box-shadow: 0 4px 0px #f1c40f; // 키치한 느낌을 주는 단색 그림자
+  border-bottom: 3px solid #333; // 약간의 카툰 느낌 테두리
+  z-index: 100;
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+
+  .hamburger-btn {
+    display: none; // PC에서는 숨김
+    color: #333;
+    z-index: 101;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+
+    a {
+      font-weight: 800;
+      color: #333;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #ff5757;
+        color: #fff;
+      }
+    }
+  }
+
+  // --- 모바일 대응 (768px 이하) ---
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    .hamburger-btn {
+      display: block; // 모바일에서 보임
+    }
+
+    .nav-links {
+      position: fixed;
+      top: 0;
+      right: -100%; // 평소엔 화면 오른쪽 밖으로 숨김
+      width: 250px;
+      height: 100vh;
+      flex-direction: column;
+      background-color: #fffdf7;
+      padding-top: 5rem;
+      gap: 1rem;
+      border-left: 3px solid #333;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 스르륵 열리는 애니메이션
+      z-index: 100;
+
+      &.open {
+        right: 0; // open 클래스가 붙으면 화면 안으로 들어옴
+      }
+
+      a {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+        border-radius: 0;
+        border-bottom: 2px dashed #eee;
+
+        &:hover {
+          background-color: #ffde59;
+          color: #333;
+        }
+      }
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 99; // 메뉴보다 한 칸 뒤
+    }
+  }
+}

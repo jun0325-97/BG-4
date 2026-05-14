@@ -1,0 +1,8 @@
+// src/styles/global.scss
+
+@use "reset"; // 방금 만든 _reset.scss를 불러옴
+
+// 키치하고 귀여운 폰트 느낌을 내기 위해 둥근 산세리프 기본 폰트 적용
+body {
+  font-family: "Comic Sans MS", "Nunito", "Quicksand", sans-serif;
+}

@@ -1,0 +1,82 @@
+import { Member, BoardGame, GatheringRecord } from "../types";
+
+export const MEMBERS: Member[] = [
+  { id: "m1", name: "레드", color: "red", title: "분노의 승부사", winRate: 55 },
+  {
+    id: "m2",
+    name: "블루",
+    color: "blue",
+    title: "냉철한 전략가",
+    winRate: 60,
+  },
+  { id: "m3", name: "그린", color: "green", title: "평화주의자", winRate: 30 },
+  {
+    id: "m4",
+    name: "옐로우",
+    color: "yellow",
+    title: "블러핑 중독자",
+    winRate: 45,
+  },
+];
+
+export const BOARD_GAMES: BoardGame[] = [
+  {
+    id: "g1",
+    name: "스플렌더",
+    genre: "엔진빌딩",
+    minPlayers: 2,
+    maxPlayers: 4,
+    playTimeMinutes: 30,
+    ownerId: "m1",
+  },
+  {
+    id: "g2",
+    name: "아발론",
+    genre: "마피아/블러핑",
+    minPlayers: 5,
+    maxPlayers: 10,
+    playTimeMinutes: 30,
+    ownerId: "m4",
+  },
+  {
+    id: "g3",
+    name: "카탄",
+    genre: "전략/협상",
+    minPlayers: 3,
+    maxPlayers: 4,
+    playTimeMinutes: 90,
+    ownerId: "m2",
+  },
+];
+
+export const GATHERING_RECORDS: GatheringRecord[] = [
+  {
+    id: "r1",
+    date: "2026-05-10",
+    memo: "옐로우의 블러핑에 다들 속아 넘어간 날 😡",
+    playLogs: [
+      {
+        id: "log1",
+        gameId: "g1", // 스플렌더
+        durationMinutes: 40,
+        results: [
+          { memberId: "m1", score: 15, isWinner: true },
+          { memberId: "m2", score: 12, isWinner: false },
+          { memberId: "m3", score: 9, isWinner: false },
+          { memberId: "m4", score: 14, isWinner: false },
+        ],
+      },
+      {
+        id: "log2",
+        gameId: "g2", // 아발론
+        durationMinutes: 35,
+        results: [
+          { memberId: "m1", isWinner: false },
+          { memberId: "m2", isWinner: false },
+          { memberId: "m3", isWinner: false },
+          { memberId: "m4", isWinner: true }, // 옐로우 혼자 캐리
+        ],
+      },
+    ],
+  },
+];
