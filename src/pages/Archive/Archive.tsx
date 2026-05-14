@@ -75,8 +75,17 @@ export default function Archive() {
                   return (
                     <div key={log.id} className="game-log-item">
                       <div className="game-info">
-                        <span className="game-num">GAME {index + 1}</span>
-                        <h4 className="game-name">{game?.name}</h4>
+                        <div className="log-thumbnail">
+                          {game?.imageUrl ? (
+                            <img src={game.imageUrl} alt="" />
+                          ) : (
+                            "🎲"
+                          )}
+                        </div>
+                        <div>
+                          <span className="game-num">GAME {index + 1}</span>
+                          <h4 className="game-name">{game?.name}</h4>
+                        </div>
                         <div className="duration">
                           <Clock size={14} /> {log.durationMinutes}분
                         </div>

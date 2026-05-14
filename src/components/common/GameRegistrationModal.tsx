@@ -1,9 +1,9 @@
 // src/components/common/GameRegistrationModal.tsx
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Image as ImageIcon } from "lucide-react";
 import { MEMBERS } from "../../mocks/dummyData";
-import { GameResultType } from "../../types";
+import { GameResultType, GAME_GENRES } from "../../types";
 import "./GameRegistrationModal.scss";
 
 interface Props {
@@ -13,23 +13,21 @@ interface Props {
 
 export default function GameRegistrationModal({ isOpen, onClose }: Props) {
   const [name, setName] = useState("");
-  const [genre, setGenre] = useState("");
+  const [genre, setGenre] = useState<string>(GAME_GENRES[0]);
   const [minPlayers, setMinPlayers] = useState("");
   const [maxPlayers, setMaxPlayers] = useState("");
   const [playTime, setPlayTime] = useState("");
   const [ownerId, setOwnerId] = useState(MEMBERS[0].id);
-
-  // 💡 1. 초기값을 "unknown"으로 변경! (유저가 고민할 필요 없이 쾌속 등록 가능)
   const [resultType, setResultType] = useState<GameResultType>("unknown");
+  // 💡 썸네일 이미지 URL을 받을 상태 추가!
+  const [imageUrl, setImageUrl] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     alert(`'${name}' 등록 완료! 🎲 다음 게임을 계속 등록해주세요.`);
 
-    // 💡 2. 초기화할 때도 "unknown"으로 되돌려놓기
     setName("");
     setGenre("");
     setMinPlayers("");
@@ -37,19 +35,47 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
     setPlayTime("");
     setOwnerId(MEMBERS[0].id);
     setResultType("unknown");
+    setImageUrl(""); // 💡 폼 초기화 시 이미지도 같이 비워주기
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>
-          <X size={24} />
-        </button>
-
+    // 💡 overlay 자체가 이제 화면 전체를 덮는 캔버스가 될 거야
+    <div className="fullscreen-modal-overlay">
+      {/* 모달 전용 상단 헤더 (고정) */}
+      <header className="modal-header">
         <h2 className="modal-title">새로운 게임 등록</h2>
+        <button className="close-btn" onClick={onClose}>
+          <X size={28} />
+        </button>
+      </header>
 
+      {/* 스크롤이 가능한 폼 영역 */}
+      <div className="modal-body">
         <form onSubmit={handleSubmit} className="registration-form">
-          {/* ... (게임 이름, 장르, 인원수, 플레이 타임, 소유자 입력 폼은 기존과 완전히 동일) ... */}
+          {/* 💡 썸네일 이미지 입력 영역 추가 */}
+          <div className="form-group image-input-group">
+            <label>게임 표지 이미지 (선택)</label>
+            <div className="image-preview-box">
+              {imageUrl ? (
+                <img src={imageUrl} alt="미리보기" className="preview-img" />
+              ) : (
+                <div className="empty-preview">
+                  <ImageIcon size={40} />
+                  <span>
+                    이미지 URL을 입력하면
+                    <br />
+                    미리보기가 나타나요!
+                  </span>
+                </div>
+              )}
+            </div>
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://... (이미지 주소 복사/붙여넣기)"
+            />
+          </div>
 
           <div className="form-group">
             <label>게임 이름</label>
@@ -64,16 +90,17 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
 
           <div className="form-group">
             <label>장르</label>
-            <input
-              type="text"
-              required
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-              placeholder="예: 엔진빌딩"
-            />
+            {/* 💡 input 대신 select로 변경! */}
+            <select value={genre} onChange={(e) => setGenre(e.target.value)}>
+              {GAME_GENRES.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="form-row">
+          <div className="form-row triple-row">
             <div className="form-group">
               <label>최소 인원</label>
               <input
@@ -130,7 +157,6 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
               value={resultType}
               onChange={(e) => setResultType(e.target.value as GameResultType)}
             >
-              {/* 💡 3. 가장 위에 "나중에 결정" 옵션 추가 */}
               <option value="unknown">
                 🤔 아직 안 해봐서 몰라요 (나중에 결정)
               </option>

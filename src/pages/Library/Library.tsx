@@ -1,12 +1,11 @@
 // src/pages/Library/Library.tsx
 
 import { useState } from "react";
-import { Search, X, Users, Clock } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon } from "lucide-react";
 import { BOARD_GAMES } from "../../mocks/dummyData";
 import { BoardGame } from "../../types";
 import "./Library.scss";
 
-// 💡 팁: 더미 데이터가 적으니 일단 한 페이지에 2개씩만 보여줄게! (나중에 10 등으로 늘리면 돼)
 const ITEMS_PER_PAGE = 2;
 
 export default function Library() {
@@ -52,25 +51,44 @@ export default function Library() {
 
       {/* 보드게임 리스트 */}
       <div className="game-list">
+        {/* currentGames 배열에 데이터가 있을 때만 map을 돌리고, 없으면 empty-state를 보여주기! */}
         {currentGames.length > 0 ? (
-          currentGames.map((game) => (
-            <div
-              key={game.id}
-              className="game-card"
-              onClick={() => setSelectedGame(game)}
-            >
-              <div className="game-info-main">
-                <h3 className="game-name">{game.name}</h3>
-                <span className="game-genre">{game.genre}</span>
+          currentGames.map((game) => {
+            const owner = MEMBERS.find((m) => m.id === game.ownerId);
+            return (
+              <div key={game.id} className="game-card">
+                {/* 썸네일 영역 */}
+                <div className="game-thumbnail">
+                  {game.imageUrl ? (
+                    <img src={game.imageUrl} alt={game.name} />
+                  ) : (
+                    <div className="no-image">
+                      <ImageIcon size={20} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="game-info">
+                  <h3 className="game-name">{game.name}</h3>
+                  <span className="game-genre">{game.genre}</span>
+                  <div className="game-meta-inline">
+                    <span className="meta-item">
+                      <Users size={12} /> {game.minPlayers}-{game.maxPlayers}인
+                    </span>
+                    <span className="meta-item">
+                      <Clock size={12} /> {game.playTimeMinutes}분
+                    </span>
+                  </div>
+                </div>
+
+                <div className="game-owner">
+                  <span className="owner-badge" data-color={owner?.color}>
+                    {owner?.name}
+                  </span>
+                </div>
               </div>
-              <div className="game-info-sub">
-                <span>
-                  {game.minPlayers}~{game.maxPlayers}인
-                </span>
-                <span>{game.playTimeMinutes}분</span>
-              </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="empty-state">검색 결과가 없습니다 🥲</div>
         )}
