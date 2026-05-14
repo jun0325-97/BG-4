@@ -2,18 +2,23 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react"; // 귀여운 아이콘 라이브러리 사용
+import { Menu, X, ChevronDown, ChevronUp } from "lucide-react"; // 아이콘 추가
+import { MEMBERS } from "../../mocks/dummyData"; // 친구 목록 가져오기
 import "./Header.scss";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // 💡 마이페이지 하위 메뉴 열림 상태
+  const [isMyPageOpen, setIsMyPageOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    if (isMenuOpen) setIsMyPageOpen(false); // 전체 메뉴 닫을 때 하위 메뉴도 초기화
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setIsMyPageOpen(false);
   };
 
   return (
@@ -24,7 +29,6 @@ export default function Header() {
         </Link>
       </div>
 
-      {/* 모바일 햄버거 버튼 */}
       <button
         className="hamburger-btn"
         onClick={toggleMenu}
@@ -33,7 +37,7 @@ export default function Header() {
         {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
       </button>
 
-      {/* 네비게이션 링크들 */}
+      {/* 네비게이션 링크들: 'open' 클래스로 애니메이션 제어 */}
       <nav className={`nav-links ${isMenuOpen ? "open" : ""}`}>
         <Link to="/" onClick={closeMenu}>
           Dashboard
@@ -44,12 +48,37 @@ export default function Header() {
         <Link to="/archive" onClick={closeMenu}>
           Archive
         </Link>
-        <Link to="/mypage" onClick={closeMenu}>
-          My Page
-        </Link>
+
+        {/* 💡 My Page를 버튼으로 변경하고 하위 메뉴 추가 */}
+        <div className="mypage-menu-container">
+          <button
+            className="mypage-toggle-btn"
+            onClick={() => setIsMyPageOpen(!isMyPageOpen)}
+          >
+            My Page{" "}
+            {isMyPageOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          {/* 하위 메뉴 (토글) */}
+          <div className={`submenu ${isMyPageOpen ? "show" : ""}`}>
+            {MEMBERS.map((member) => (
+              <Link
+                key={member.id}
+                to={`/mypage/${member.color}`}
+                onClick={closeMenu}
+                className="submenu-link"
+              >
+                <span
+                  className="dot"
+                  style={{ backgroundColor: member.color }}
+                ></span>
+                {member.name}
+              </Link>
+            ))}
+          </div>
+        </div>
       </nav>
 
-      {/* 모바일에서 메뉴 열렸을 때 뒷배경 어둡게 처리 */}
       {isMenuOpen && <div className="overlay" onClick={closeMenu}></div>}
     </header>
   );

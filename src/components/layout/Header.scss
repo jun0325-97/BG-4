@@ -97,3 +97,51 @@
     }
   }
 }
+
+.mypage-menu-container {
+  width: 100%;
+
+  .mypage-toggle-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    font-size: 1.2rem; // 기존 링크 크기와 맞춤
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .submenu {
+    display: none; // 기본은 숨김
+    flex-direction: column;
+    padding-left: 1.5rem; // 들여쓰기
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+
+    &.show {
+      display: flex; // 클래스 붙으면 보임
+    }
+
+    .submenu-link {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #333;
+      }
+    }
+  }
+}

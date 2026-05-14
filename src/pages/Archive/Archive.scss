@@ -1,0 +1,174 @@
+// src/pages/Archive/Archive.scss
+
+@use "../../styles/variables" as *;
+
+.archive-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 5rem;
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+}
+
+.year-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+
+  .year-tab {
+    padding: 0.5rem 1.2rem;
+    border: 3px solid #333;
+    border-radius: 20px;
+    background-color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+
+    &.active {
+      background-color: $color-yellow;
+      box-shadow: 3px 3px 0 #333;
+      transform: translate(-2px, -2px);
+    }
+  }
+}
+
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.record-card {
+  border: 3px solid #333;
+  border-radius: 16px;
+  background-color: #fff;
+  box-shadow: 4px 4px 0 #333;
+  overflow: hidden;
+
+  .record-header {
+    padding: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+
+    .date-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #888;
+    }
+
+    .memo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #333;
+      padding-right: 2rem;
+    }
+
+    .icon-wrapper {
+      position: absolute;
+      right: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #333;
+    }
+  }
+
+  .record-detail {
+    padding: 0 1.2rem 1.2rem;
+    border-top: 2px dashed #eee;
+    background-color: #fffdf7;
+
+    .game-log-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid #eee;
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .game-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0.8rem;
+
+        .game-num {
+          font-size: 0.7rem;
+          font-weight: 900;
+          background: #333;
+          color: #fff;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+
+        .game-name {
+          font-size: 1rem;
+          font-weight: 900;
+        }
+
+        .duration {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.8rem;
+          color: #888;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.results-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  .player-result-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+
+    &[data-color="red"] {
+      background-color: #ffe5e5;
+    }
+    &[data-color="blue"] {
+      background-color: #e5ebff;
+    }
+    &[data-color="green"] {
+      background-color: #eaffea;
+    }
+    &[data-color="yellow"] {
+      background-color: #fff9e5;
+    }
+
+    .score {
+      color: #666;
+      font-size: 0.75rem;
+    }
+    .winner-crown {
+      color: #ffab00;
+    }
+    .rank-badge {
+      font-size: 0.75rem;
+      color: #555;
+    }
+  }
+}

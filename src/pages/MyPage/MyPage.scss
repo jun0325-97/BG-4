@@ -1,1 +1,121 @@
+// src/pages/MyPage/MyPage.scss
+
 @use "../../styles/variables" as *;
+
+.mypage-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mypage-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  border-radius: 16px;
+  border: 3px solid #333;
+  box-shadow: 4px 4px 0 #333; // 키치한 블록 그림자
+  text-align: center;
+  transition: background-color 0.3s ease;
+
+  // URL 파라미터에 따라 받아온 멤버 색상 테마 적용
+  &[data-color="red"] {
+    background-color: #fff0f0;
+  }
+  &[data-color="blue"] {
+    background-color: #f0f4ff;
+  }
+  &[data-color="green"] {
+    background-color: #f0fff4;
+  }
+  &[data-color="yellow"] {
+    background-color: #fffbf0;
+  }
+
+  .profile-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .name {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #333;
+  }
+
+  .title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #666;
+    margin-top: 0.25rem;
+  }
+
+  .sub-title {
+    margin-top: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 2px solid #333;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: #333;
+  }
+}
+
+.stats-section {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem; // 줄 간 간격
+
+  .stat-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 3px solid #333;
+    background-color: #fff;
+    box-shadow: 3px 3px 0 #333;
+
+    .label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #888;
+    }
+
+    .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #333;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+.chart-section {
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 3px solid #333;
+  box-shadow: 4px 4px 0 #333;
+  background-color: #fff;
+
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .radar-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
