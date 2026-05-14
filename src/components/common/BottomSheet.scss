@@ -1,0 +1,72 @@
+// src/components/common/BottomSheet.scss
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+}
+
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fffdf7;
+  border-radius: 20px 20px 0 0;
+  border: 3px solid #333;
+  border-bottom: none;
+  box-shadow: 0 -4px 0 #333;
+  z-index: 201;
+  animation: slideUp 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+  max-height: 85vh;
+  overflow-y: auto;
+
+  &__handle {
+    width: 40px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 0.75rem auto 0;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem 0.5rem;
+    border-bottom: 2px dashed #eee;
+  }
+
+  &__title {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #333;
+  }
+
+  &__close {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #888;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+
+    &:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+  }
+
+  &__body {
+    padding: 1rem 1.25rem 2rem;
+  }
+}

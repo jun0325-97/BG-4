@@ -28,3 +28,59 @@
     height: 50px;
   }
 }
+// fab-menu 스타일 추가
+
+.fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 3px solid #333;
+    background: #fff;
+    box-shadow: 3px 3px 0 #333;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-align: left;
+    width: 100%;
+
+    &:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #333;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 2px 2px 0 #333;
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    strong {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #333;
+    }
+
+    span {
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: 600;
+    }
+  }
+}
