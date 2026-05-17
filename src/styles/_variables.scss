@@ -1,16 +1,18 @@
-// src/styles/_variables.scss
+// 1. 레트로 팝 멤버 고유 색상 (레퍼런스 팜레트 정확 반영)
+$color-red: #fd5a46; // 코랄 레드
+$color-blue: #058cd7; // 레트로 블루
+$color-green: #00995e; // 에메랄드 그린
+$color-yellow: #ffc567; // 골든 오렌지 옐로우
+$color-pink: #fb7da8; // 레트로 핑크 (더보용)
+$color-purple: #552cb7; // 레트로 퍼플 (더보용)
 
-// 1. 멤버 고유 색상 (기획안 기준)
-$color-red: #ff5757;
-$color-blue: #5271ff;
-$color-green: #7ed957;
-$color-yellow: #ffde59;
-
-// 2. 공통 UI 색상
-$color-background: #fffdf7;
-$color-text-main: #333333;
-$color-text-sub: #888888;
-$color-border: #eeeeee;
+// 2. 공통 UI 색상 (레퍼런스 배경색: 따뜻한 크림오프화이트)
+$color-background: #f5ead8; // 이 배경색이 레퍼런스의 필릴 아이보리
+$color-grid-line: rgba(180, 140, 80, 0.18); // 은은한 따뜻한 선
+$color-card-bg: #ffffff;
+$color-text-main: #1a1a1a;
+$color-text-sub: #777777;
+$color-border: #1a1a1a;
 
 // 3. 반응형 중단점 (모바일 최우선)
 $breakpoint-mobile: 768px;
@@ -19,5 +21,35 @@ $breakpoint-mobile: 768px;
 @mixin mobile {
   @media (max-width: #{$breakpoint-mobile}) {
     @content;
+  }
+}
+
+// 🌟 5. 레트로 키치 믹스인 (적당한 2px 굵기)
+@mixin retro-border {
+  border: 2px solid $color-border;
+  border-radius: 12px;
+}
+
+@mixin retro-shadow {
+  // 그림자 제거
+}
+
+@mixin retro-window-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.8rem 1rem;
+  background-color: $color-card-bg;
+  border-bottom: 2px solid $color-border;
+  
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: $color-red; // 빨강
+    box-shadow: 18px 0 0 $color-yellow, 36px 0 0 $color-green; // 노랑, 초록
+    margin-right: 1rem;
   }
 }

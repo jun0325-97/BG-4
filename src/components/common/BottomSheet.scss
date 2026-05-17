@@ -1,5 +1,5 @@
 // src/components/common/BottomSheet.scss
-
+@use "../../styles/variables" as *;
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -21,11 +21,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fffdf7;
+  background: $color-card-bg;
   border-radius: 20px 20px 0 0;
-  border: 3px solid #333;
+  border: 2px solid $color-border;
   border-bottom: none;
-  box-shadow: 0 -4px 0 #333;
   z-index: 201;
   animation: slideUp 0.3s cubic-bezier(0.33, 1, 0.68, 1);
   max-height: 85vh;
@@ -50,19 +49,19 @@
   &__title {
     font-size: 1.1rem;
     font-weight: 900;
-    color: #333;
+    color: $color-text-main;
   }
 
   &__close {
     font-size: 1rem;
     font-weight: 700;
-    color: #888;
+    color: $color-text-sub;
     padding: 0.25rem 0.5rem;
     border-radius: 8px;
 
     &:hover {
       background: #f0f0f0;
-      color: #333;
+      color: $color-text-main;
     }
   }
 
@@ -83,28 +82,21 @@
     gap: 12px;
     padding: 1.2rem;
     background-color: #fff;
-    border: 3px solid #333;
-    border-radius: 16px;
+    @include retro-border;
     font-size: 1.1rem;
     font-weight: 800;
     font-family: inherit;
-    color: #333;
+    color: $color-text-main;
     cursor: pointer;
-    transition: all 0.1s;
-    box-shadow: 0 4px 0 #333;
-
-    &:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #333;
-    }
+    @include retro-shadow;
 
     svg {
-      color: #555;
+      color: $color-text-sub;
     }
 
     // 두 번째 버튼(게임 등록)은 배경색을 살짝 다르게 줘서 포인트를 줄 수도 있어!
     &:nth-child(2) {
-      background-color: #f0f4ff; // 블루톤
+      background-color: rgba($color-blue, 0.1); // 블루톤
     }
   }
 }

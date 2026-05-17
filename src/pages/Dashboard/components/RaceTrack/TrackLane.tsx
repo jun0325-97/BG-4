@@ -4,19 +4,24 @@ import { useEffect, useState } from "react";
 import "./TrackLane.scss";
 import { Member } from "../../../../types";
 
+import imgRed from "../../../../assets/images/img-red-1.png";
+import imgBlue from "../../../../assets/images/img-blue-1.png";
+import imgGreen from "../../../../assets/images/img-green-1.png";
+import imgYellow from "../../../../assets/images/img-yellow-1.png";
+
+const CHARACTER_IMAGES: Record<string, string> = {
+  red: imgRed,
+  blue: imgBlue,
+  green: imgGreen,
+  yellow: imgYellow,
+};
+
 interface TrackLaneProps {
   member: Member;
   rank: number;
-  isLast: boolean; // 꼴찌 여부
-  animate: boolean; // 부모가 "출발!" 신호를 줄 때 true로 바뀜
+  isLast: boolean;
+  animate: boolean;
 }
-
-const CAR_EMOJI: Record<string, string> = {
-  red: "🚗",
-  blue: "🚙",
-  green: "🚕",
-  yellow: "🚌",
-};
 
 export default function TrackLane({
   member,
@@ -24,25 +29,25 @@ export default function TrackLane({
   isLast,
   animate,
 }: TrackLaneProps) {
-  // animate가 false면 0%, true면 실제 winRate 위치로
   const [carPosition, setCarPosition] = useState(0);
 
   useEffect(() => {
     if (animate) {
-      // 약간의 딜레이 후 실제 위치로 이동 (rank마다 살짝 다르게 → 순차 출발 느낌)
+      // 모든 미플이 동시에 출발하도록 rank 딜레이 제거하고 100ms 고정 딜레이 적용!
       const timer = setTimeout(() => {
         setCarPosition(member.winRate);
-      }, rank * 120); // 1등이 먼저 출발, 꼴찌가 마지막 출발
+      }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [animate, member.winRate, rank]);
+  }, [animate, member.winRate]);
 
   return (
     <div
       className={`track-lane ${rank === 1 ? "is-first" : ""} ${
         isLast ? "is-last" : ""
       }`}
+      data-color={member.color}
     >
       {/* 왼쪽: 순위 + 이름 */}
       <div className="lane-info">
@@ -55,13 +60,23 @@ export default function TrackLane({
       {/* 가운데: 트랙 */}
       <div className="lane-track">
         <div
-          className={`car ${rank === 1 ? "car--bounce" : ""} ${
+          className={`car ${
+            rank === 1 ? "car--bounce" :
+            rank === 2 ? "car--wobble" :
+            rank === 3 ? "car--float" :
             isLast ? "car--smoke" : ""
           }`}
           style={{ left: `${carPosition}%` }}
           title={`${member.winRate}%`}
         >
-          {CAR_EMOJI[member.color]}
+          {/* 보드게임 미플(Meeple)처럼 이미지 렌더링 */}
+          <div className="meeple-wrapper" data-color={member.color}>
+            <img
+              src={CHARACTER_IMAGES[member.color]}
+              alt={member.name}
+              className="meeple-img"
+            />
+          </div>
 
           {/* 꼴찌 연기 파티클 */}
           {isLast && (

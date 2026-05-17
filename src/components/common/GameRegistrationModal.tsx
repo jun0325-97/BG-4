@@ -52,28 +52,34 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
       {/* 스크롤이 가능한 폼 영역 */}
       <div className="modal-body">
         <form onSubmit={handleSubmit} className="registration-form">
-          {/* 💡 썸네일 이미지 입력 영역 추가 */}
           <div className="form-group image-input-group">
             <label>게임 표지 이미지 (선택)</label>
-            <div className="image-preview-box">
+            <div className="image-preview-box" onClick={() => document.getElementById("game-image-upload")?.click()}>
               {imageUrl ? (
                 <img src={imageUrl} alt="미리보기" className="preview-img" />
               ) : (
                 <div className="empty-preview">
                   <ImageIcon size={40} />
                   <span>
-                    이미지 URL을 입력하면
+                    클릭하여 사진첩에서
                     <br />
-                    미리보기가 나타나요!
+                    이미지를 업로드하세요
                   </span>
                 </div>
               )}
             </div>
             <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://... (이미지 주소 복사/붙여넣기)"
+              id="game-image-upload"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const localUrl = URL.createObjectURL(file);
+                  setImageUrl(localUrl);
+                }
+              }}
+              style={{ display: "none" }}
             />
           </div>
 

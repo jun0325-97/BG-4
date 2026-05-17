@@ -1,8 +1,9 @@
 // src/pages/Library/Library.tsx
 
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, X, Users, Clock, Image as ImageIcon } from "lucide-react";
-import { BOARD_GAMES } from "../../mocks/dummyData";
+import { BOARD_GAMES, MEMBERS } from "../../mocks/dummyData";
 import { BoardGame } from "../../types";
 import "./Library.scss";
 
@@ -12,11 +13,20 @@ export default function Library() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<BoardGame | null>(null);
+  
+  // 💡 URL에서 쿼리 파라미터 읽어오기 (예: ?owner=red)
+  const [searchParams] = useSearchParams();
+  const ownerFilter = searchParams.get("owner");
 
-  // 1. 검색어에 맞게 데이터 필터링
-  const filteredGames = BOARD_GAMES.filter((game) =>
-    game.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 1. 검색어 및 URL 필터에 맞게 데이터 필터링
+  const filteredGames = BOARD_GAMES.filter((game) => {
+    const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // owner 쿼리가 있다면 해당 멤버가 가진 게임만, 없으면 모두 통과
+    const matchesOwner = ownerFilter ? game.ownerId === MEMBERS.find(m => m.color === ownerFilter)?.id : true;
+    
+    return matchesSearch && matchesOwner;
+  });
 
   // 2. 전체 페이지 수 계산 (예: 4개 / 2 = 2페이지)
   const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE) || 1;
@@ -49,6 +59,13 @@ export default function Library() {
         />
       </div>
 
+      {/* 현재 필터 상태 표시 */}
+      {ownerFilter && (
+        <div className="filter-badge">
+          <span>{MEMBERS.find(m => m.color === ownerFilter)?.name} 님의 책장 구경중 👀</span>
+        </div>
+      )}
+
       {/* 보드게임 리스트 */}
       <div className="game-list">
         {/* currentGames 배열에 데이터가 있을 때만 map을 돌리고, 없으면 empty-state를 보여주기! */}
@@ -56,7 +73,11 @@ export default function Library() {
           currentGames.map((game) => {
             const owner = MEMBERS.find((m) => m.id === game.ownerId);
             return (
-              <div key={game.id} className="game-card">
+              <div 
+                key={game.id} 
+                className="game-card" 
+                onClick={() => setSelectedGame(game)} // 💡 클릭 이벤트 연결!
+              >
                 {/* 썸네일 영역 */}
                 <div className="game-thumbnail">
                   {game.imageUrl ? (
@@ -113,13 +134,12 @@ export default function Library() {
       {selectedGame && (
         <div className="modal-overlay" onClick={() => setSelectedGame(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedGame(null)}>
-              <X size={24} />
-            </button>
-
             <div className="modal-header">
               <h2>{selectedGame.name}</h2>
-              <span className="badge">{selectedGame.genre}</span>
+              {/* <span className="badge">{selectedGame.genre}</span> */}
+              <button className="close-btn" onClick={() => setSelectedGame(null)}>
+                <X size={24} />
+              </button>
             </div>
 
             <div className="modal-body">
@@ -136,13 +156,7 @@ export default function Library() {
               <div className="detail-item">
                 <span>📦 소유자: </span>
                 <strong>
-                  {selectedGame.ownerId === "m1"
-                    ? "레드"
-                    : selectedGame.ownerId === "m2"
-                    ? "블루"
-                    : selectedGame.ownerId === "m3"
-                    ? "그린"
-                    : "옐로우"}
+                  {MEMBERS.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
                 </strong>
               </div>
             </div>

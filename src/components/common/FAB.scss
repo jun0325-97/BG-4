@@ -4,21 +4,20 @@
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background-color: $color-red; // 포인트 컬러 사용
+  background-color: $color-red;
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  z-index: 1000; // 항상 맨 위에 떠 있게!
+  border: 2px solid $color-border;
+  z-index: 1000;
+  transition: transform 0.15s ease;
 
   &:hover {
-    transform: translateY(-5px);
-    // background-color: darken($color-red, 10%);
+    transform: translateY(-3px);
   }
 
   @include mobile {
@@ -40,25 +39,11 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    border-radius: 12px;
-    border: 3px solid #333;
-    background: #fff;
-    box-shadow: 3px 3px 0 #333;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: $color-card-bg;
+    @include retro-border;
+    @include retro-shadow;
     text-align: left;
     width: 100%;
-
-    &:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0 #333;
-    }
-
-    @media (hover: hover) {
-      &:hover {
-        transform: translate(1px, 1px);
-        box-shadow: 2px 2px 0 #333;
-      }
-    }
   }
 
   &__icon {
@@ -74,12 +59,12 @@
     strong {
       font-size: 1rem;
       font-weight: 900;
-      color: #333;
+      color: $color-text-main;
     }
 
     span {
       font-size: 0.8rem;
-      color: #888;
+      color: $color-text-sub;
       font-weight: 600;
     }
   }

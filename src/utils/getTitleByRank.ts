@@ -6,10 +6,10 @@ interface RankTitle {
 }
 
 const RANK_TITLES: Record<number, RankTitle> = {
-  1: { emoji: "👑", title: "이 판 제가 먹겠습니다" },
-  2: { emoji: "😤", title: "2등도 내 탓이오" },
-  3: { emoji: "🫠", title: "나 요즘 좀 힘들어" },
-  4: { emoji: "🤙", title: "져도 돼 어차피 추억" },
+  1: { emoji: "👑", title: "오늘의 대장" },
+  2: { emoji: "🥈", title: "은빛 추격자" },
+  3: { emoji: "🥉", title: "평화주의자" },
+  4: { emoji: "🌱", title: "수호 요정" },
 };
 
 export function getTitleByRank(rank: number): RankTitle {

@@ -3,8 +3,6 @@
 @use "../../styles/variables" as *;
 
 .mypage-container {
-  max-width: 600px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -15,24 +13,24 @@
   flex-direction: column;
   align-items: center;
   padding: 2.5rem 1rem;
-  border-radius: 16px;
-  border: 3px solid #333;
-  box-shadow: 4px 4px 0 #333; // 키치한 블록 그림자
+  @include retro-border;
+  background-color: $color-card-bg;
+  @include retro-shadow;
   text-align: center;
   transition: background-color 0.3s ease;
 
   // URL 파라미터에 따라 받아온 멤버 색상 테마 적용
   &[data-color="red"] {
-    background-color: #fff0f0;
+    background-color: rgba($color-red, 0.12);
   }
   &[data-color="blue"] {
-    background-color: #f0f4ff;
+    background-color: rgba($color-blue, 0.12);
   }
   &[data-color="green"] {
-    background-color: #f0fff4;
+    background-color: rgba($color-green, 0.12);
   }
   &[data-color="yellow"] {
-    background-color: #fffbf0;
+    background-color: rgba($color-yellow, 0.2);
   }
 
   .profile-icon {
@@ -43,25 +41,25 @@
   .name {
     font-size: 2rem;
     font-weight: 900;
-    color: #333;
+    color: $color-text-main;
   }
 
   .title {
     font-size: 1rem;
     font-weight: 700;
-    color: #666;
+    color: $color-text-sub;
     margin-top: 0.25rem;
   }
 
   .sub-title {
     margin-top: 0.75rem;
     padding: 0.25rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.6);
-    border: 2px solid #333;
+    background-color: rgba(255, 255, 255, 0.8);
+    @include retro-border;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 900;
-    color: #333;
+    color: $color-text-main;
   }
 }
 
@@ -77,39 +75,51 @@
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
-    border-radius: 12px;
-    border: 3px solid #333;
-    background-color: #fff;
-    box-shadow: 3px 3px 0 #333;
+    @include retro-border;
+    background-color: $color-card-bg;
+    @include retro-shadow;
 
     .label {
       font-size: 0.9rem;
       font-weight: 700;
-      color: #888;
+      color: $color-text-sub;
     }
 
     .value {
       font-size: 1.8rem;
       font-weight: 900;
-      color: #333;
+      color: $color-text-main;
       margin-top: 0.25rem;
+
+      &.highlight {
+        color: $color-red;
+        font-size: 1.4rem;
+      }
+    }
+  }
+
+  &.single-box {
+    .stat-box {
+      padding: 1rem;
+      
+      .value {
+        font-size: 1.2rem;
+      }
     }
   }
 }
 
 .chart-section {
   padding: 1.5rem;
-  border-radius: 16px;
-  border: 3px solid #333;
-  box-shadow: 4px 4px 0 #333;
-  background-color: #fff;
+  @include retro-border;
+  background-color: $color-card-bg;
+  @include retro-shadow;
 
   .section-title {
     font-size: 1.2rem;
     font-weight: 900;
     text-align: center;
     margin-bottom: 1rem;
-    color: #333;
   }
 
   .radar-wrapper {
@@ -117,5 +127,24 @@
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+}
+
+.action-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+
+  .library-link-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background-color: $color-yellow;
+    color: $color-text-main;
+    font-size: 1.1rem;
+    font-weight: 900;
+    @include retro-border;
+    border-radius: 12px;
+    cursor: pointer;
+    @include retro-shadow;
   }
 }

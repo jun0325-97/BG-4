@@ -1,8 +1,34 @@
 // src/styles/global.scss
 
 @use "reset"; // 방금 만든 _reset.scss를 불러옴
+@use "variables" as *; // 변수 사용을 위해 추가
+@import url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy.css');
 
-// 키치하고 귀여운 폰트 느낌을 내기 위해 둥근 산세리프 기본 폰트 적용
+// 전체 폰트 패밀리를 페이퍼로지로 통일
 body {
-  font-family: "Comic Sans MS", "Nunito", "Quicksand", sans-serif;
+  font-family: 'Paperlogy', "Comic Sans MS", "Nunito", "Quicksand", sans-serif;
+  color: $color-text-main;
+  
+  // 🌟 레트로 팝: 어두운 남색 배경에 눈금선(Grid) 패턴
+  background-color: $color-background;
+  background-image: 
+    linear-gradient($color-grid-line 1px, transparent 1px),
+    linear-gradient(90deg, $color-grid-line 1px, transparent 1px);
+  background-size: 32px 32px; // 간직한 모눈종이 간격
+  background-position: center center;
 }
+
+/* 📱 모바일 앱처럼 가운데 정렬 & 고정폭 (공통 컨테이너) */
+#root {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.55); // 반투명 화이트로 위에 격자 좌없게 비쳐서
+  position: relative;
+}
+
+/* 🧱 모든 페이지의 공통 여백 (상단, 좌우, 하단 FAB 영역 확보) */
+.main-content {
+  padding: 1.5rem 1.25rem 6rem 1.25rem;
+}
+

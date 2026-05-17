@@ -1,0 +1,164 @@
+/* src/components/common/RecordRegistrationModal.scss */
+
+@use "../../styles/variables" as *;
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: $color-background;
+  background-image: 
+    linear-gradient($color-grid-line 1px, transparent 1px),
+    linear-gradient(90deg, $color-grid-line 1px, transparent 1px);
+  background-size: 40px 40px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.modal-content {
+  background: $color-card-bg;
+  @include retro-border;
+  @include retro-shadow;
+  padding: 0; // 헤더와 분리되도록 내부 패딩 제거
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh; /* 화면을 넘어가면 스크롤되도록 */
+  overflow: hidden; // 내부 스크롤은 body에서
+  display: flex;
+  flex-direction: column;
+
+  .modal-header {
+    @include retro-window-header;
+    justify-content: space-between;
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: $color-text-main;
+      margin: 0;
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  .close-btn {
+    background: none; border: none; cursor: pointer;
+    color: $color-text-main;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.modal-body-scroll {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.record-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: $color-text-main;
+    }
+
+    input[type="date"],
+    select,
+    textarea {
+      padding: 0.8rem;
+      @include retro-border;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 700;
+      outline: none;
+
+      &:focus {
+        border-color: $color-blue;
+      }
+    }
+  }
+
+  /* 🌟 이번 스텝에 추가된 멤버별 입력 영역 스타일 */
+  .player-results-section {
+    background-color: #fff;
+    padding: 1rem;
+    @include retro-border;
+    border-radius: 8px;
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: $color-text-main;
+    }
+
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .member-name {
+        font-weight: bold;
+        min-width: 60px;
+      }
+
+      .inputs-ranked {
+        display: flex;
+        gap: 8px;
+        
+        input {
+          width: 70px;
+          padding: 6px;
+          @include retro-border;
+          border-radius: 6px;
+          text-align: center;
+          font-family: inherit;
+          font-weight: 700;
+        }
+      }
+
+      .input-winner {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      .no-result-text {
+        font-size: 14px;
+        color: #777;
+      }
+    }
+  }
+
+  .submit-btn {
+    margin-top: 1.5rem;
+    padding: 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 900;
+    font-family: inherit;
+    background-color: $color-yellow;
+    color: $color-text-main;
+    @include retro-border;
+    border-radius: 8px;
+    @include retro-shadow;
+    cursor: pointer;
+  }
+}

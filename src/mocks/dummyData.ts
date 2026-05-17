@@ -3,17 +3,17 @@
 import { Member, BoardGame, GatheringRecord } from "../types";
 
 export const MEMBERS: Member[] = [
-  { id: "m1", name: "레드", color: "red", winRate: 55 },
-  { id: "m2", name: "블루", color: "blue", winRate: 60 },
-  { id: "m3", name: "그린", color: "green", winRate: 30 },
-  { id: "m4", name: "옐로우", color: "yellow", winRate: 45 },
+  { id: "m1", name: "영준", color: "red", winRate: 55 },
+  { id: "m2", name: "가영", color: "blue", winRate: 60 },
+  { id: "m3", name: "윤혁", color: "green", winRate: 30 },
+  { id: "m4", name: "한솔", color: "yellow", winRate: 45 },
 ];
 
 export const BOARD_GAMES: BoardGame[] = [
   {
     id: "g1",
     name: "스플렌더",
-    genre: "엔진빌딩",
+    genre: "엔진/덱빌딩",
     minPlayers: 2,
     maxPlayers: 4,
     playTimeMinutes: 30,
@@ -33,7 +33,7 @@ export const BOARD_GAMES: BoardGame[] = [
   {
     id: "g3",
     name: "카탄",
-    genre: "전략/협상",
+    genre: "전략/수싸움",
     minPlayers: 3,
     maxPlayers: 4,
     playTimeMinutes: 90,
@@ -56,7 +56,7 @@ export const GATHERING_RECORDS: GatheringRecord[] = [
   {
     id: "r1",
     date: "2026-05-10",
-    memo: "옐로우의 블러핑에 다들 속아 넘어간 날 😡",
+    memo: "한솔의 블러핑에 다들 속아 넘어간 날 😡",
     playLogs: [
       {
         id: "log1",

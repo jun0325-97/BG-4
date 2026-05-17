@@ -11,8 +11,7 @@
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-color: #fffdf7; // 따뜻한 크림색 배경
-  color: #333333;
+  // 배경색과 폰트 색상은 global.scss에서 변수로 관리
 }
 
 ul,

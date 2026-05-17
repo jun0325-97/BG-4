@@ -1,12 +1,13 @@
 // src/pages/Archive/Archive.tsx
 
 import { useState } from "react";
-import { GATHERING_RECORDS, BOARD_GAMES, MEMBERS } from "../../mocks/dummyData";
+import { useStore } from "../../store/useStore"; // ⭕ 새 코드: Store 불러오기!
 import { Calendar, ChevronDown, ChevronUp, Trophy, Clock } from "lucide-react";
 import "./Archive.scss";
 
 export default function Archive() {
   // 1. 데이터에서 존재하는 연도들만 뽑아서 중복 제거 후 내림차순 정렬 (2026, 2025...)
+const { records: GATHERING_RECORDS, members: MEMBERS, boardGames: BOARD_GAMES } = useStore();
   const years = Array.from(
     new Set(GATHERING_RECORDS.map((rec) => rec.date.split("-")[0]))
   ).sort((a, b) => b.localeCompare(a));
@@ -61,7 +62,6 @@ export default function Archive() {
                 <Calendar size={16} />
                 <span>{record.date}</span>
               </div>
-              <h3 className="memo">"{record.memo}"</h3>
               <div className="icon-wrapper">
                 {openRecordId === record.id ? <ChevronUp /> : <ChevronDown />}
               </div>
@@ -70,6 +70,16 @@ export default function Archive() {
             {/* 아코디언 내용 (클릭 시 펼쳐지는 상세 정보) */}
             {openRecordId === record.id && (
               <div className="record-detail">
+                {record.photoUrl && (
+                  <div className="record-photo">
+                    <img src={record.photoUrl} alt="모임 인증샷" />
+                  </div>
+                )}
+                {record.memo && (
+                  <div className="record-memo">
+                    <p>"{record.memo}"</p>
+                  </div>
+                )}
                 {record.playLogs.map((log, index) => {
                   const game = BOARD_GAMES.find((g) => g.id === log.gameId);
                   return (

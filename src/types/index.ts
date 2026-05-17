@@ -40,17 +40,6 @@ export interface Member {
   winRate: number;
 }
 
-export interface BoardGame {
-  id: string;
-  name: string;
-  genre: string;
-  minPlayers: number;
-  maxPlayers: number;
-  playTimeMinutes: number;
-  ownerId: string;
-  resultType: GameResultType; // 추가 ✨
-  imageUrl?: string;
-}
 
 // PlayerResult는 resultType에 따라 쓰는 필드가 달라짐
 export interface PlayerResult {

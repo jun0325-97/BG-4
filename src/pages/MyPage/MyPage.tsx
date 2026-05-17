@@ -1,6 +1,6 @@
 // src/pages/MyPage/MyPage.tsx
 
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import {
   Radar,
   RadarChart,
@@ -16,7 +16,8 @@ import "./MyPage.scss";
 const MOCK_STATS: Record<string, any> = {
   red: {
     playTime: 1200,
-    nemesis: "블루",
+    nemesis: "가영",
+    favoriteGame: "스플렌더",
     genreTitle: "엔진빌딩 깎는 노인",
     radar: [
       { genre: "엔진빌딩", win: 80 },
@@ -28,7 +29,8 @@ const MOCK_STATS: Record<string, any> = {
   },
   blue: {
     playTime: 950,
-    nemesis: "옐로우",
+    nemesis: "한솔",
+    favoriteGame: "테라포밍 마스",
     genreTitle: "전략적 암살자",
     radar: [
       { genre: "엔진빌딩", win: 40 },
@@ -40,7 +42,8 @@ const MOCK_STATS: Record<string, any> = {
   },
   green: {
     playTime: 820,
-    nemesis: "레드",
+    nemesis: "영준",
+    favoriteGame: "팬데믹",
     genreTitle: "평화주의자",
     radar: [
       { genre: "엔진빌딩", win: 50 },
@@ -52,7 +55,8 @@ const MOCK_STATS: Record<string, any> = {
   },
   yellow: {
     playTime: 1040,
-    nemesis: "그린",
+    nemesis: "윤혁",
+    favoriteGame: "아발론",
     genreTitle: "입만 산 마피아",
     radar: [
       { genre: "엔진빌딩", win: 30 },
@@ -74,6 +78,7 @@ const THEME_COLORS = {
 
 export default function MyPage() {
   const { memberId } = useParams<{ memberId: string }>();
+  const navigate = useNavigate();
   const member = MEMBERS.find((m) => m.color === memberId);
 
   if (!member) return <Navigate to="/" replace />;
@@ -119,6 +124,14 @@ export default function MyPage() {
         </div>
       </section>
 
+      {/* 💡 새로 추가된: 최애 게임 영역 */}
+      <section className="stats-section single-box">
+        <div className="stat-box full-width">
+          <span className="label">가장 많이 플레이한 최애 게임</span>
+          <span className="value highlight">🎲 {stats.favoriteGame}</span>
+        </div>
+      </section>
+
       {/* 장르별 승률 레이더 차트 */}
       <section className="chart-section">
         <h2 className="section-title">장르별 승률 분석</h2>
@@ -141,6 +154,16 @@ export default function MyPage() {
             </RadarChart>
           </ResponsiveContainer>
         </div>
+      </section>
+
+      {/* 💡 새로 추가된: 내 책장 보기 버튼 */}
+      <section className="action-section">
+        <button 
+          className="library-link-btn"
+          onClick={() => navigate(`/library?owner=${member.color}`)}
+        >
+          {member.name} 님이 보유한 보드게임 보기 📚
+        </button>
       </section>
     </div>
   );
