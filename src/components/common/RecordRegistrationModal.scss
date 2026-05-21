@@ -2,72 +2,82 @@
 
 @use "../../styles/variables" as *;
 
-.modal-overlay {
+.fullscreen-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: $color-background;
   background-image: 
     linear-gradient($color-grid-line 1px, transparent 1px),
     linear-gradient(90deg, $color-grid-line 1px, transparent 1px);
   background-size: 40px 40px; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
   animation: slideUp 0.3s ease-out forwards;
 }
 
-.modal-content {
-  background: $color-card-bg;
-  @include retro-border;
-  @include retro-shadow;
-  padding: 0; // 헤더와 분리되도록 내부 패딩 제거
-  width: 90%;
-  max-width: 400px;
-  max-height: 90vh; /* 화면을 넘어가면 스크롤되도록 */
-  overflow: hidden; // 내부 스크롤은 body에서
-  display: flex;
-  flex-direction: column;
-
-  .modal-header {
-    @include retro-window-header;
-    justify-content: space-between;
-
-    h2 {
-      font-size: 1.4rem;
-      font-weight: 900;
-      color: $color-text-main;
-      margin: 0;
-      flex: 1;
-      text-align: center;
-    }
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
   }
-
-  .close-btn {
-    background: none; border: none; cursor: pointer;
-    color: $color-text-main;
-    display: flex;
-    align-items: center;
+  to {
+    transform: translateY(0);
   }
 }
 
-.modal-body-scroll {
-  padding: 24px;
+.modal-header {
+  @include retro-window-header;
+  justify-content: space-between;
+  z-index: 10;
+  border-bottom: 2px solid $color-border;
+
+  h2 {
+    flex: 1;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: $color-text-main;
+    margin: 0;
+    text-align: center;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: $color-text-main;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.modal-body {
+  flex: 1;
   overflow-y: auto;
+  padding: 1.5rem;
+  background-color: $color-card-bg;
+  display: flex;
+  justify-content: center;
 }
 
 .record-form {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  width: 100%;
+  max-width: 500px;
+  padding-bottom: 3rem;
 
   .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 
     label {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 800;
       color: $color-text-main;
     }
@@ -75,37 +85,296 @@
     input[type="date"],
     select,
     textarea {
-      padding: 0.8rem;
+      padding: 0.75rem;
       @include retro-border;
       border-radius: 8px;
       font-family: inherit;
       font-weight: 700;
       outline: none;
+      background: #fff;
 
       &:focus {
         border-color: $color-blue;
       }
     }
+    }
   }
 
-  /* 🌟 이번 스텝에 추가된 멤버별 입력 영역 스타일 */
+  .date-emoji-group {
+    .date-emoji-inputs {
+      display: flex;
+      gap: 10px;
+      
+      input[type="date"] {
+        flex: 1;
+      }
+    }
+
+    .emoji-picker-container {
+      position: relative;
+      flex-shrink: 0;
+      
+      .emoji-btn {
+        width: 48px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        background-color: #fff;
+        @include retro-border;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+
+        &:hover {
+          background-color: rgba($color-yellow, 0.2);
+        }
+      }
+
+      .emoji-dropdown {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        width: 260px;
+        max-height: 200px;
+        overflow-y: auto;
+        background: #fff;
+        @include retro-border;
+        @include retro-shadow;
+        border-radius: 8px;
+        padding: 10px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+        z-index: 100;
+
+
+        button {
+          background: none;
+          border: none;
+          font-size: 1.3rem;
+          cursor: pointer;
+          border-radius: 4px;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s;
+          
+          &:hover {
+            background-color: rgba($color-yellow, 0.3);
+          }
+        }
+      }
+    }
+  }
+
+  .photo-preview {
+    margin-top: 8px;
+    max-width: 100%;
+    border-radius: 8px;
+    @include retro-border;
+  }
+
+  // ── 다중 게임 섹션 ──────────────────────────────────────────
+
+  .play-logs-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .play-logs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .play-logs-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: $color-text-main;
+    }
+
+    .add-log-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      font-family: inherit;
+      background-color: $color-blue;
+      color: #fff;
+      border: 1.5px solid $color-border;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover { opacity: 0.85; }
+    }
+  }
+
+  // 개별 게임 카드
+  .play-log-card {
+    background: #fff;
+    @include retro-border;
+    border-radius: 8px;
+    padding: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .log-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .log-num {
+        font-size: 0.7rem;
+        font-weight: 900;
+        background: $color-border;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .participant-picker-wrapper {
+          position: relative;
+
+          .participant-icon-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: rgba($color-border, 0.1);
+            border: 1px solid $color-border;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: $color-text-main;
+            transition: background 0.15s;
+
+            &:hover {
+              background: rgba($color-border, 0.2);
+            }
+
+            .participant-count {
+              font-size: 0.72rem;
+              font-weight: 900;
+            }
+          }
+
+          .participant-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #fff;
+            @include retro-border;
+            border-radius: 10px;
+            padding: 0.6rem;
+            z-index: 100;
+            min-width: 130px;
+            @include retro-shadow;
+
+            .picker-label {
+              font-size: 0.65rem;
+              font-weight: 800;
+              color: $color-text-sub;
+              margin-bottom: 0.4rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+
+            .picker-member-btn {
+              display: flex;
+              align-items: center;
+              gap: 7px;
+              width: 100%;
+              padding: 5px 6px;
+              background: none;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 0.82rem;
+              font-weight: 700;
+              font-family: inherit;
+              color: $color-text-sub;
+              transition: background 0.12s;
+
+              &:hover {
+                background: rgba($color-border, 0.08);
+              }
+
+              &.active {
+                color: $color-text-main;
+              }
+
+              .member-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+
+              .check {
+                margin-left: auto;
+                font-size: 0.75rem;
+                color: $color-blue;
+              }
+            }
+          }
+        }
+
+        .remove-log-btn {
+          display: flex;
+          align-items: center;
+          padding: 4px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: $color-red;
+          opacity: 0.7;
+          transition: opacity 0.15s;
+
+          &:hover { opacity: 1; }
+        }
+      }
+    }
+
+    // 카드 안 form-group label은 더 작게
+    .form-group label {
+      font-size: 0.82rem;
+    }
+  }
+
+  // ── 멤버 결과 입력 ──────────────────────────────────────────
+
   .player-results-section {
-    background-color: #fff;
-    padding: 1rem;
+    background-color: rgba($color-yellow, 0.08);
+    padding: 0.8rem;
     @include retro-border;
     border-radius: 8px;
 
     h3 {
-      font-size: 1rem;
+      font-size: 0.85rem;
       font-weight: 800;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: $color-text-main;
     }
 
     .player-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .player-row {
@@ -115,21 +384,23 @@
 
       .member-name {
         font-weight: bold;
-        min-width: 60px;
+        font-size: 0.9rem;
+        min-width: 52px;
       }
 
       .inputs-ranked {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         
         input {
-          width: 70px;
-          padding: 6px;
+          width: 62px;
+          padding: 5px;
           @include retro-border;
           border-radius: 6px;
           text-align: center;
           font-family: inherit;
           font-weight: 700;
+          font-size: 0.85rem;
         }
       }
 
@@ -138,27 +409,51 @@
         align-items: center;
         gap: 6px;
         cursor: pointer;
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 0.9rem;
       }
 
       .no-result-text {
-        font-size: 14px;
+        font-size: 0.85rem;
         color: #777;
       }
     }
   }
 
-  .submit-btn {
-    margin-top: 1.5rem;
-    padding: 1.2rem;
-    font-size: 1.2rem;
-    font-weight: 900;
-    font-family: inherit;
-    background-color: $color-yellow;
-    color: $color-text-main;
-    @include retro-border;
-    border-radius: 8px;
-    @include retro-shadow;
-    cursor: pointer;
+  // ── 하단 액션 버튼 ───────────────────────────────────────────────
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.5rem;
+
+    button {
+      padding: 0.95rem;
+      font-size: 1rem;
+      font-weight: 800;
+      font-family: inherit;
+      @include retro-border;
+      border-radius: 8px;
+      @include retro-shadow;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover { opacity: 0.9; }
+    }
+
+    .delete-btn {
+      flex: 1;
+      background-color: #fff;
+      color: $color-red;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .submit-btn {
+      flex: 2;
+      background-color: $color-yellow;
+      color: $color-text-main;
+    }
   }
-}

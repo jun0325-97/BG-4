@@ -9,14 +9,14 @@
   padding: 1rem 1.25rem;
   background-color: $color-card-bg;
   color: $color-text-main;
-  border-bottom: 2px solid $color-border;
+  border-bottom: 1.5px solid $color-border;
   z-index: 100;
   transition: none;
   &:active { transform: none; }
 
   .logo {
-    font-size: 1.5rem;
-    font-weight: 900;
+    font-size: 1.2rem;
+    font-weight: 800;
     letter-spacing: 1px;
 
     a {
@@ -39,12 +39,13 @@
     right: -100%;
     width: 260px;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     background-color: $color-card-bg;
     padding-top: 5rem;
     gap: 1rem;
-    border-left: 2px solid $color-border;
+    border-left: 1.5px solid $color-border;
     transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 100;
 
@@ -53,8 +54,8 @@
     }
 
     a {
-      font-size: 1.1rem;
-      font-weight: 800;
+      font-size: 1rem;
+      font-weight: 700;
       padding: 1rem 2rem;
       border-radius: 0;
       border-bottom: 2px solid rgba($color-border, 0.1);
@@ -85,8 +86,8 @@
     width: 100%;
     background: none;
     border: none;
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: 1rem;
+    font-weight: 700;
     color: $color-text-main;
     display: flex;
     align-items: center;
@@ -130,9 +131,38 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        border: 2px solid $color-border;
+        border: 1.5px solid $color-border;
         flex-shrink: 0;
       }
+    }
+  }
+}
+
+// 메뉴 최하단 고정 영역
+.nav-bottom-actions {
+  margin-top: auto;
+  padding: 2rem;
+  border-top: 1px solid rgba($color-border, 0.1);
+
+  .global-logout-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fa5252;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(#fa5252, 0.1);
     }
   }
 }

@@ -1,224 +1,249 @@
 // src/pages/Dashboard/components/RaceTrack/TrackLane.scss
+@use "sass:color";
 @use "../../../../styles/variables" as *;
 
-// ── 키프레임 ──────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 키프레임 — 도착 후 아이들 (순위별)
+// ─────────────────────────────────────────────────────────────
 
+// 1등: 여유로운 위아래 바운스
 @keyframes bounce {
   0%, 100% { transform: translate(-50%, -50%); }
-  50%       { transform: translate(-50%, calc(-50% - 6px)); }
+  45%       { transform: translate(-50%, calc(-50% - 6px)); }
 }
 
+// 2등: 자신감 있는 좌우 흔들기
 @keyframes wobble {
   0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-  25%       { transform: translate(-50%, -50%) rotate(-6deg); }
-  75%       { transform: translate(-50%, -50%) rotate(6deg); }
+  25%       { transform: translate(-50%, -51%) rotate(-6deg); }
+  75%       { transform: translate(-50%, -51%) rotate(6deg); }
 }
 
+// 3등: 살짝 떠있는 느낌
 @keyframes floatGently {
   0%, 100% { transform: translate(-50%, -50%); }
-  50%       { transform: translate(-50%, calc(-50% - 3px)); }
+  50%       { transform: translate(-50%, calc(-50% - 4px)); }
 }
 
-// 4등 수호요정용: 앞뒤로 왔다갔다 흔들리며 분투하는 귀여운 모션!
-@keyframes struggleBackAndForth {
-  0%, 100% { transform: translate(-50%, -50%); }
-  50%       { transform: translate(calc(-50% - 10px), -50%); } // 확실히 10px 가량 앞뒤로 왕복하며 보임!
+// 4등: 안타깝게 앞뒤로 버벅거림
+@keyframes smoothBackAndForth {
+  0%, 100% { 
+    transform: translate(-50%, -50%) rotate(0deg); 
+  }
+  50% { 
+    transform: translate(calc(-50% + 4px), -50%) rotate(1deg); 
+  }
 }
 
+// 트랙 위 속도선 shimmer — 이동 중에만 활성화
+@keyframes speedShimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+// 꼴찌 연기
 @keyframes smokeRise {
   0%   { opacity: 0.8; transform: translateY(0) scale(0.7); }
   100% { opacity: 0;   transform: translateY(-24px) scale(1.2); }
 }
 
-// ── 레인 전체 ─────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 레인 전체
+// ─────────────────────────────────────────────────────────────
+
 .track-lane {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.5rem; // 더 밀착되게 패딩 조절
-  border-radius: 10px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
   transition: background-color 0.2s;
 
-  // 멤버 색상별 레인 배경 테마
-  &[data-color="red"] {
-    background: rgba($color-red, 0.05);
-  }
-  &[data-color="blue"] {
-    background: rgba($color-blue, 0.05);
-  }
-  &[data-color="green"] {
-    background: rgba($color-green, 0.05);
-  }
-  &[data-color="yellow"] {
-    background: rgba($color-yellow, 0.08);
-  }
+  &[data-color="red"]    { background: rgba($color-red,    0.05); }
+  &[data-color="blue"]   { background: rgba($color-blue,   0.05); }
+  &[data-color="green"]  { background: rgba($color-green,  0.05); }
+  &[data-color="yellow"] { background: rgba($color-yellow, 0.08); }
 
   &.is-last {
-    .lane-info .member-name {
-      opacity: 0.6;
-    }
-    .lane-track {
-      opacity: 0.75;
-    }
+    .lane-info .member-name { opacity: 0.6; }
+    .lane-track              { opacity: 0.75; }
   }
 }
 
-// ── 왼쪽 정보 (순위 + 이름 - 가로 트랙 확장을 위해 최소화) ──────────────────
+// ─────────────────────────────────────────────────────────────
+// 왼쪽 정보 (순위 + 이름)
+// ─────────────────────────────────────────────────────────────
+
 .lane-info {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  min-width: 55px; // 72px -> 55px 로 극단적으로 줄여서 트랙 가로폭 극대화!
+  min-width: 55px;
 
   .rank {
-    font-size: 1rem; // 이모지 1.2배 확대 (0.8rem -> 1rem)
+    font-size: 1rem;
     font-weight: 900;
     color: $color-text-sub;
     min-width: 18px;
   }
 
   .member-name {
-    font-size: 0.9rem; // 글씨 크기도 살짝 키움 (0.85rem -> 0.9rem)
+    font-size: 0.9rem;
     font-weight: 800;
 
-    // 멤버 고유 색상으로 이름 텍스트 표시
     &[data-color="red"]    { color: $color-red; }
     &[data-color="blue"]   { color: $color-blue; }
     &[data-color="green"]  { color: $color-green; }
-    &[data-color="yellow"] { color: darken(#ffc567, 20%); }
+    &[data-color="yellow"] { color: color.scale(#ffc567, $lightness: -20%); }
   }
 }
 
-// ── 트랙 (보드게임 칸 느낌 - 1.5배 미플 대응) ──────────────────
+// ─────────────────────────────────────────────────────────────
+// 트랙 영역
+// ─────────────────────────────────────────────────────────────
+
 .lane-track {
   flex: 1;
   position: relative;
-  height: 54px; // 38px -> 54px 로 미플 확대에 맞춰 높이 확장!
-  border-radius: 10px;
+  height: 48px;
+  border-radius: 8px;
   overflow: visible;
 
-  // 기본 트랙: 연한 격자 칸 패턴
   background-color: rgba(255, 255, 255, 0.7);
   background-image: repeating-linear-gradient(
     90deg,
     rgba($color-border, 0.08) 0px,
     rgba($color-border, 0.08) 1px,
     transparent 1px,
-    transparent 32px // 보폭 간격도 조금 넓힘
+    transparent 32px
   );
   border: 1.5px solid rgba($color-border, 0.15);
+
+  // 이동 중 트랙 shimmer 오버레이
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 35%,
+      rgba(255, 255, 255, 0.28) 50%,
+      rgba(255, 255, 255, 0.06) 65%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  &--active::after {
+    opacity: 1;
+    animation: speedShimmer 0.55s linear infinite;
+  }
 
   // 멤버 색상별 트랙 테마
   .track-lane[data-color="red"] & {
     border-color: rgba($color-red, 0.25);
     background-image: repeating-linear-gradient(
       90deg,
-      rgba($color-red, 0.1) 0px,
-      rgba($color-red, 0.1) 1px,
-      transparent 1px,
-      transparent 32px
+      rgba($color-red, 0.1) 0px, rgba($color-red, 0.1) 1px,
+      transparent 1px, transparent 32px
     );
   }
   .track-lane[data-color="blue"] & {
     border-color: rgba($color-blue, 0.25);
     background-image: repeating-linear-gradient(
       90deg,
-      rgba($color-blue, 0.1) 0px,
-      rgba($color-blue, 0.1) 1px,
-      transparent 1px,
-      transparent 32px
+      rgba($color-blue, 0.1) 0px, rgba($color-blue, 0.1) 1px,
+      transparent 1px, transparent 32px
     );
   }
   .track-lane[data-color="green"] & {
     border-color: rgba($color-green, 0.25);
     background-image: repeating-linear-gradient(
       90deg,
-      rgba($color-green, 0.1) 0px,
-      rgba($color-green, 0.1) 1px,
-      transparent 1px,
-      transparent 32px
+      rgba($color-green, 0.1) 0px, rgba($color-green, 0.1) 1px,
+      transparent 1px, transparent 32px
     );
   }
   .track-lane[data-color="yellow"] & {
     border-color: rgba($color-yellow, 0.35);
     background-image: repeating-linear-gradient(
       90deg,
-      rgba($color-yellow, 0.15) 0px,
-      rgba($color-yellow, 0.15) 1px,
-      transparent 1px,
-      transparent 32px
+      rgba($color-yellow, 0.15) 0px, rgba($color-yellow, 0.15) 1px,
+      transparent 1px, transparent 32px
     );
   }
 }
 
-// ── 캐릭터 말 (보드게임 미플) ─────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 캐릭터 말
+// ─────────────────────────────────────────────────────────────
+
 .car {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  transition: left 1.2s cubic-bezier(0.33, 1, 0.68, 1);
+
+  // ★ 핵심: expo-out 커브 — 초반에 쓰웅~하고 빠르게 치고 나가다 끝에서 사뿐히 멈춤
+  transition: left 3.2s cubic-bezier(0.16, 1, 0.3, 1);
+
   user-select: none;
   z-index: 5;
 
-  &.car--bounce {
-    animation: bounce 0.9s ease-in-out infinite;
-    animation-delay: 1.5s;
+  // ── 이동 중 ──
+  &.car--moving {
+    .meeple-wrapper {
+      // 이동 방향으로 살짝 기울어져 속도감 강조
+      transform: rotate(-8deg) scale(1.05);
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3)) blur(0.3px);
+      transition:
+        transform 0.2s ease-out,
+        filter 0.2s;
+    }
   }
 
-  &.car--wobble {
-    animation: wobble 0.7s ease-in-out infinite;
-    animation-delay: 1.5s;
+  // ── 도착 후 정지 — meeple-wrapper 원상복귀 ──
+  &:not(.car--moving) .meeple-wrapper {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
+    transition:
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), // 도착 시 살짝 스프링
+      filter 0.3s;
   }
 
-  &.car--float {
-    animation: floatGently 1.6s ease-in-out infinite;
-    animation-delay: 1.5s;
-  }
-
-  &.car--shake {
-    animation: struggleBackAndForth 1.0s ease-in-out infinite; // 앞뒤로 10px씩 귀엽게 시소처럼 왕복 운동!
-    animation-delay: 1.5s;
-  }
+  // ── 도착 후 아이들 ──
+  &.car--bounce    { animation: bounce           1.2s ease-in-out infinite; }
+  &.car--wobble    { animation: wobble           0.95s ease-in-out infinite; }
+  &.car--float     { animation: floatGently      1.8s ease-in-out infinite; }
+  &.car--shake     { animation: smoothBackAndForth 1.8s ease-in-out infinite; }
 }
 
+// ─────────────────────────────────────────────────────────────
+// 미플 래퍼
+// ─────────────────────────────────────────────────────────────
+
 .meeple-wrapper {
-  width: 48px;  // 32px -> 48px (1.5배 스케일 업!)
-  height: 48px; // 32px -> 48px (1.5배 스케일 업!)
-  border-radius: 50%;
-  border: 2px solid $color-border;
-  background-color: #ffffff;
-  overflow: hidden;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-  
-  &[data-color="red"] {
-    border-color: $color-red;
-    background-color: rgba($color-red, 0.15);
-  }
-  &[data-color="blue"] {
-    border-color: $color-blue;
-    background-color: rgba($color-blue, 0.15);
-  }
-  &[data-color="green"] {
-    border-color: $color-green;
-    background-color: rgba($color-green, 0.15);
-  }
-  &[data-color="yellow"] {
-    border-color: darken($color-yellow, 15%);
-    background-color: rgba($color-yellow, 0.25);
-  }
 }
 
 .meeple-img {
-  width: 92%;
-  height: 92%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  border-radius: 50%;
 }
 
-// ── 꼴찌 연기 (1.2배 확대) ─────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 꼴찌 연기 파티클
+// ─────────────────────────────────────────────────────────────
+
 .smoke-container {
   position: absolute;
   right: 100%;
@@ -229,7 +254,7 @@
 
 .smoke {
   position: absolute;
-  font-size: 0.95rem; // 0.7rem -> 0.95rem (1.3배 이상 확대되어 귀엽게 보임)
+  font-size: 0.95rem;
   opacity: 0;
   animation: smokeRise 1.2s ease-out infinite;
 
@@ -238,13 +263,16 @@
   &--3 { left: -14px; animation-delay: 0.8s; }
 }
 
-// ── 오른쪽 승률 (1.2배 가볍고 깔끔하게) ───────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 오른쪽 승률
+// ─────────────────────────────────────────────────────────────
+
 .lane-stat {
   min-width: 42px;
   text-align: right;
 
   .win-rate {
-    font-size: 0.85rem; // 0.78rem -> 0.85rem 로 가독성 상향
+    font-size: 0.85rem;
     font-weight: 600;
     color: $color-text-sub;
   }

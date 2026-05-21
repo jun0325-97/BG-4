@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { X, Image as ImageIcon } from "lucide-react";
-import { MEMBERS } from "../../mocks/dummyData";
-import { GameResultType, GAME_GENRES } from "../../types";
+import { useStore } from "../../store/useStore";
+import { useAlertStore } from "../../store/useAlertStore";
+import { supabase } from "../../utils/supabase";
+import { BoardGame, GameResultType, GAME_GENRES } from "../../types";
 import "./GameRegistrationModal.scss";
 
 interface Props {
@@ -12,30 +14,78 @@ interface Props {
 }
 
 export default function GameRegistrationModal({ isOpen, onClose }: Props) {
+  const { members, addGame } = useStore();
+  const { showAlert } = useAlertStore();
   const [name, setName] = useState("");
   const [genre, setGenre] = useState<string>(GAME_GENRES[0]);
   const [minPlayers, setMinPlayers] = useState("");
   const [maxPlayers, setMaxPlayers] = useState("");
   const [playTime, setPlayTime] = useState("");
-  const [ownerId, setOwnerId] = useState(MEMBERS[0].id);
+  const [ownerId, setOwnerId] = useState(members[0]?.id || "m1");
   const [resultType, setResultType] = useState<GameResultType>("unknown");
-  // 💡 썸네일 이미지 URL을 받을 상태 추가!
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`'${name}' 등록 완료! 🎲 다음 게임을 계속 등록해주세요.`);
+    setIsUploading(true);
 
-    setName("");
-    setGenre("");
-    setMinPlayers("");
-    setMaxPlayers("");
-    setPlayTime("");
-    setOwnerId(MEMBERS[0].id);
-    setResultType("unknown");
-    setImageUrl(""); // 💡 폼 초기화 시 이미지도 같이 비워주기
+    let finalImageUrl = imageUrl;
+
+    try {
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("images")
+          .upload(`games/${fileName}`, imageFile);
+
+        if (uploadError) {
+          console.error("Storage upload error:", uploadError);
+          throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+        }
+
+        const { data } = supabase.storage.from("images").getPublicUrl(`games/${fileName}`);
+        finalImageUrl = data.publicUrl;
+      }
+
+      const newGame: BoardGame = {
+        id: `g-${Date.now()}`,
+        name,
+        genre: genre as any,
+        minPlayers: Number(minPlayers),
+        maxPlayers: Number(maxPlayers),
+        playTimeMinutes: Number(playTime),
+        ownerId,
+        resultType,
+        imageUrl: finalImageUrl || undefined,
+        description: description || undefined,
+      };
+
+      await addGame(newGame);
+      showAlert(`'${name}' 등록 완료! 🎲`, "success");
+      
+      setName("");
+      setGenre(GAME_GENRES[0]);
+      setMinPlayers("");
+      setMaxPlayers("");
+      setPlayTime("");
+      setOwnerId(members[0]?.id || "m1");
+      setResultType("unknown");
+      setImageFile(null);
+      setImageUrl("");
+      setDescription("");
+    } catch (err: any) {
+      console.error("Game registration error:", err);
+      showAlert(`등록 실패: ${err.message}`, "error");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -71,10 +121,16 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
             <input
               id="game-image-upload"
               type="file"
-              accept="image/*"
+              accept="image/jpeg, image/png, image/webp"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  // 용량 제한 3MB
+                  if (file.size > 3 * 1024 * 1024) {
+                    showAlert("이미지 용량은 3MB 이하여야 합니다.", "error");
+                    return;
+                  }
+                  setImageFile(file);
                   const localUrl = URL.createObjectURL(file);
                   setImageUrl(localUrl);
                 }
@@ -91,6 +147,16 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="예: 스플렌더"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>게임 한 줄 메모 (선택)</label>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="예: 꿀잼 우정파괴 마피아 게임"
             />
           </div>
 
@@ -130,16 +196,20 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
               />
             </div>
             <div className="form-group">
-              <label>플레이 타임(분)</label>
-              <input
-                type="number"
-                required
-                min="1"
-                step="5"
+              <label>플레이 타임</label>
+              <select
                 value={playTime}
                 onChange={(e) => setPlayTime(e.target.value)}
-                placeholder="30"
-              />
+                required
+              >
+                <option value="">- 선택 -</option>
+                <option value="15">15분 이하</option>
+                <option value="30">30분</option>
+                <option value="45">45분</option>
+                <option value="60">1시간</option>
+                <option value="90">1시간 30분</option>
+                <option value="120">2시간 이상</option>
+              </select>
             </div>
           </div>
 
@@ -149,7 +219,7 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
               value={ownerId}
               onChange={(e) => setOwnerId(e.target.value)}
             >
-              {MEMBERS.map((m) => (
+              {members.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
                 </option>
@@ -172,8 +242,8 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
             </select>
           </div>
 
-          <button type="submit" className="submit-btn">
-            등록하기
+          <button type="submit" className="submit-btn" disabled={isUploading}>
+            {isUploading ? "업로드 중..." : "등록하기"}
           </button>
         </form>
       </div>

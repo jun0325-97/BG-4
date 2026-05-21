@@ -23,6 +23,9 @@ interface TrackLaneProps {
   animate: boolean;
 }
 
+const TRANSITION_DURATION_MS = 1100; // CSS transition 과 동일하게 맞춤
+const INITIAL_DELAY_MS = 200;        // 전체 시작 딜레이
+
 export default function TrackLane({
   member,
   rank,
@@ -30,17 +33,44 @@ export default function TrackLane({
   animate,
 }: TrackLaneProps) {
   const [carPosition, setCarPosition] = useState(0);
+  const [isMoving, setIsMoving] = useState(false);
+  const [arrived, setArrived] = useState(false);
 
   useEffect(() => {
-    if (animate) {
-      // 모든 미플이 동시에 출발하도록 rank 딜레이 제거하고 100ms 고정 딜레이 적용!
-      const timer = setTimeout(() => {
-        setCarPosition(member.winRate);
-      }, 100);
+    if (!animate) return;
 
-      return () => clearTimeout(timer);
-    }
-  }, [animate, member.winRate]);
+    // 순위별로 20ms씩 엇박 출발 — 경주 출발선 느낌
+    const delay = INITIAL_DELAY_MS + (rank - 1) * 20;
+
+    const startTimer = setTimeout(() => {
+      setIsMoving(true);
+      setCarPosition(member.winRate);
+
+      // transition 완료 후 도착 아이들 애니메이션 전환
+      const endTimer = setTimeout(() => {
+        setIsMoving(false);
+        setArrived(true);
+      }, TRANSITION_DURATION_MS);
+
+      return () => clearTimeout(endTimer);
+    }, delay);
+
+    return () => clearTimeout(startTimer);
+  }, [animate, member.winRate, rank]);
+
+  const idleClass =
+    rank === 1 ? "car--bounce" :
+    rank === 2 ? "car--wobble" :
+    rank === 3 ? "car--float" :
+    "car--shake";
+
+  const carClass = [
+    "car",
+    isMoving ? "car--moving" : "",
+    arrived ? idleClass : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
@@ -58,18 +88,13 @@ export default function TrackLane({
       </div>
 
       {/* 가운데: 트랙 */}
-      <div className="lane-track">
+      <div className={`lane-track ${isMoving ? "lane-track--active" : ""}`}>
         <div
-          className={`car ${
-            rank === 1 ? "car--bounce" :
-            rank === 2 ? "car--wobble" :
-            rank === 3 ? "car--float" :
-            isLast ? "car--smoke" : ""
-          }`}
+          className={carClass}
           style={{ left: `${carPosition}%` }}
           title={`${member.winRate}%`}
         >
-          {/* 보드게임 미플(Meeple)처럼 이미지 렌더링 */}
+          {/* 보드게임 미플(Meeple) 이미지 */}
           <div className="meeple-wrapper" data-color={member.color}>
             <img
               src={CHARACTER_IMAGES[member.color]}
@@ -79,7 +104,7 @@ export default function TrackLane({
           </div>
 
           {/* 꼴찌 연기 파티클 */}
-          {isLast && (
+          {isLast && arrived && (
             <span className="smoke-container" aria-hidden="true">
               <span className="smoke smoke--1">💨</span>
               <span className="smoke smoke--2">💨</span>

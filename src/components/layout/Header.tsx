@@ -1,19 +1,42 @@
-// src/components/layout/Header.tsx
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown, ChevronUp } from "lucide-react"; // 아이콘 추가
-import { MEMBERS } from "../../mocks/dummyData"; // 친구 목록 가져오기
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, ChevronDown, ChevronUp, LogOut } from "lucide-react";
+import { useStore } from "../../store/useStore";
+import { useAuthStore } from "../../store/useAuthStore";
+import { supabase } from "../../utils/supabase";
 import "./Header.scss";
+
+const getKoreanName = (username: string) => {
+  switch (username.toLowerCase()) {
+    case "hansol": return "한솔";
+    case "yoonhyuk": return "윤혁";
+    case "gayoung": return "가영";
+    case "youngjun": return "영준";
+    default: return "";
+  }
+};
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // 💡 마이페이지 하위 메뉴 열림 상태
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
+
+  const { user, clearAuth } = useAuthStore();
+  const { members } = useStore();
+  const navigate = useNavigate();
+
+  const currentUsername = user?.email?.split("@")[0] || "";
+  const currentKoreanName = getKoreanName(currentUsername);
+
+  // 본인이 가장 위에 오도록 정렬
+  const sortedMembers = [...members].sort((a, b) => {
+    if (a.name === currentKoreanName) return -1;
+    if (b.name === currentKoreanName) return 1;
+    return 0;
+  });
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    if (isMenuOpen) setIsMyPageOpen(false); // 전체 메뉴 닫을 때 하위 메뉴도 초기화
+    if (isMenuOpen) setIsMyPageOpen(false);
   };
 
   const closeMenu = () => {
@@ -21,11 +44,17 @@ export default function Header() {
     setIsMyPageOpen(false);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    clearAuth();
+    navigate("/login");
+  };
+
   return (
     <header className="global-header">
       <div className="logo">
         <Link to="/" onClick={closeMenu}>
-          🎲 SPIEL CREW
+          🎲 보미새
         </Link>
       </div>
 
@@ -37,7 +66,6 @@ export default function Header() {
         {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
       </button>
 
-      {/* 네비게이션 링크들: 'open' 클래스로 애니메이션 제어 */}
       <nav className={`nav-links ${isMenuOpen ? "open" : ""}`}>
         <Link to="/" onClick={closeMenu}>
           Dashboard
@@ -49,7 +77,6 @@ export default function Header() {
           Archive
         </Link>
 
-        {/* 💡 My Page를 버튼으로 변경하고 하위 메뉴 추가 */}
         <div className="mypage-menu-container">
           <button
             className="mypage-toggle-btn"
@@ -59,9 +86,8 @@ export default function Header() {
             {isMyPageOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
 
-          {/* 하위 메뉴 (토글) */}
           <div className={`submenu ${isMyPageOpen ? "show" : ""}`}>
-            {MEMBERS.map((member) => (
+            {sortedMembers.map((member) => (
               <Link
                 key={member.id}
                 to={`/mypage/${member.color}`}
@@ -72,10 +98,17 @@ export default function Header() {
                   className="dot"
                   style={{ backgroundColor: member.color }}
                 ></span>
-                {member.name}
+                {member.name} {member.name === currentKoreanName && "(나)"}
               </Link>
             ))}
           </div>
+        </div>
+        
+        {/* 메뉴 최하단 영역으로 분리된 로그아웃 버튼 */}
+        <div className="nav-bottom-actions">
+          <button onClick={handleLogout} className="global-logout-btn">
+            <LogOut size={16} /> 로그아웃
+          </button>
         </div>
       </nav>
 

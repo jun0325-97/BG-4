@@ -8,61 +8,119 @@
   gap: 1rem;
 
   .page-title {
-    font-size: 1.8rem;
-    font-weight: 900;
-    margin-bottom: 1.5rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
     text-align: center;
-    color: #fff;
-    text-shadow: 2px 2px 0 $color-border; // 타이틀 그림자
+    color: $color-text-main;
   }
 }
 
-.search-bar {
+.search-filter-header {
   display: flex;
-  align-items: center;
-  background-color: #fff;
-  @include retro-border;
-  padding: 0.8rem 1rem;
-  margin-bottom: 1.5rem;
-  @include retro-shadow;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 
-  .search-icon {
-    color: #666;
-    margin-right: 10px;
+  .search-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    @include retro-border;
+    padding: 0.6rem 0.85rem;
+    box-sizing: border-box;
+    min-width: 0;
+    @include retro-shadow;
+
+    .search-icon {
+      color: #666;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      min-width: 0;
+
+      &::placeholder {
+        color: #aaa;
+      }
+    }
   }
 
-  input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: inherit;
+  .filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    background-color: #fff;
+    color: $color-text-main;
+    flex-shrink: 0;
+    @include retro-border;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    @include retro-shadow;
 
-    &::placeholder {
-      color: #aaa;
+    &.active {
+      background-color: $color-yellow;
     }
   }
 }
 
-.filter-badge {
-  text-align: center;
+.filter-section {
+  display: none; // 기본 숨김
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
   margin-bottom: 1rem;
-  
-  span {
-    background-color: $color-border;
-    color: #fff;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 0.9rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  @include retro-border;
+
+  &.open {
+    display: grid;
+  }
+
+  select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem;
+    @include retro-border;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $color-text-main;
+    font-family: inherit;
+    outline: none;
+    appearance: none; // Safari support
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+    text-overflow: ellipsis;
+    
+    &:focus {
+      border-color: $color-blue;
+    }
   }
 }
 
 .game-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.45rem;
 
   .empty-state {
     text-align: center;
@@ -77,24 +135,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
   background-color: $color-card-bg;
   @include retro-border;
   cursor: pointer;
   @include retro-shadow;
+  transition: transform 0.12s, box-shadow 0.12s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
 
   .game-info-main {
     .game-name {
-      font-size: 1.2rem;
-      font-weight: 900;
-      margin-bottom: 0.3rem;
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 0.15rem;
     }
     .game-genre {
-      font-size: 0.85rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: $color-text-sub;
       background-color: rgba($color-border, 0.08);
-      padding: 2px 8px;
+      padding: 1px 6px;
       border-radius: 6px;
     }
   }
@@ -104,17 +168,17 @@
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    font-size: 0.85rem;
-    font-weight: 800;
+    font-size: 0.8rem;
+    font-weight: 700;
     color: $color-text-sub;
   }
 
   .game-thumbnail {
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0; // 이미지 크기 고정
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
     @include retro-border;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     background-color: #eee;
 
@@ -136,11 +200,43 @@
 
   .game-info {
     flex: 1;
+    min-width: 0;
+
+    .game-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 0.1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-genre {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: $color-text-sub;
+      background-color: rgba($color-border, 0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-bottom: 0.2rem;
+    }
+
+    .game-description {
+      font-size: 0.72rem;
+      color: $color-text-sub;
+      margin: 0.15rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0.8;
+    }
+
     .game-meta-inline {
       display: flex;
-      gap: 10px;
-      margin-top: 4px;
-      font-size: 0.75rem;
+      gap: 8px;
+      margin-top: 3px;
+      font-size: 0.7rem;
       color: $color-text-sub;
       .meta-item {
         display: flex;
@@ -155,15 +251,16 @@
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 
   .page-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     @include retro-border;
     background-color: #fff;
-    border-radius: 8px;
-    font-weight: 900;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.85rem;
     cursor: pointer;
     color: $color-text-main;
 
@@ -180,6 +277,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -210,8 +308,8 @@
       justify-content: space-between;
 
       h2 {
-        font-size: 1.5rem;
-        font-weight: 900;
+        font-size: 1.2rem;
+        font-weight: 800;
         margin: 0;
         flex: 1;
         text-align: center;
@@ -239,6 +337,15 @@
         gap: 10px;
         font-weight: 700;
         color: $color-text-sub;
+
+        &.description-item {
+          font-style: italic;
+          font-size: 0.88rem;
+          color: $color-text-main;
+          opacity: 0.75;
+          padding-bottom: 0.4rem;
+          border-bottom: 1px dashed rgba($color-border, 0.3);
+        }
       }
     }
   }

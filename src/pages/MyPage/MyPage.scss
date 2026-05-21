@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.5rem 1rem;
+  padding: 2rem 1rem;
   @include retro-border;
   background-color: $color-card-bg;
   @include retro-shadow;
@@ -34,18 +34,18 @@
   }
 
   .profile-icon {
-    font-size: 3.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 2.8rem;
+    margin-bottom: 0.4rem;
   }
 
   .name {
-    font-size: 2rem;
-    font-weight: 900;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: $color-text-main;
   }
 
   .title {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: $color-text-sub;
     margin-top: 0.25rem;
@@ -56,9 +56,9 @@
     padding: 0.25rem 0.75rem;
     background-color: rgba(255, 255, 255, 0.8);
     @include retro-border;
-    border-radius: 20px;
+    border-radius: 6px;
     font-size: 0.85rem;
-    font-weight: 900;
+    font-weight: 800;
     color: $color-text-main;
   }
 }
@@ -74,7 +74,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 1.2rem;
     @include retro-border;
     background-color: $color-card-bg;
     @include retro-shadow;
@@ -86,14 +86,14 @@
     }
 
     .value {
-      font-size: 1.8rem;
-      font-weight: 900;
+      font-size: 1.5rem;
+      font-weight: 800;
       color: $color-text-main;
       margin-top: 0.25rem;
 
       &.highlight {
         color: $color-red;
-        font-size: 1.4rem;
+        font-size: 1.2rem;
       }
     }
   }
@@ -103,7 +103,7 @@
       padding: 1rem;
       
       .value {
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
     }
   }
@@ -116,8 +116,8 @@
   @include retro-shadow;
 
   .section-title {
-    font-size: 1.2rem;
-    font-weight: 900;
+    font-size: 1rem;
+    font-weight: 800;
     text-align: center;
     margin-bottom: 1rem;
   }
@@ -137,11 +137,11 @@
 
   .library-link-btn {
     width: 100%;
-    padding: 1.2rem;
+    padding: 1rem;
     background-color: $color-yellow;
     color: $color-text-main;
-    font-size: 1.1rem;
-    font-weight: 900;
+    font-size: 1rem;
+    font-weight: 800;
     @include retro-border;
     border-radius: 12px;
     cursor: pointer;

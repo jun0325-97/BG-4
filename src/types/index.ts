@@ -9,12 +9,12 @@ export const GAME_GENRES = [
   "파티/순발력",
   "전략/수싸움",
   "방탈출/추리",
-  "테마/스토리",
-  "2인 전용",
+  "테마/머더미스터리",
   "마피아/블러핑",
   "협력",
-  "엔진/덱빌딩",
   "퍼즐/타일놓기",
+  "카드게임",
+  "엔진/덱빌딩",
   "기타",
 ] as const;
 
@@ -31,6 +31,7 @@ export interface BoardGame {
   ownerId: string;
   resultType: GameResultType;
   imageUrl?: string;
+  description?: string; // 💡 새 필드: 한 줄 메모
 }
 
 export interface Member {
@@ -53,14 +54,16 @@ export interface PlayerResult {
 export interface PlayLog {
   id: string;
   gameId: string;
-  resultType: GameResultType; // 어떤 방식으로 기록됐는지
+  resultType: GameResultType;
   durationMinutes: number;
+  participatingMembers?: string[]; // 💡 새 필드: 참여 멤버 ID 리스트
   results: PlayerResult[];
 }
 
 export interface GatheringRecord {
   id: string;
   date: string;
+  emoji?: string;
   memo: string;
   photoUrl?: string;
   playLogs: PlayLog[];

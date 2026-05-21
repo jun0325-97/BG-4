@@ -1,4 +1,5 @@
 // src/pages/Dashboard/components/MemberCards/MemberCards.scss
+@use "sass:color";
 @use "../../../../styles/variables" as *;
 
 .member-cards {
@@ -12,7 +13,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  padding: 1rem 0.75rem;
+  padding: 0.85rem 0.6rem;
   background: $color-card-bg;
   cursor: pointer;
   
@@ -34,10 +35,10 @@
   }
 
   &__meeple {
-    width: 72px;  // 48px -> 72px (1.5배 스케일 업!)
-    height: 72px; // 48px -> 72px (1.5배 스케일 업!)
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    border: 2px solid $color-border;
+    border: 1.5px solid $color-border;
     background-color: #ffffff;
     overflow: hidden;
     display: flex;
@@ -56,11 +57,11 @@
     }
     &[data-color="green"] {
       border-color: $color-green;
-      background-color: rgba($color-green, 0.15);
+      background: rgba($color-green, 0.15);
     }
     &[data-color="yellow"] {
-      border-color: darken($color-yellow, 15%);
-      background-color: rgba($color-yellow, 0.25);
+      border-color: color.scale($color-yellow, $lightness: -15%);
+      background: rgba($color-yellow, 0.2);
     }
 
     img {
@@ -72,18 +73,18 @@
   }
 
   &__name {
-    font-size: 1.1rem;
-    font-weight: 900;
+    font-size: 0.95rem;
+    font-weight: 800;
     color: $color-text-main;
   }
 
   &__rate {
     margin-top: 0.25rem;
-    font-size: 0.8rem;
-    font-weight: 800;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    border: 2px solid $color-border;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    border: 1.5px solid $color-border;
     color: $color-text-main; // 시크한 까만색 글씨로 통일!
 
     // 🌟 검은 글씨가 훨씬 잘 보이도록 라벨 배경의 투명도를 높여 매우 부드럽고 연하게 처리!
