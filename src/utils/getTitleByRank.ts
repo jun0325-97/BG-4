@@ -6,7 +6,7 @@ interface RankTitle {
 }
 
 const RANK_TITLES: Record<number, RankTitle> = {
-  1: { emoji: "👑", title: "오늘의 대장" },
+  1: { emoji: "👑", title: "보겜의 왕" },
   2: { emoji: "🥈", title: "은빛 추격자" },
   3: { emoji: "🥉", title: "평화주의자" },
   4: { emoji: "🌱", title: "수호 요정" },

@@ -15,7 +15,7 @@ export default function RaceTrack({ members }: RaceTrackProps) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimate(true), 100);
+    const timer = setTimeout(() => setAnimate(true), 50);
     return () => clearTimeout(timer);
   }, []);
 

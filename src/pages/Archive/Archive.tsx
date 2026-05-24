@@ -1,19 +1,19 @@
 // src/pages/Archive/Archive.tsx
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore } from "../../store/useStore";
 import { ChevronDown, ChevronUp, Trophy, Clock, Edit2 } from "lucide-react";
 import RecordRegistrationModal from "../../components/common/RecordRegistrationModal";
 import { GatheringRecord } from "../../types";
 import "./Archive.scss";
 
-// 날짜를 보기 좋게 변환하는 헬퍼 함수
 function formatRecordTitle(dateString: string, emoji?: string) {
   const parts = dateString.split("-");
   if (parts.length === 3) {
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-    const title = `${month}월 ${day}일의 모임 기록`;
+    const year = parts[0];
+    const month = parts[1].padStart(2, "0");
+    const day = parts[2].padStart(2, "0");
+    const title = `${year}.${month}.${day} 플레이 일기`;
     return emoji ? `${emoji} ${title}` : `🎲 ${title}`;
   }
   return dateString;
@@ -21,15 +21,23 @@ function formatRecordTitle(dateString: string, emoji?: string) {
 
 export default function Archive() {
   const { records: GATHERING_RECORDS, members: MEMBERS, boardGames: BOARD_GAMES } = useStore();
-  
-  // 1. 데이터에서 존재하는 연도들만 뽑아서 중복 제거 후 내림차순 정렬
+
+  // 1. 데이터에서 존재하는 연도들만 뽑아서 중복 제거 후 오름차순 정렬 (최근게 오른쪽)
   const years = useMemo(() => {
     return Array.from(
       new Set(GATHERING_RECORDS.map((rec) => rec.date.split("-")[0]))
-    ).sort((a, b) => b.localeCompare(a));
+    ).sort((a, b) => a.localeCompare(b));
   }, [GATHERING_RECORDS]);
 
-  const [selectedYear, setSelectedYear] = useState(years[0] || "");
+  const [selectedYear, setSelectedYear] = useState(years[years.length - 1] || "");
+
+  // 데이터가 나중에 로드되어 years 배열이 업데이트될 때 selectedYear를 최신 연도로 갱신
+  useEffect(() => {
+    if (years.length > 0 && (!selectedYear || !years.includes(selectedYear))) {
+      setSelectedYear(years[years.length - 1]);
+    }
+  }, [years, selectedYear]);
+
   const [openRecordId, setOpenRecordId] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<GatheringRecord | null>(null);
 
@@ -46,7 +54,7 @@ export default function Archive() {
 
   return (
     <div className="archive-container">
-      <h1 className="page-title">모임 기록고</h1>
+      <h1 className="page-title">게임 다이어리</h1>
 
       {/* 연도별 탭 */}
       <div className="year-tabs">
@@ -69,21 +77,20 @@ export default function Archive() {
         {filteredRecords.map((record) => (
           <div
             key={record.id}
-            className={`record-card ${
-              openRecordId === record.id ? "open" : ""
-            }`}
+            className={`record-card ${openRecordId === record.id ? "open" : ""
+              }`}
           >
             {/* 아코디언 헤더 */}
             <div
               className="record-header"
               onClick={() => toggleAccordion(record.id)}
             >
-              <div className="date-info" style={{ fontWeight: 800, fontSize: "1.05rem" }}>
+              <div className="date-info" >
                 <span>{formatRecordTitle(record.date, record.emoji)}</span>
               </div>
               <div className="icon-wrapper">
-                <button 
-                  className="edit-btn" 
+                <button
+                  className="edit-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     setEditingRecord(record);
@@ -156,7 +163,7 @@ export default function Archive() {
                             );
                           })
                         ) : (
-                          (log.participatingMembers || MEMBERS.map(m=>m.id)).map((memberId) => {
+                          (log.participatingMembers || MEMBERS.map(m => m.id)).map((memberId) => {
                             const member = MEMBERS.find((m) => m.id === memberId);
                             return (
                               <div

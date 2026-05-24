@@ -13,17 +13,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0.85rem; // 조금 줄인 패딩
-  border-bottom: 1.5px solid rgba($color-border, 0.15);
+  border-bottom: 1px solid rgba($color-border, 0.2);
 
   .track-title {
     font-size: 1rem;
-    font-weight: 900;
+    font-weight: 700;
     color: $color-text-main;
   }
 
   .track-subtitle {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.7rem;
+    font-weight: 600;
     color: $color-text-sub;
   }
 }

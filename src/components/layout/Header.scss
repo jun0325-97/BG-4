@@ -2,7 +2,8 @@
 @use "../../styles/variables" as *;
 
 .global-header {
-  position: relative;
+  position: sticky;
+  top: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -11,17 +12,44 @@
   color: $color-text-main;
   border-bottom: 1.5px solid $color-border;
   z-index: 100;
-  transition: none;
-  &:active { transform: none; }
+  transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+
+  &.hidden {
+    transform: translateY(-100%);
+  }
+
+  &.visible {
+    transform: translateY(0);
+  }
+
+  &:active {
+    transform: none;
+  }
 
   .logo {
-    font-size: 1.2rem;
-    font-weight: 800;
-    letter-spacing: 1px;
+    line-height: 1;
 
     a {
       text-decoration: none;
       color: inherit;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0;
+    }
+
+    .logo-bms {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.06rem;
+      color: $color-text-main;
+    }
+
+    .logo-crew {
+      font-size: 1.15rem;
+      font-weight: 500;
+      margin-left: 0.2rem;
+      letter-spacing: -0.04rem;
+      color: $color-text-main;
     }
   }
 
@@ -32,51 +60,67 @@
     z-index: 101;
   }
 
-  // 기본적으로 nav는 숨김 — 햄버거로만 열림
-  .nav-links {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 260px;
-    height: 100vh;
-    height: 100dvh;
+}
+
+// 기본적으로 nav는 숨김 — 햄버거로만 열림
+.nav-links {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 260px;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: $color-card-bg;
+  padding-top: 5rem;
+  // gap: 1rem;
+  border-left: 1.5px solid $color-border;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000; // 사이드바는 최상단에 위치
+
+  &.open {
+    right: 0;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    color: $color-text-main;
+    cursor: pointer;
     display: flex;
-    flex-direction: column;
-    background-color: $color-card-bg;
-    padding-top: 5rem;
-    gap: 1rem;
-    border-left: 1.5px solid $color-border;
-    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 1001;
+  }
 
-    &.open {
-      right: 0;
-    }
+  a {
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 1.2rem 2rem;
+    border-radius: 0;
+    border-bottom: 2px solid rgba($color-border, 0.1);
+    color: $color-text-main;
 
-    a {
-      font-size: 1rem;
-      font-weight: 700;
-      padding: 1rem 2rem;
-      border-radius: 0;
-      border-bottom: 2px solid rgba($color-border, 0.1);
+    &:hover {
+      background-color: rgba($color-yellow, 0.25);
       color: $color-text-main;
-
-      &:hover {
-        background-color: rgba($color-yellow, 0.25);
-        color: $color-text-main;
-      }
     }
   }
+}
 
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 99;
-  }
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
 }
 
 .mypage-menu-container {
@@ -93,7 +137,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 8px;
-    padding: 1rem 2rem;
+    padding: 1.2rem 2rem;
     cursor: pointer;
     font-family: inherit;
     border-bottom: 2px solid rgba($color-border, 0.1);
@@ -106,7 +150,7 @@
   .submenu {
     display: none;
     flex-direction: column;
-    padding-left: 1rem;
+    // padding-left: 1rem;
     gap: 0.5rem;
     margin-top: 0.25rem;
 

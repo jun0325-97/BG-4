@@ -1,7 +1,7 @@
 // src/components/common/RecordRegistrationModal.tsx
 
 import { useState } from "react";
-import { X, Plus, Trash2, Users } from "lucide-react";
+import { X, Plus, Trash2, Users, Image as ImageIcon } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
@@ -49,7 +49,7 @@ export default function RecordRegistrationModal({
 
 
   const EMOJI_LIST = [
-    '🎲', '🃏', '♟️', '🧩', '🏆', '🎉', '🔥', '⛺', '🍕', '🍻', 
+    '🎲', '🃏', '♟️', '🧩', '🏆', '🎉', '🔥', '⛺', '🍕', '🍻',
     '👻', '🤩', '😎', '🤪', '🤔', '😡', '🤬', '🥳', '😴', '🤯',
     '😭', '😱', '🤫', '👀', '🧠', '👑', '💸', '💎', '⏳', '💡',
     '⚔️', '🛡️', '💣', '🧸', '🍔', '🍟', '🍖', '🍣', '🍰', '☕',
@@ -75,12 +75,12 @@ export default function RecordRegistrationModal({
       prev.map((log, i) =>
         i === logIndex
           ? {
-              ...log,
-              gameId,
-              resultType: game?.resultType ?? "no_result",
-              durationMinutes: game?.playTimeMinutes ?? 0,
-              results: [],
-            }
+            ...log,
+            gameId,
+            resultType: game?.resultType ?? "no_result",
+            durationMinutes: game?.playTimeMinutes ?? 0,
+            results: [],
+          }
           : log
       )
     );
@@ -99,8 +99,8 @@ export default function RecordRegistrationModal({
         const existing = log.results.find((r) => r.memberId === memberId);
         const updatedResults: PlayerResult[] = existing
           ? log.results.map((r) =>
-              r.memberId === memberId ? { ...r, [field]: value } : r
-            )
+            r.memberId === memberId ? { ...r, [field]: value } : r
+          )
           : [...log.results, { memberId, [field]: value }];
         return { ...log, results: updatedResults };
       })
@@ -154,7 +154,7 @@ export default function RecordRegistrationModal({
       if (photoFile) {
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `records/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from("images")
           .upload(fileName, photoFile);
@@ -168,39 +168,39 @@ export default function RecordRegistrationModal({
         finalPhotoUrl = data.publicUrl;
       }
 
-    if (isEditMode && editRecord) {
-      // 수정 모드
-      const updated: GatheringRecord = {
-        ...editRecord,
-        date,
-        emoji,
-        memo,
-        photoUrl: finalPhotoUrl,
-        playLogs,
-      };
-      await updateRecord(updated);
-      showAlert("기록이 수정되었습니다! ✅", "success");
-      onClose();
-    } else {
-      // 신규 추가 모드
-      const newRecord: GatheringRecord = {
-        id: `r-${Date.now()}`,
-        date,
-        emoji,
-        memo,
-        photoUrl: finalPhotoUrl,
-        playLogs,
-      };
-      await addRecord(newRecord);
-      showAlert("새로운 기록이 등록되었습니다! 🎉", "success");
-      // 연속 등록을 위해 폼 초기화
-      setDate(new Date().toISOString().split("T")[0]);
-      setEmoji("🎲");
-      setMemo("");
-      setPhotoUrl("");
-      setPhotoFile(null);
-      setPlayLogs([emptyLog(members)]);
-    }
+      if (isEditMode && editRecord) {
+        // 수정 모드
+        const updated: GatheringRecord = {
+          ...editRecord,
+          date,
+          emoji,
+          memo,
+          photoUrl: finalPhotoUrl,
+          playLogs,
+        };
+        await updateRecord(updated);
+        showAlert("기록이 수정되었습니다! ✅", "success");
+        onClose();
+      } else {
+        // 신규 추가 모드
+        const newRecord: GatheringRecord = {
+          id: `r-${Date.now()}`,
+          date,
+          emoji,
+          memo,
+          photoUrl: finalPhotoUrl,
+          playLogs,
+        };
+        await addRecord(newRecord);
+        showAlert("새로운 기록이 등록되었습니다! 🎉", "success");
+        // 연속 등록을 위해 폼 초기화
+        setDate(new Date().toISOString().split("T")[0]);
+        setEmoji("🎲");
+        setMemo("");
+        setPhotoUrl("");
+        setPhotoFile(null);
+        setPlayLogs([emptyLog(members)]);
+      }
     } catch (err: any) {
       console.error("Record registration error:", err);
       showAlert(`등록/수정 실패: ${err.message}`, "error");
@@ -234,47 +234,53 @@ export default function RecordRegistrationModal({
       <div className="modal-body">
         <form onSubmit={handleSubmit} className="record-form">
 
-            {/* 날짜 & 이모지 */}
-            <div className="form-group date-emoji-group">
-              <label>언제, 어떤 분위기였나요?</label>
-              <div className="date-emoji-inputs">
-                <div className="emoji-picker-container">
-                  <button 
-                    type="button" 
-                    className="emoji-btn"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  >
-                    {emoji}
-                  </button>
-                  {showEmojiPicker && (
-                    <div className="emoji-dropdown">
-                      {EMOJI_LIST.map(e => (
-                        <button 
-                          key={e} 
-                          type="button" 
-                          onClick={() => { setEmoji(e); setShowEmojiPicker(false); }}
-                        >
-                          {e}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
+          {/* 날짜 & 이모지 */}
+          <div className="form-group date-emoji-group">
+            {/* <label>언제, 어떤 분위기였나요?</label> */}
+            <div className="date-emoji-inputs">
+              <div className="emoji-picker-container">
+                <button
+                  type="button"
+                  className="emoji-btn"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                  {emoji}
+                </button>
+                {showEmojiPicker && (
+                  <div className="emoji-dropdown">
+                    {EMOJI_LIST.map(e => (
+                      <button
+                        key={e}
+                        type="button"
+                        onClick={() => { setEmoji(e); setShowEmojiPicker(false); }}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* 인증샷 */}
-            <div className="form-group">
-              <label>모임 인증샷 (선택)</label>
               <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          {/* 인증샷 */}
+          <div className="form-group photo-upload-group">
+            <label>모임 인증샷 (선택)</label>
+            <div className="file-upload-wrapper">
+              <label htmlFor="photo-upload" className="file-upload-btn">
+                <ImageIcon size={14} /> 사진 첨부하기
+              </label>
+              <input
+                id="photo-upload"
                 type="file"
                 accept="image/jpeg, image/png, image/webp"
+                style={{ display: "none" }}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -287,116 +293,118 @@ export default function RecordRegistrationModal({
                   }
                 }}
               />
-              {photoUrl && (
+            </div>
+            {photoUrl && (
+              <div className="photo-preview-wrapper">
                 <img
                   src={photoUrl}
                   alt="인증샷 미리보기"
                   className="photo-preview"
                 />
-              )}
-            </div>
-
-            {/* ── 게임 목록 (다중) ── */}
-            <div className="play-logs-section">
-              <div className="play-logs-header">
-                <span className="play-logs-title">🎲 플레이한 게임</span>
-                <button
-                  type="button"
-                  className="add-log-btn"
-                  onClick={handleAddLog}
-                >
-                  <Plus size={14} /> 게임 추가
+                <button type="button" className="remove-photo-btn" onClick={() => { setPhotoFile(null); setPhotoUrl(""); }}>
+                  <X size={14} />
                 </button>
               </div>
+            )}
+          </div>
 
-              {playLogs.map((log, logIndex) => {
-                const selectedGame = boardGames.find((g) => g.id === log.gameId);
-                return (
-                  <div key={log.id} className="play-log-card">
-                    {/* 카드 헤더: 게임 번호 + 참여멤버 피커 + 삭제 */}
-                    <div className="log-card-header">
-                      <span className="log-num">GAME {logIndex + 1}</span>
-                      
-                      <div className="header-actions">
-                        {/* 폰 타입 참여멤버 피커 */}
-                        <div className="participant-picker-wrapper">
-                          <button
-                            type="button"
-                            className="participant-icon-btn"
-                            onClick={() => setOpenParticipantPicker(
-                              openParticipantPicker === logIndex ? null : logIndex
-                            )}
-                            title="참여 멤버 편집"
-                          >
-                            <Users size={15} />
-                            <span className="participant-count">
-                              {(log.participatingMembers || members.map(x=>x.id)).length}
-                            </span>
-                          </button>
+          {/* ── 게임 목록 (다중) ── */}
+          <div className="play-logs-section">
+            <div className="play-logs-header">
+              <span className="play-logs-title">플레이한 게임</span>
+              <button
+                type="button"
+                className="add-log-btn"
+                onClick={handleAddLog}
+              >
+                <Plus size={14} /> 게임 추가
+              </button>
+            </div>
 
-                          {/* 드롭다운 피커 */}
-                          {openParticipantPicker === logIndex && (
-                            <div className="participant-dropdown">
-                              <p className="picker-label">참여 멤버 선택</p>
-                              {members.map(m => {
-                                const isParticipating = (log.participatingMembers || members.map(x=>x.id)).includes(m.id);
-                                return (
-                                  <button
-                                    key={m.id}
-                                    type="button"
-                                    className={`picker-member-btn ${isParticipating ? 'active' : ''}`}
-                                    onClick={() => handleToggleMember(logIndex, m.id)}
-                                  >
-                                    <span
-                                      className="member-dot"
-                                      style={{ backgroundColor: `var(--${m.color})` }}
-                                    />
-                                    {m.name}
-                                    {isParticipating && <span className="check">✔</span>}
-                                  </button>
-                                );
-                              })}
-                            </div>
+            {playLogs.map((log, logIndex) => {
+              const selectedGame = boardGames.find((g) => g.id === log.gameId);
+              return (
+                <div key={log.id} className="play-log-card">
+                  {/* 카드 헤더: 게임 번호 + 참여멤버 피커 + 삭제 */}
+                  <div className="log-card-header">
+                    <span className="log-num">GAME {logIndex + 1}</span>
+
+                    <div className="header-actions">
+                      {/* 폰 타입 참여멤버 피커 */}
+                      <div className="participant-picker-wrapper">
+                        <button
+                          type="button"
+                          className="participant-icon-btn"
+                          onClick={() => setOpenParticipantPicker(
+                            openParticipantPicker === logIndex ? null : logIndex
                           )}
-                        </div>
+                          title="참여 멤버 편집"
+                        >
+                          <Users size={15} />
+                          <span className="participant-count">
+                            {(log.participatingMembers || members.map(x => x.id)).length}
+                          </span>
+                        </button>
 
-                        {playLogs.length > 1 && (
-                          <button
-                            type="button"
-                            className="remove-log-btn"
-                            onClick={() => handleRemoveLog(logIndex)}
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                        {/* 드롭다운 피커 */}
+                        {openParticipantPicker === logIndex && (
+                          <div className="participant-dropdown">
+                            <p className="picker-label">참여 멤버 선택</p>
+                            {members.map(m => {
+                              const isParticipating = (log.participatingMembers || members.map(x => x.id)).includes(m.id);
+                              return (
+                                <button
+                                  key={m.id}
+                                  type="button"
+                                  className={`picker-member-btn ${isParticipating ? 'active' : ''}`}
+                                  onClick={() => handleToggleMember(logIndex, m.id)}
+                                >
+                                  {m.name}
+                                  {isParticipating && <span className="check">✔</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
-                    </div>
 
-                    {/* 게임 선택 */}
-                    <div className="form-group">
-                      <label>어떤 게임?</label>
-                      <select
-                        value={log.gameId}
-                        onChange={(e) => handleGameChange(logIndex, e.target.value)}
-                        required
-                      >
-                        <option value="">-- 보드게임 선택 --</option>
-                        {boardGames.map((game) => (
-                          <option key={game.id} value={game.id}>
-                            {game.name} ({game.genre})
-                          </option>
-                        ))}
-                      </select>
+                      {playLogs.length > 1 && (
+                        <button
+                          type="button"
+                          className="remove-log-btn"
+                          onClick={() => handleRemoveLog(logIndex)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
+                  </div>
 
-                    {/* 멤버별 결과 */}
-                    {selectedGame && (
-                      <div className="player-results-section">
-                        <h3>참여 멤버 기록</h3>
-                        <div className="player-list">
-                          {members
-                            .filter(m => (log.participatingMembers || members.map(x=>x.id)).includes(m.id))
-                            .map((member) => {
+                  {/* 게임 선택 */}
+                  <div className="form-group">
+                    {/* <label>어떤 게임?</label> */}
+                    <select
+                      value={log.gameId}
+                      onChange={(e) => handleGameChange(logIndex, e.target.value)}
+                      required
+                    >
+                      <option value="">-- 보드게임 선택 --</option>
+                      {boardGames.map((game) => (
+                        <option key={game.id} value={game.id}>
+                          {game.name} ({game.genre})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* 멤버별 결과 */}
+                  {selectedGame && (
+                    <div className="player-results-section">
+                      {/* <h3>참여 멤버 기록</h3> */}
+                      <div className="player-list">
+                        {members
+                          .filter(m => (log.participatingMembers || members.map(x => x.id)).includes(m.id))
+                          .map((member) => {
                             const res = log.results.find(
                               (r) => r.memberId === member.id
                             );
@@ -428,7 +436,7 @@ export default function RecordRegistrationModal({
                                     />
                                     <input
                                       type="number"
-                                      placeholder="점수 (선택)"
+                                      placeholder="점수(선택)"
                                       defaultValue={res?.score ?? ""}
                                       onChange={(e) =>
                                         handleResultChange(
@@ -464,36 +472,36 @@ export default function RecordRegistrationModal({
                               </div>
                             );
                           })}
-                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-            {/* 메모 */}
-            <div className="form-group">
-              <label>한 줄 메모 (에피소드)</label>
-              <textarea
-                placeholder="예: 한솔의 블러핑에 다들 속아 넘어간 날 😡"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                rows={3}
-              />
-            </div>
+          {/* 메모 */}
+          <div className="form-group">
+            <label>한 줄 메모</label>
+            <textarea
+              placeholder="예: 부산 가는 KTX 안에서 스페이스 크루함"
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              rows={3}
+            />
+          </div>
 
-            <div className="modal-actions">
-              {isEditMode && (
-                <button type="button" className="delete-btn" onClick={handleDelete}>
-                  <Trash2 size={16} /> 삭제
-                </button>
-              )}
-              <button type="submit" className="submit-btn" disabled={isUploading}>
-                {isUploading ? "업로드 중..." : (isEditMode ? "✅ 수정 완료" : "🎉 최종 등록하기")}
+          <div className="modal-actions">
+            {isEditMode && (
+              <button type="button" className="delete-btn" onClick={handleDelete}>
+                <Trash2 size={16} /> 삭제
               </button>
-            </div>
-          </form>
+            )}
+            <button type="submit" className="submit-btn" disabled={isUploading}>
+              {isUploading ? "업로드 중..." : (isEditMode ? "수정 완료" : "등록하기")}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

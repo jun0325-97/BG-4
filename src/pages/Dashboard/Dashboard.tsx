@@ -53,8 +53,8 @@ export default function Dashboard() {
     // 3. 멤버 객체에 보정 승률(winRate) 덮어씌우기
     return members.map(m => {
       const s = stats[m.id];
-      // 💡 보정 승률: (승점 + 1) / (참여 + 2) * 100
-      const calculatedWinRate = Math.round(((s.wins + 1) / (s.plays + 2)) * 100);
+      // 💡 실제 승률: (승점 / 참여 횟수) * 100 (단, 참여 횟수가 0이면 0%)
+      const calculatedWinRate = s.plays === 0 ? 0 : Math.round((s.wins / s.plays) * 100);
       return { ...m, winRate: calculatedWinRate };
     });
   }, [members, records]);

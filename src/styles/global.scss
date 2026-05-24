@@ -4,9 +4,9 @@
 @use "variables" as *; // 변수 사용을 위해 추가
 @import url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy.css');
 
-// 전체 폰트 패밀리를 페이퍼로지로 통일
+// 전체 폰트 패밀리를 영문은 Montserrat, 국문은 Paperlogy로 설정
 body {
-  font-family: 'Paperlogy', "Comic Sans MS", "Nunito", "Quicksand", sans-serif;
+  font-family: 'Montserrat', 'Paperlogy', "Comic Sans MS", "Nunito", "Quicksand", sans-serif;
   color: $color-text-main;
   background-color: $color-background;
   overscroll-behavior-y: none; /* 당겨서 새로고침 / 바운스 효과 방지 */

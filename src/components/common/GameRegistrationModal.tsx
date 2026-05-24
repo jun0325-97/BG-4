@@ -40,7 +40,7 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from("images")
           .upload(`games/${fileName}`, imageFile);
@@ -69,7 +69,7 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
 
       await addGame(newGame);
       showAlert(`'${name}' 등록 완료! 🎲`, "success");
-      
+
       setName("");
       setGenre(GAME_GENRES[0]);
       setMinPlayers("");
@@ -104,18 +104,32 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
         <form onSubmit={handleSubmit} className="registration-form">
           <div className="form-group image-input-group">
             <label>게임 표지 이미지 (선택)</label>
-            <div className="image-preview-box" onClick={() => document.getElementById("game-image-upload")?.click()}>
-              {imageUrl ? (
-                <img src={imageUrl} alt="미리보기" className="preview-img" />
-              ) : (
-                <div className="empty-preview">
-                  <ImageIcon size={40} />
-                  <span>
-                    클릭하여 사진첩에서
-                    <br />
-                    이미지를 업로드하세요
-                  </span>
-                </div>
+            <div className="image-preview-wrapper">
+              <div className="image-preview-box" onClick={() => document.getElementById("game-image-upload")?.click()}>
+                {imageUrl ? (
+                  <img src={imageUrl} alt="미리보기" className="preview-img" />
+                ) : (
+                  <div className="empty-preview">
+                    <ImageIcon size={40} />
+                    <span>
+                      클릭하여 사진첩에서
+                      <br />
+                      이미지를 업로드하세요
+                    </span>
+                  </div>
+                )}
+              </div>
+              {imageUrl && (
+                <button
+                  type="button"
+                  className="remove-image-btn"
+                  onClick={() => {
+                    setImageFile(null);
+                    setImageUrl("");
+                  }}
+                >
+                  <X size={16} />
+                </button>
               )}
             </div>
             <input
@@ -156,7 +170,7 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="예: 꿀잼 우정파괴 마피아 게임"
+              placeholder="예: 우주로 떠나는 고도의 심리전"
             />
           </div>
 
@@ -242,9 +256,11 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
             </select>
           </div>
 
-          <button type="submit" className="submit-btn" disabled={isUploading}>
-            {isUploading ? "업로드 중..." : "등록하기"}
-          </button>
+          <div className="modal-actions">
+            <button type="submit" className="submit-btn" disabled={isUploading}>
+              {isUploading ? "업로드 중..." : "등록하기"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

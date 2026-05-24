@@ -9,10 +9,10 @@
   right: 0;
   bottom: 0;
   background-color: $color-background;
-  background-image: 
+  background-image:
     linear-gradient($color-grid-line 1px, transparent 1px),
     linear-gradient(90deg, $color-grid-line 1px, transparent 1px);
-  background-size: 40px 40px; 
+  background-size: 40px 40px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -23,6 +23,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -32,10 +33,8 @@
   @include retro-window-header;
   justify-content: space-between;
   z-index: 10;
-  border-bottom: 2px solid $color-border; // 재선언하여 덮어쓰기 방지
+  border-bottom: 1px solid $color-border;
 
-  // 윈도우 컨트롤러 3개가 before로 들어가므로 타이틀을 약간 오른쪽으로 밀 필요 없음 (flex로 자동정렬)
-  
   .modal-title {
     flex: 1;
     font-size: 1.4rem;
@@ -61,9 +60,6 @@
   overflow-y: auto; // 내용이 길면 여기서 스크롤!
   padding: 1.5rem;
   background-color: $color-card-bg;
-  // 모바일에서 너무 넓어지지 않게 가운데 정렬 (선택 사항)
-  display: flex;
-  justify-content: center;
 }
 
 .registration-form {
@@ -72,7 +68,8 @@
   gap: 1.2rem;
   width: 100%;
   max-width: 500px;
-  padding-bottom: 3rem; // 폼 맨 아래 여유 공간
+  margin: 0 auto;
+  padding-bottom: 1rem;
 
   .form-group {
     display: flex;
@@ -106,6 +103,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.8rem;
+
     .form-group {
       flex: 1 1 100px;
     }
@@ -128,47 +126,90 @@
   }
 
   // 💡 새로 추가된 썸네일 프리뷰 영역 스타일
-  .image-preview-box {
+  .image-preview-wrapper {
+    position: relative;
     width: 100%;
-    height: 180px;
-    border: 2px dashed $color-border;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff;
     margin-bottom: 0.5rem;
 
-    .preview-img {
+    .image-preview-box {
       width: 100%;
-      height: 100%;
-      object-fit: contain; // 비율 유지하며 꽉 차게
+      height: 180px;
+      border: 2px dashed $color-border;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff;
+      cursor: pointer;
+
+      .preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; // 비율 유지하며 꽉 차게
+      }
+
+      .empty-preview {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: #aaa;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
     }
 
-    .empty-preview {
+    .remove-image-btn {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: $color-red;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      color: #aaa;
-      text-align: center;
-      font-size: 0.85rem;
-      font-weight: 700;
+      justify-content: center;
+      cursor: pointer;
+      @include retro-shadow;
+      transition: transform 0.15s;
+
+      &:hover {
+        transform: scale(1.1);
+      }
     }
   }
 
-  .submit-btn {
-    margin-top: 1.5rem;
-    padding: 1.2rem;
-    font-size: 1.2rem;
-    font-weight: 900;
-    font-family: inherit;
-    background-color: $color-yellow;
-    color: $color-text-main;
-    @include retro-border;
-    border-radius: 8px;
-    @include retro-shadow;
-    cursor: pointer;
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+
+    button {
+      padding: 0.95rem;
+      font-size: 1rem;
+      font-weight: 800;
+      font-family: inherit;
+      @include retro-border;
+      border-radius: 8px;
+      @include retro-shadow;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    .submit-btn {
+      flex: 1;
+      background-color: $color-yellow;
+      color: $color-text-main;
+    }
   }
 }

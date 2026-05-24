@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronUp, LogOut } from "lucide-react";
 import { useStore } from "../../store/useStore";
@@ -19,6 +19,28 @@ const getKoreanName = (username: string) => {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY <= 50) {
+        setIsVisible(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        // 메뉴가 열려있을 때는 헤더를 숨기지 않음
+        if (!isMenuOpen) setIsVisible(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isMenuOpen]);
 
   const { user, clearAuth } = useAuthStore();
   const { members } = useStore();
@@ -51,22 +73,28 @@ export default function Header() {
   };
 
   return (
-    <header className="global-header">
-      <div className="logo">
-        <Link to="/" onClick={closeMenu}>
-          🎲 보미새
-        </Link>
-      </div>
+    <>
+      <header className={`global-header ${isVisible ? "visible" : "hidden"}`}>
+        <div className="logo">
+          <Link to="/" onClick={closeMenu}>
+            <span className="logo-bms">BMS</span><span className="logo-crew"> Crew</span>
+          </Link>
+        </div>
 
-      <button
-        className="hamburger-btn"
-        onClick={toggleMenu}
-        aria-label="Toggle menu"
-      >
-        {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-      </button>
+        <button
+          className="hamburger-btn"
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+        >
+          <Menu size={28} />
+        </button>
+      </header>
 
       <nav className={`nav-links ${isMenuOpen ? "open" : ""}`}>
+        <button className="close-btn" onClick={closeMenu} aria-label="Close menu">
+          <X size={28} />
+        </button>
+
         <Link to="/" onClick={closeMenu}>
           Dashboard
         </Link>
@@ -103,7 +131,7 @@ export default function Header() {
             ))}
           </div>
         </div>
-        
+
         {/* 메뉴 최하단 영역으로 분리된 로그아웃 버튼 */}
         <div className="nav-bottom-actions">
           <button onClick={handleLogout} className="global-logout-btn">
@@ -113,6 +141,6 @@ export default function Header() {
       </nav>
 
       {isMenuOpen && <div className="overlay" onClick={closeMenu}></div>}
-    </header>
+    </>
   );
 }

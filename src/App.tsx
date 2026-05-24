@@ -10,17 +10,46 @@ import AlertModal from "./components/common/AlertModal";
 import { useAuthStore } from "./store/useAuthStore";
 import { useStore } from "./store/useStore";
 import { supabase } from "./utils/supabase";
+import loginBg from "./assets/images/img-login.jpg";
+import "./pages/Login/Login.scss"; // 로딩 텍스트 및 배경 스타일 재사용
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session } = useAuthStore();
+  const { session, isInitialized } = useAuthStore();
+  const { isLoading } = useStore();
+  const isRootPath = window.location.pathname === '/';
+
+  if (!isInitialized || (session && isLoading)) {
+    if (isRootPath) {
+      return (
+        <div
+          className="login-container"
+          style={{ backgroundImage: `url(${loginBg})` }}
+        >
+          <div className="success-loading-text">
+            LOADING...
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: "1.2rem", fontWeight: 400, fontFamily: "'Montserrat', sans-serif", letterSpacing: "0.6rem", color: "#aaa" }}>
+            LOADING...
+          </div>
+        </div>
+      );
+    }
+  }
+
   if (!session) {
     return <Navigate to="/login" replace />;
   }
+
   return <>{children}</>;
 }
 
 export default function App() {
-  const { setSession, setUser, isInitialized, setInitialized } = useAuthStore();
+  const { setSession, setUser, setInitialized, isInitialized } = useAuthStore();
   const { fetchAll } = useStore();
 
   useEffect(() => {
@@ -48,12 +77,29 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, [setSession, setUser, setInitialized, fetchAll]);
 
+  // 전역 초기화 스플래시 화면 (이미 로그인된 유저가 로그인 페이지를 깜빡이는 것을 방지)
   if (!isInitialized) {
-    return (
-      <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        로그인 정보 확인 중...
-      </div>
-    );
+    const isRootOrLogin = window.location.pathname === '/' || window.location.pathname === '/login';
+    if (isRootOrLogin) {
+      return (
+        <div
+          className="login-container"
+          style={{ backgroundImage: `url(${loginBg})` }}
+        >
+          <div className="success-loading-text">
+            LOADING...
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: "1.2rem", fontWeight: 400, fontFamily: "'Montserrat', sans-serif", letterSpacing: "0.6rem", color: "#aaa" }}>
+            LOADING...
+          </div>
+        </div>
+      );
+    }
   }
 
   return (
@@ -61,7 +107,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          
+
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/library" element={<Library />} />

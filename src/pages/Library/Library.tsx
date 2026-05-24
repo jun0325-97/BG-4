@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2 } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -39,11 +39,11 @@ export default function Library() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<BoardGame | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // 상세 필터 토글 상태
-  
+
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
   const currentUser = members.find(m => m.name === currentKoreanName);
-  
+
   // URL에서 쿼리 파라미터 읽어오기
   const [searchParams] = useSearchParams();
   const ownerFilterUrl = searchParams.get("owner");
@@ -59,25 +59,25 @@ export default function Library() {
   const filteredGames = useMemo(() => {
     return boardGames.filter((game) => {
       if (searchTerm && !game.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-      
+
       if (filters.owner !== "any") {
         const owner = members.find(m => m.color === filters.owner);
         if (owner && game.ownerId !== owner.id) return false;
       }
-      
+
       if (filters.players !== "any") {
         const pCount = parseInt(filters.players, 10);
         if (pCount < game.minPlayers || pCount > game.maxPlayers) return false;
       }
-      
+
       if (filters.time !== "any") {
         if (filters.time === "short" && game.playTimeMinutes > 30) return false;
         if (filters.time === "medium" && (game.playTimeMinutes <= 30 || game.playTimeMinutes > 60)) return false;
         if (filters.time === "long" && game.playTimeMinutes <= 60) return false;
       }
-      
+
       if (filters.genre !== "any" && !game.genre.includes(filters.genre)) return false;
-      
+
       return true;
     });
   }, [searchTerm, filters, boardGames, members]);
@@ -124,7 +124,7 @@ export default function Library() {
             onChange={handleSearch}
           />
         </div>
-        <button 
+        <button
           className={`filter-toggle-btn ${isFilterOpen ? "active" : ""}`}
           onClick={() => setIsFilterOpen(!isFilterOpen)}
           aria-label="상세 필터 토글"
@@ -135,7 +135,7 @@ export default function Library() {
 
       {/* 다중 필터 옵션 영역 (isFilterOpen에 따라 노출) */}
       <div className={`filter-section ${isFilterOpen ? "open" : ""}`}>
-        <select value={filters.players} onChange={(e) => { setFilters({...filters, players: e.target.value}); setCurrentPage(1); }}>
+        <select value={filters.players} onChange={(e) => { setFilters({ ...filters, players: e.target.value }); setCurrentPage(1); }}>
           <option value="any">인원 (전체)</option>
           <option value="2">2인</option>
           <option value="3">3인</option>
@@ -143,15 +143,15 @@ export default function Library() {
           <option value="5">5인</option>
           <option value="6">6인 이상</option>
         </select>
-        
-        <select value={filters.time} onChange={(e) => { setFilters({...filters, time: e.target.value}); setCurrentPage(1); }}>
+
+        <select value={filters.time} onChange={(e) => { setFilters({ ...filters, time: e.target.value }); setCurrentPage(1); }}>
           <option value="any">시간 (전체)</option>
           <option value="short">30분 이하</option>
           <option value="medium">30~60분</option>
           <option value="long">60분 초과</option>
         </select>
-        
-        <select value={filters.genre} onChange={(e) => { setFilters({...filters, genre: e.target.value}); setCurrentPage(1); }}>
+
+        <select value={filters.genre} onChange={(e) => { setFilters({ ...filters, genre: e.target.value }); setCurrentPage(1); }}>
           <option value="any">장르 (전체)</option>
           <option value="엔진/덱빌딩">엔진/덱빌딩</option>
           <option value="마피아/블러핑">마피아/블러핑</option>
@@ -159,8 +159,8 @@ export default function Library() {
           <option value="협력">협력</option>
           <option value="파티">파티</option>
         </select>
-        
-        <select value={filters.owner} onChange={(e) => { setFilters({...filters, owner: e.target.value}); setCurrentPage(1); }}>
+
+        <select value={filters.owner} onChange={(e) => { setFilters({ ...filters, owner: e.target.value }); setCurrentPage(1); }}>
           <option value="any">소유자 (전체)</option>
           {members.map(m => (
             <option key={m.id} value={m.color}>{m.name} 님</option>
@@ -175,9 +175,9 @@ export default function Library() {
           currentGames.map((game) => {
             const owner = members.find((m) => m.id === game.ownerId);
             return (
-              <div 
-                key={game.id} 
-                className="game-card" 
+              <div
+                key={game.id}
+                className="game-card"
                 onClick={() => setSelectedGame(game)} // 💡 클릭 이벤트 연결!
               >
                 {/* 썸네일 영역 */}
@@ -193,7 +193,6 @@ export default function Library() {
 
                 <div className="game-info">
                   <h3 className="game-name">{game.name}</h3>
-                  <span className="game-genre">{game.genre}</span>
                   <div className="game-meta-inline">
                     <span className="meta-item">
                       <Users size={12} /> {formatPlayers(game.minPlayers, game.maxPlayers)}
@@ -213,7 +212,7 @@ export default function Library() {
             );
           })
         ) : (
-          <div className="empty-state">검색 결과가 없습니다 🥲</div>
+          <div className="empty-state">검색 결과가 없습니다.</div>
         )}
       </div>
 
@@ -238,39 +237,53 @@ export default function Library() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{selectedGame.name}</h2>
-              {/* <span className="badge">{selectedGame.genre}</span> */}
               <button className="close-btn" onClick={() => setSelectedGame(null)}>
                 <X size={24} />
               </button>
             </div>
 
             <div className="modal-body">
-              {selectedGame.description && (
-                <div className="detail-item description-item">
-                  <span>💬 {selectedGame.description}</span>
+              {selectedGame.imageUrl && (
+                <div className="modal-thumbnail">
+                  <img src={selectedGame.imageUrl} alt={selectedGame.name} />
                 </div>
               )}
-              <div className="detail-item">
-                <Users size={20} />
-                <span>
-                  {formatPlayers(selectedGame.minPlayers, selectedGame.maxPlayers)} 추천
-                </span>
-              </div>
-              <div className="detail-item">
-                <Clock size={20} />
-                <span>약 {formatTime(selectedGame.playTimeMinutes)} 소요</span>
-              </div>
-              <div className="detail-item">
-                <span>📦 소유자: </span>
-                <strong>
-                  {members.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
-                </strong>
+              
+              <div className="modal-info-list">
+                <div className="modal-genre-badge">
+                  <span className="badge">{selectedGame.genre}</span>
+                </div>
+
+                <div className="detail-item">
+                  <Users size={20} />
+                  <span>
+                    {formatPlayers(selectedGame.minPlayers, selectedGame.maxPlayers)} 추천
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <Clock size={20} />
+                  <span>약 {formatTime(selectedGame.playTimeMinutes)} 소요</span>
+                </div>
+                <div className="detail-item">
+                  <User size={20} />
+                  <span>소유자: </span>
+                  <span className="owner-name">
+                    {members.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
+                  </span>
+                </div>
+
+                {selectedGame.description && (
+                  <div className="detail-item description-item">
+                    <MessageSquare size={20} />
+                    <span>{selectedGame.description}</span>
+                  </div>
+                )}
               </div>
 
               {currentUser && currentUser.id === selectedGame.ownerId && (
                 <div className="modal-actions" style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button 
-                    className="delete-btn" 
+                  <button
+                    className="delete-btn"
                     onClick={() => handleDeleteGame(selectedGame.id)}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center',

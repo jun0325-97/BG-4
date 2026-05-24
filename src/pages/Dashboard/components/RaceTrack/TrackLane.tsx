@@ -23,8 +23,9 @@ interface TrackLaneProps {
   animate: boolean;
 }
 
-const TRANSITION_DURATION_MS = 1100; // CSS transition 과 동일하게 맞춤
-const INITIAL_DELAY_MS = 200;        // 전체 시작 딜레이
+// ★ 캐릭터 CSS transition 과 반드시 동일하게 맞춤
+const CAR_TRANSITION_MS = 2000;
+const INITIAL_DELAY_MS = 200;
 
 export default function TrackLane({
   member,
@@ -46,11 +47,11 @@ export default function TrackLane({
       setIsMoving(true);
       setCarPosition(member.winRate);
 
-      // transition 완료 후 도착 아이들 애니메이션 전환
+      // CSS transition 이 끝나는 시점에 맞춰 idle 전환
       const endTimer = setTimeout(() => {
         setIsMoving(false);
         setArrived(true);
-      }, TRANSITION_DURATION_MS);
+      }, CAR_TRANSITION_MS);
 
       return () => clearTimeout(endTimer);
     }, delay);
@@ -88,7 +89,10 @@ export default function TrackLane({
       </div>
 
       {/* 가운데: 트랙 */}
-      <div className={`lane-track ${isMoving ? "lane-track--active" : ""}`}>
+      <div
+        className={`lane-track ${isMoving ? "lane-track--active" : ""}`}
+        style={{ "--fill": `${carPosition}%` } as React.CSSProperties}
+      >
         <div
           className={carClass}
           style={{ left: `${carPosition}%` }}

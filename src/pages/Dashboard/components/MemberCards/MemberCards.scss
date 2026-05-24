@@ -13,92 +13,157 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.85rem 0.6rem;
-  background: $color-card-bg;
+  padding: 1.2rem 1rem;
   cursor: pointer;
-  
-  @include retro-border;
-  @include retro-shadow;
 
-  // 멤버 색상별 배경 포인트
+  border: none;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  align-items: flex-start;
+  text-align: left;
+
+  &__arrow {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    width: 22px;
+    height: 22px;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
   &[data-color="red"] {
-    background: rgba($color-red, 0.08);
+    background-color: $color-red;
+    box-shadow: 0 4px 12px rgba($color-red, 0.2);
+
+    &:hover {
+      box-shadow: 0 8px 20px rgba($color-red, 0.3);
+    }
   }
+
   &[data-color="blue"] {
-    background: rgba($color-blue, 0.08);
+    background-color: $color-blue;
+    box-shadow: 0 4px 12px rgba($color-blue, 0.2);
+
+    &:hover {
+      box-shadow: 0 8px 20px rgba($color-blue, 0.3);
+    }
   }
+
   &[data-color="green"] {
-    background: rgba($color-green, 0.08);
+    background-color: $color-green;
+    box-shadow: 0 4px 12px rgba($color-green, 0.2);
+
+    &:hover {
+      box-shadow: 0 8px 20px rgba($color-green, 0.3);
+    }
   }
+
   &[data-color="yellow"] {
-    background: rgba($color-yellow, 0.15);
+    background-color: $color-yellow;
+    box-shadow: 0 4px 12px rgba($color-yellow, 0.2);
+
+    &:hover {
+      box-shadow: 0 8px 20px rgba($color-yellow, 0.3);
+    }
   }
 
   &__meeple {
+    position: relative;
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    border: 1.5px solid $color-border;
+    // border: 1.5px solid $color-border;
     background-color: #ffffff;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 0.25rem;
 
     &[data-color="red"] {
       border-color: $color-red;
-      background-color: rgba($color-red, 0.15);
+
+      img {
+        position: absolute;
+        top: -52%;
+        left: -46%;
+        width: 180%;
+      }
     }
+
     &[data-color="blue"] {
       border-color: $color-blue;
-      background-color: rgba($color-blue, 0.15);
+
+      img {
+        position: absolute;
+        top: -52%;
+        left: -42%;
+      }
     }
+
     &[data-color="green"] {
       border-color: $color-green;
-      background: rgba($color-green, 0.15);
+
+      img {
+        position: absolute;
+        top: -14%;
+        left: -48%;
+      }
     }
+
     &[data-color="yellow"] {
       border-color: color.scale($color-yellow, $lightness: -15%);
-      background: rgba($color-yellow, 0.2);
+
+      img {
+        position: absolute;
+        top: 10%;
+        left: -24%;
+        width: 140%;
+      }
     }
 
     img {
-      width: 92%;
-      height: 92%;
-      object-fit: contain;
+      width: 200%;
+      height: auto;
+      object-fit: unset;
       border-radius: 50%;
     }
   }
 
   &__name {
-    font-size: 0.95rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: $color-text-main;
   }
 
-  &__rate {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
-    border: 1.5px solid $color-border;
-    color: $color-text-main; // 시크한 까만색 글씨로 통일!
+  &__labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.2rem;
+    margin-top: 0.35rem;
+  }
 
-    // 🌟 검은 글씨가 훨씬 잘 보이도록 라벨 배경의 투명도를 높여 매우 부드럽고 연하게 처리!
-    [data-color="red"] & {
-      background: rgba($color-red, 0.18);
-    }
-    [data-color="blue"] & {
-      background: rgba($color-blue, 0.18);
-    }
-    [data-color="green"] & {
-      background: rgba($color-green, 0.18);
-    }
-    [data-color="yellow"] & {
-      background: rgba($color-yellow, 0.28);
+  &__label {
+    font-size: 0.6rem;
+    padding: 0.25rem 0.46rem;
+    border-radius: 20px;
+    color: $color-text-main;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.02em;
+
+    &--rank {
+      background: #ffffff;
+      font-weight: 700;
+      // box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
     }
   }
 }

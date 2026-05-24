@@ -2,35 +2,146 @@
 
 .login-container {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  /* 로그인 박스를 하단에 배치 */
   justify-content: center;
   min-height: 100vh;
-  background-color: var(--background-color, #f8f9fa);
-  padding: 20px;
+  min-height: 100dvh;
+  background-image: url("../../assets/images/img-login.jpg");
+  background-size: cover;
+  background-position: top 0 left 50%;
+  background-repeat: no-repeat;
+  padding: 0;
+  /* 여백 제거하여 패널이 바닥에 붙게 함 */
+  position: relative;
+  overflow: hidden;
+
+  /* 이미지가 너무 밝을 경우를 대비해 살짝 어두운 오버레이 추가 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.0);
+    z-index: 1;
+  }
+}
+
+.success-loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.6rem;
+  text-transform: uppercase;
+  z-index: 2;
+  animation: elegant-breathe 2s ease-in-out infinite;
+}
+
+@keyframes elegant-breathe {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .login-box {
   background: white;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  padding: 36px 24px 40px;
+  border-radius: 36px 36px 0 0;
+  // box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   text-align: center;
+  z-index: 3;
+  position: relative;
 
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--text-primary, #212529);
-  }
+  /* 패널이 아래에서 위로 올라오는 애니메이션 */
+  animation: slide-up-panel 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  transform: translateY(100%);
 
-  p {
-    font-size: 0.9rem;
-    color: var(--text-secondary, #6c757d);
-    margin-bottom: 32px;
+  &.slide-down {
+    animation: slide-down-panel 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
   }
 }
+
+@keyframes slide-down-panel {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes slide-up-panel {
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animated-title {
+  margin-bottom: 24px;
+  color: var(--text-primary, #212529);
+  display: inline-block;
+  cursor: default;
+
+
+  span {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
+    animation: wave-bounce 1s ease-in-out forwards;
+    opacity: 0;
+
+    &:hover {
+      transform: translateY(-8px) scale(1.1) rotate(3deg);
+      color: #20b2f5;
+    }
+  }
+
+  .bms-text {
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: -0.1rem;
+
+    &:nth-child(4) {
+      font-size: 1.8rem;
+    }
+  }
+
+  .club-text {
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: -0.1rem;
+  }
+}
+
+@keyframes wave-bounce {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 .input-group {
   text-align: left;
@@ -38,7 +149,7 @@
 
   label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     margin-bottom: 6px;
     color: var(--text-primary, #495057);
@@ -55,6 +166,10 @@
     &:focus {
       outline: none;
       border-color: #339af0;
+    }
+
+    &::placeholder {
+      color: #c3c3c3;
     }
   }
 }
@@ -89,7 +204,7 @@
   }
 
   .btn-primary {
-    background-color: #339af0;
+    background-color: #20b2f5;
     color: white;
 
     &:hover:not(:disabled) {

@@ -5,106 +5,116 @@
 .mypage-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
-.mypage-header {
+.mypage-header-sleek {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  padding: 2rem 1rem;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: #fff;
   @include retro-border;
-  background-color: $color-card-bg;
   @include retro-shadow;
-  text-align: center;
-  transition: background-color 0.3s ease;
+  border-radius: 12px;
 
-  // URL 파라미터에 따라 받아온 멤버 색상 테마 적용
-  &[data-color="red"] {
-    background-color: rgba($color-red, 0.12);
-  }
-  &[data-color="blue"] {
-    background-color: rgba($color-blue, 0.12);
-  }
-  &[data-color="green"] {
-    background-color: rgba($color-green, 0.12);
-  }
-  &[data-color="yellow"] {
-    background-color: rgba($color-yellow, 0.2);
-  }
+  .avatar-area {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    overflow: hidden;
 
-  .profile-icon {
-    font-size: 2.8rem;
-    margin-bottom: 0.4rem;
+    .character-img {
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+    }
   }
 
-  .name {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: $color-text-main;
-  }
+  // 각 색상별 캐릭터 배경 (아주 옅고 고급스러운 틴트)
+  &[data-color="red"] .avatar-area { background-color: rgba($color-red, 0.12); }
+  &[data-color="blue"] .avatar-area { background-color: rgba($color-blue, 0.12); }
+  &[data-color="green"] .avatar-area { background-color: rgba($color-green, 0.12); }
+  &[data-color="yellow"] .avatar-area { background-color: rgba($color-yellow, 0.2); }
 
-  .title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: $color-text-sub;
-    margin-top: 0.25rem;
-  }
-
-  .sub-title {
-    margin-top: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.8);
-    @include retro-border;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: $color-text-main;
-  }
-}
-
-.stats-section {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 0.5rem; // 줄 간 간격
-
-  .stat-box {
-    flex: 1;
+  .info-area {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1.2rem;
-    @include retro-border;
-    background-color: $color-card-bg;
-    @include retro-shadow;
+    align-items: flex-start;
+    gap: 0.35rem;
 
-    .label {
-      font-size: 0.9rem;
+    .title {
+      font-size: 0.75rem;
       font-weight: 700;
       color: $color-text-sub;
+      background-color: #f4f4f5; // 아주 깔끔하고 모던한 회색
+      padding: 4px 10px;
+      border-radius: 8px; // 둥근 사각형 느낌으로 알약보다 모던함
+      letter-spacing: 0.02em;
     }
 
-    .value {
+    .name {
       font-size: 1.5rem;
       font-weight: 800;
       color: $color-text-main;
-      margin-top: 0.25rem;
-
-      &.highlight {
-        color: $color-red;
-        font-size: 1.2rem;
-      }
+      line-height: 1.1;
     }
   }
+}
 
-  &.single-box {
-    .stat-box {
-      padding: 1rem;
-      
-      .value {
-        font-size: 1rem;
-      }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 0.2rem;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  @include retro-border;
+  background-color: $color-card-bg;
+  @include retro-shadow;
+  border-radius: 12px;
+
+  &.full-width {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 1.2rem;
+  }
+
+  .label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $color-text-sub;
+    margin-bottom: 0.3rem;
+  }
+
+  .value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: $color-text-main;
+
+    &.highlight-win {
+      color: $color-red;
+      font-size: 1.5rem;
+    }
+
+    &.highlight-game {
+      color: $color-blue;
+      font-size: 1.15rem;
+    }
+
+    &.nemesis-value {
+      font-size: 1.15rem;
     }
   }
 }
@@ -119,7 +129,7 @@
     font-size: 1rem;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
   }
 
   .radar-wrapper {

@@ -12,9 +12,9 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['vite.svg'],
       manifest: {
-        name: "Boardgame Crew",
-        short_name: "BG Crew",
-        description: "보드게임 크루 전적 기록 및 랭킹 관리 앱",
+        name: "BMS Club",
+        short_name: "BMS Club",
+        description: "BMS Club 전적 기록 및 랭킹 관리 앱",
         theme_color: "#f5ead8",
         background_color: "#f5ead8",
         display: "standalone",

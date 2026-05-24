@@ -12,6 +12,18 @@ import { useStore } from "../../store/useStore";
 import { getTitleByRank } from "../../utils/getTitleByRank";
 import "./MyPage.scss";
 
+import imgRed from "../../assets/images/img-red-1.png";
+import imgBlue from "../../assets/images/img-blue-1.png";
+import imgGreen from "../../assets/images/img-green-1.png";
+import imgYellow from "../../assets/images/img-yellow-1.png";
+
+const CHARACTER_IMAGES: Record<string, string> = {
+  red: imgRed,
+  blue: imgBlue,
+  green: imgGreen,
+  yellow: imgYellow,
+};
+
 
 
 // 실제 데이터 기반 통계 계산 헬퍼
@@ -36,8 +48,11 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
   };
 
   let totalPlays = 0;
+  let totalRatedPlays = 0;
   let totalPlayTime = 0;
+  let totalOverallWins = 0;
   const gamePlayCounts: Record<string, number> = {};
+  const nemesisStats: Record<string, number> = {};
 
   records.forEach((rec) => {
     rec.playLogs.forEach((log: any) => {
@@ -47,49 +62,90 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
       const game = boardGames.find((g: any) => g.id === log.gameId);
       if (!game) return;
 
-      if (log.resultType === "no_result") return;
-
+      // 누적 플레이 타임과 총 플레이 횟수는 승패 결과 유무와 무관하게 모든 게임을 집계
       totalPlays++;
       totalPlayTime += log.durationMinutes;
       gamePlayCounts[game.name] = (gamePlayCounts[game.name] || 0) + 1;
 
-      const category = GENRE_MAPPING[game.genre];
-      if (!category) return;
+      // 승률 및 천적 계산은 승패가 있는 게임만
+      if (log.resultType === "no_result") return;
+
+      totalRatedPlays++;
 
       const myResult = log.results.find((r: any) => r.memberId === memberId);
-      let winValue = 0; // 💡 부분 승점 (0.0 ~ 1.0)
+      let winValue = 0;
 
       if (log.resultType === "ranked") {
         const myRank = myResult?.rank;
         if (myRank) {
           const n = participants.length;
           if (n <= 1) {
-            winValue = 1.0; // 혼자 했으면 무조건 1점
+            winValue = 1.0;
           } else {
-            // 공식: (참여 인원 수 - 내 등수) / (참여 인원 수 - 1)
-            // ex) 4명 중 1등: 3/3 = 1.0
-            // ex) 4명 중 2등: 2/3 = 0.66
-            // ex) 4명 중 4등: 0/3 = 0.0
-            const safeRank = Math.min(myRank, n); 
+            const safeRank = Math.min(myRank, n);
             winValue = Math.max(0, (n - safeRank) / (n - 1));
           }
+
+          // 천적 로직: 나보다 순위가 높은 사람에게 천적 스택 부여
+          participants.forEach((oppId: string) => {
+            if (oppId === memberId) return;
+            const oppResult = log.results.find((r: any) => r.memberId === oppId);
+            if (oppResult?.rank && oppResult.rank < myRank) {
+              nemesisStats[oppId] = (nemesisStats[oppId] || 0) + 1;
+            }
+          });
         }
       } else if (log.resultType === "winner_only") {
         winValue = myResult?.isWinner === true ? 1.0 : 0.0;
+
+        // 천적 로직: 내가 졌는데 상대방이 이겼다면 천적 스택 부여
+        if (myResult?.isWinner === false) {
+          participants.forEach((oppId: string) => {
+            if (oppId === memberId) return;
+            const oppResult = log.results.find((r: any) => r.memberId === oppId);
+            if (oppResult?.isWinner) {
+              nemesisStats[oppId] = (nemesisStats[oppId] || 0) + 1;
+            }
+          });
+        }
       }
 
-      const c = category as keyof typeof stats;
-      stats[c].plays++;
-      stats[c].wins += winValue; // 💡 단순 1,0이 아닌 소수점 점수 누적
+      totalOverallWins += winValue;
+
+      const category = GENRE_MAPPING[game.genre];
+      if (category) {
+        const c = category as keyof typeof stats;
+        stats[c].plays++;
+        stats[c].wins += winValue;
+      }
     });
   });
 
+  let bestGenre = "";
+  let highestScore = -1;
+
   const radar = Object.keys(stats).map((category) => {
     const s = stats[category as keyof typeof stats];
-    // 💡 보정 승률: (승리 + 1) / (참여 + 2) * 100
-    const score = Math.round(((s.wins + 1) / (s.plays + 2)) * 100);
+    const score = s.plays === 0 ? 0 : Math.round((s.wins / s.plays) * 100);
+
+    if (s.plays > 0 && score > highestScore) {
+      highestScore = score;
+      bestGenre = category;
+    }
+
     return { genre: category, win: score };
   });
+
+  const overallWinRate = totalRatedPlays === 0 ? 0 : Math.round((totalOverallWins / totalRatedPlays) * 100);
+
+  const GENRE_TITLES: Record<string, string> = {
+    전략: "전략적 천재",
+    설계: "빌드 깎는 장인",
+    심리: "마스터 마인드",
+    논리: "명탐정",
+    감각: "타고난 감각의 소유자",
+  };
+  const genreTitle = bestGenre ? GENRE_TITLES[bestGenre] : "보드게임 탐험가";
 
   let favoriteGame = "아직 없음";
   let maxCount = 0;
@@ -100,14 +156,24 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
     }
   });
 
-  // TODO: 천적 및 타이틀 계산 로직 추가
+  let nemesisId = "";
+  let nemesisMax = 0;
+  Object.entries(nemesisStats).forEach(([oppId, count]) => {
+    if (count > nemesisMax) {
+      nemesisMax = count;
+      nemesisId = oppId;
+    }
+  });
+  const nemesisName = nemesisId ? members.find((m: any) => m.id === nemesisId)?.name || "없음" : "아직 없음";
+
   return {
     radar,
+    overallWinRate,
     playTime: totalPlayTime,
     totalPlays,
     favoriteGame,
-    nemesis: "비밀",
-    genreTitle: "보드게임 탐험가",
+    nemesis: nemesisName,
+    genreTitle,
   };
 }
 
@@ -137,44 +203,42 @@ export default function MyPage() {
 
   return (
     <div className="mypage-container">
-      <header className="mypage-header" data-color={member.color}>
-        <div className="profile-icon">{emoji}</div>
-        <h1 className="name">{member.name}</h1>
-        <p className="title">{title}</p>
-        {/* 장르 기반 서브 타이틀 추가 */}
-        <p className="sub-title">"{stats.genreTitle}"</p>
+      {/* 💡 세련된 가로형 프로필 헤더 */}
+      <header className="mypage-header-sleek" data-color={member.color}>
+        <div className="avatar-area">
+          <img src={CHARACTER_IMAGES[member.color]} alt={member.name} className="character-img" />
+        </div>
+        
+        <div className="info-area">
+          <span className="title">{title}</span>
+          <h1 className="name">{member.name}</h1>
+        </div>
       </header>
 
-      {/* 기본 & 추가 스탯 영역 */}
-      <section className="stats-section">
+      {/* 기본 & 추가 스탯 영역 그룹화 */}
+      <div className="stats-grid">
         <div className="stat-box">
           <span className="label">종합 승률</span>
-          <span className="value">{member.winRate}%</span>
+          <span className="value highlight-win">{stats.overallWinRate}%</span>
         </div>
         <div className="stat-box">
-          <span className="label">플레이 횟수</span>
+          <span className="label">총 플레이</span>
           <span className="value">{stats.totalPlays}회</span>
-        </div>
-      </section>
-
-      <section className="stats-section">
-        <div className="stat-box">
-          <span className="label">누적 플레이</span>
-          <span className="value">{stats.playTime}분</span>
         </div>
         <div className="stat-box">
           <span className="label">나의 천적</span>
-          <span className="value">{stats.nemesis}</span>
+          <span className="value nemesis-value">{stats.nemesis}</span>
         </div>
-      </section>
+        <div className="stat-box">
+          <span className="label">누적 시간</span>
+          <span className="value">{stats.playTime}분</span>
+        </div>
+      </div>
 
-      {/* 💡 새로 추가된: 최애 게임 영역 */}
-      <section className="stats-section single-box">
-        <div className="stat-box full-width">
-          <span className="label">가장 많이 플레이한 최애 게임</span>
-          <span className="value highlight">🎲 {stats.favoriteGame}</span>
-        </div>
-      </section>
+      <div className="stat-box full-width">
+        <span className="label">가장 많이 플레이한 최애 게임</span>
+        <span className="value highlight-game">🎲 {stats.favoriteGame}</span>
+      </div>
 
       {/* 장르별 승률 레이더 차트 */}
       <section className="chart-section">
@@ -202,11 +266,11 @@ export default function MyPage() {
 
       {/* 💡 새로 추가된: 내 책장 보기 버튼 */}
       <section className="action-section">
-        <button 
+        <button
           className="library-link-btn"
           onClick={() => navigate(`/library?owner=${member.color}`)}
         >
-          {member.name} 님이 보유한 보드게임 보기 📚
+          {member.name}님이 보유한 보드게임 보기
         </button>
       </section>
     </div>

@@ -12,7 +12,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid $color-border;
+  // border: 2px solid $color-border;
   z-index: 1000;
   transition: transform 0.15s ease;
 
@@ -27,6 +27,7 @@
     height: 50px;
   }
 }
+
 // fab-menu 스타일 추가
 
 .fab-menu {
