@@ -7,17 +7,6 @@ import { Member } from "../../../../types";
 import { getTitleByRank } from "../../../../utils/getTitleByRank";
 import "./MemberCards.scss";
 
-import imgRed from "../../../../assets/images/img-red-1.png";
-import imgBlue from "../../../../assets/images/img-blue-1.png";
-import imgGreen from "../../../../assets/images/img-green-1.png";
-import imgYellow from "../../../../assets/images/img-yellow-1.png";
-
-const CHARACTER_IMAGES: Record<string, string> = {
-  red: imgRed,
-  blue: imgBlue,
-  green: imgGreen,
-  yellow: imgYellow,
-};
 
 interface MemberCardsProps {
   members: Member[];
@@ -25,7 +14,7 @@ interface MemberCardsProps {
 
 export default function MemberCards({ members }: MemberCardsProps) {
   const navigate = useNavigate();
-  const { boardGames, records } = useStore();
+  const { boardGames } = useStore();
 
   // 1. 게임 최다 소유자 찾기
   const gameCounts = boardGames.reduce((acc, game) => {
