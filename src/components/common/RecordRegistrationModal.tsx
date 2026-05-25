@@ -139,11 +139,11 @@ export default function RecordRegistrationModal({
     e.preventDefault();
 
     if (playLogs.length === 0) {
-      showAlert("게임을 최소 1개 이상 추가해 주세요! 🎲", "error");
+      showAlert("게임을 최소 1개 이상 추가해 주세요!", "error");
       return;
     }
     if (playLogs.some((log) => !log.gameId)) {
-      showAlert("모든 게임 항목에서 게임을 선택해 주세요! 🎲", "error");
+      showAlert("모든 게임 항목에서 게임을 선택해 주세요!", "error");
       return;
     }
 
@@ -179,7 +179,7 @@ export default function RecordRegistrationModal({
           playLogs,
         };
         await updateRecord(updated);
-        showAlert("기록이 수정되었습니다! ✅", "success");
+        showAlert("기록이 수정되었습니다!", "success");
         onClose();
       } else {
         // 신규 추가 모드
@@ -192,7 +192,7 @@ export default function RecordRegistrationModal({
           playLogs,
         };
         await addRecord(newRecord);
-        showAlert("새로운 기록이 등록되었습니다! 🎉", "success");
+        showAlert("새로운 기록이 등록되었습니다!", "success");
         // 연속 등록을 위해 폼 초기화
         setDate(new Date().toISOString().split("T")[0]);
         setEmoji("🎲");
@@ -214,7 +214,7 @@ export default function RecordRegistrationModal({
     if (window.confirm("정말 이 모임 기록을 삭제하시겠습니까? 관련 게임 기록도 모두 삭제됩니다.")) {
       try {
         await deleteRecord(editRecord.id);
-        showAlert("모임 기록이 삭제되었습니다. 🗑️", "success");
+        showAlert("모임 기록이 삭제되었습니다.", "success");
         onClose();
       } catch (err: any) {
         showAlert(`삭제 실패: ${err.message}`, "error");

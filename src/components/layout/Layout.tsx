@@ -43,7 +43,7 @@ export default function Layout() {
             <PenLine size={20} />
             <span>새로운 기록 추가</span>
           </button>
-          
+
           <button className="menu-item" onClick={handleOpenGameModal}>
             <Gamepad2 size={20} />
             <span>새로운 게임 등록</span>

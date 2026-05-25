@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User, Pencil, Dices } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { BoardGame } from "../../types";
+import GameRegistrationModal from "../../components/common/GameRegistrationModal";
+import GamePickerModal from "../../components/common/GamePickerModal";
 import "./Library.scss";
 
 const ITEMS_PER_PAGE = 20;
@@ -32,13 +34,15 @@ const getKoreanName = (username: string) => {
 };
 
 export default function Library() {
-  const { boardGames, members, deleteGame } = useStore();
+  const { boardGames, members, records, deleteGame } = useStore();
   const { user } = useAuthStore();
   const { showAlert } = useAlertStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<BoardGame | null>(null);
+  const [editingGame, setEditingGame] = useState<BoardGame | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // 상세 필터 토글 상태
+  const [isPickerModalOpen, setIsPickerModalOpen] = useState(false);
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
@@ -93,6 +97,19 @@ export default function Library() {
   );
 
   const handleDeleteGame = async (gameId: string) => {
+    // 이 게임이 플레이 기록에 사용되고 있는지 먼저 확인
+    const isInUse = records.some((rec) =>
+      rec.playLogs.some((log) => log.gameId === gameId)
+    );
+
+    if (isInUse) {
+      showAlert(
+        "이 게임은 플레이 기록에 사용 중이라 삭제할 수 없습니다. 관련 기록을 먼저 삭제해 주세요.",
+        "error"
+      );
+      return;
+    }
+
     if (window.confirm("정말 이 게임을 라이브러리에서 삭제하시겠습니까?")) {
       try {
         await deleteGame(gameId);
@@ -111,7 +128,12 @@ export default function Library() {
 
   return (
     <div className="library-container">
-      <h1 className="page-title">보드게임 책장</h1>
+      <div className="page-title-row">
+        <h1 className="page-title">보드게임 책장</h1>
+        <button className="roulette-btn" onClick={() => setIsPickerModalOpen(true)} title="오늘 뭐 할까?">
+          <Dices size={24} />
+        </button>
+      </div>
 
       {/* 검색창 및 필터 토글 버튼 영역 */}
       <div className="search-filter-header">
@@ -178,7 +200,7 @@ export default function Library() {
               <div
                 key={game.id}
                 className="game-card"
-                onClick={() => setSelectedGame(game)} // 💡 클릭 이벤트 연결!
+                onClick={() => setSelectedGame(game)}
               >
                 {/* 썸네일 영역 */}
                 <div className="game-thumbnail">
@@ -248,10 +270,28 @@ export default function Library() {
                   <img src={selectedGame.imageUrl} alt={selectedGame.name} />
                 </div>
               )}
-              
+
               <div className="modal-info-list">
                 <div className="modal-genre-badge">
                   <span className="badge">{selectedGame.genre}</span>
+                  {currentUser && currentUser.id === selectedGame.ownerId && (
+                    <div className="modal-genre-actions">
+                      <button
+                        className="modal-icon-btn"
+                        onClick={() => { setEditingGame(selectedGame); setSelectedGame(null); }}
+                        title="수정"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        className="modal-icon-btn delete"
+                        onClick={() => handleDeleteGame(selectedGame.id)}
+                        title="삭제"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="detail-item">
@@ -279,27 +319,25 @@ export default function Library() {
                   </div>
                 )}
               </div>
-
-              {currentUser && currentUser.id === selectedGame.ownerId && (
-                <div className="modal-actions" style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDeleteGame(selectedGame.id)}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'none', border: 'none', color: '#aaa',
-                      cursor: 'pointer', padding: '0.5rem', transition: 'color 0.2s'
-                    }}
-                    title="이 게임 삭제하기"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* 게임 수정 모달 */}
+      {editingGame && (
+        <GameRegistrationModal
+          isOpen={true}
+          onClose={() => setEditingGame(null)}
+          editGame={editingGame}
+        />
+      )}
+
+      {/* 오늘 뭐 할까? 모달 */}
+      <GamePickerModal
+        isOpen={isPickerModalOpen}
+        onClose={() => setIsPickerModalOpen(false)}
+      />
     </div>
   );
 }

@@ -102,7 +102,7 @@ export default function Header() {
           Library
         </Link>
         <Link to="/archive" onClick={closeMenu}>
-          Archive
+          Diary
         </Link>
 
         <div className="mypage-menu-container">

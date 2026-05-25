@@ -279,8 +279,9 @@ export const useStore = create<AppState>((set, get) => ({
 
   addRecord: async (newRecord) => {
     await insertRecord(newRecord);
-    // 낙관적 업데이트 + 서버 재조회
+    // 낙관적 업데이트 후 서버 재조회로 데이터 정합성 보장
     set((state) => ({ records: [newRecord, ...state.records] }));
+    await get().fetchRecords();
   },
 
   updateRecord: async (updated) => {
@@ -288,6 +289,8 @@ export const useStore = create<AppState>((set, get) => ({
     set((state) => ({
       records: state.records.map((r) => (r.id === updated.id ? updated : r)),
     }));
+    // 수정 후 서버 재조회로 데이터 정합성 보장
+    await get().fetchRecords();
   },
 
   deleteRecord: async (id) => {

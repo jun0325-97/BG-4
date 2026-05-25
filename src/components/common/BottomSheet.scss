@@ -98,5 +98,9 @@
     &:nth-child(2) {
       background-color: rgba($color-blue, 0.1); // 블루톤
     }
+
+    &:nth-child(3) {
+      background-color: rgba($color-yellow, 0.18); // 옐로우톤
+    }
   }
 }

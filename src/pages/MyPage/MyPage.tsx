@@ -52,9 +52,14 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
   let totalPlayTime = 0;
   let totalOverallWins = 0;
   const gamePlayCounts: Record<string, number> = {};
-  const nemesisStats: Record<string, number> = {};
+  
+  let currentStreak = 0;
+  let maxStreak = 0;
 
-  records.forEach((rec) => {
+  // 기록을 날짜순으로 오름차순 정렬하여 연승 계산
+  const sortedRecords = [...records].sort((a, b) => a.date.localeCompare(b.date));
+
+  sortedRecords.forEach((rec) => {
     rec.playLogs.forEach((log: any) => {
       const participants = log.participatingMembers || members.map((m: any) => m.id);
       if (!participants.includes(memberId)) return;
@@ -86,27 +91,23 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
             winValue = Math.max(0, (n - safeRank) / (n - 1));
           }
 
-          // 천적 로직: 나보다 순위가 높은 사람에게 천적 스택 부여
-          participants.forEach((oppId: string) => {
-            if (oppId === memberId) return;
-            const oppResult = log.results.find((r: any) => r.memberId === oppId);
-            if (oppResult?.rank && oppResult.rank < myRank) {
-              nemesisStats[oppId] = (nemesisStats[oppId] || 0) + 1;
-            }
-          });
+          // 연승 로직: 1등이면 연승 추가, 아니면 초기화
+          if (myRank === 1) {
+            currentStreak++;
+            if (currentStreak > maxStreak) maxStreak = currentStreak;
+          } else {
+            currentStreak = 0;
+          }
         }
       } else if (log.resultType === "winner_only") {
         winValue = myResult?.isWinner === true ? 1.0 : 0.0;
 
-        // 천적 로직: 내가 졌는데 상대방이 이겼다면 천적 스택 부여
-        if (myResult?.isWinner === false) {
-          participants.forEach((oppId: string) => {
-            if (oppId === memberId) return;
-            const oppResult = log.results.find((r: any) => r.memberId === oppId);
-            if (oppResult?.isWinner) {
-              nemesisStats[oppId] = (nemesisStats[oppId] || 0) + 1;
-            }
-          });
+        // 연승 로직: 승리 시 연승 추가, 아니면 초기화
+        if (myResult?.isWinner === true) {
+          currentStreak++;
+          if (currentStreak > maxStreak) maxStreak = currentStreak;
+        } else if (myResult?.isWinner === false) {
+          currentStreak = 0;
         }
       }
 
@@ -156,23 +157,13 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
     }
   });
 
-  let nemesisId = "";
-  let nemesisMax = 0;
-  Object.entries(nemesisStats).forEach(([oppId, count]) => {
-    if (count > nemesisMax) {
-      nemesisMax = count;
-      nemesisId = oppId;
-    }
-  });
-  const nemesisName = nemesisId ? members.find((m: any) => m.id === nemesisId)?.name || "없음" : "아직 없음";
-
   return {
     radar,
     overallWinRate,
     playTime: totalPlayTime,
     totalPlays,
     favoriteGame,
-    nemesis: nemesisName,
+    maxStreak, // 천적 대신 최대 연승 기록
     genreTitle,
   };
 }
@@ -226,8 +217,8 @@ export default function MyPage() {
           <span className="value">{stats.totalPlays}회</span>
         </div>
         <div className="stat-box">
-          <span className="label">나의 천적</span>
-          <span className="value nemesis-value">{stats.nemesis}</span>
+          <span className="label">최대 연승</span>
+          <span className="value nemesis-value">{stats.maxStreak}연승</span>
         </div>
         <div className="stat-box">
           <span className="label">누적 시간</span>

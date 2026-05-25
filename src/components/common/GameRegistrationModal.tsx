@@ -1,7 +1,7 @@
 // src/components/common/GameRegistrationModal.tsx
 
 import { useState } from "react";
-import { X, Image as ImageIcon } from "lucide-react";
+import { X, Image as ImageIcon, Trash2 } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
@@ -11,21 +11,25 @@ import "./GameRegistrationModal.scss";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  /** 수정 모드: 기존 게임을 넘기면 편집 모달로 동작 */
+  editGame?: BoardGame;
 }
 
-export default function GameRegistrationModal({ isOpen, onClose }: Props) {
-  const { members, addGame } = useStore();
+export default function GameRegistrationModal({ isOpen, onClose, editGame }: Props) {
+  const { members, addGame, updateGame, deleteGame } = useStore();
   const { showAlert } = useAlertStore();
-  const [name, setName] = useState("");
-  const [genre, setGenre] = useState<string>(GAME_GENRES[0]);
-  const [minPlayers, setMinPlayers] = useState("");
-  const [maxPlayers, setMaxPlayers] = useState("");
-  const [playTime, setPlayTime] = useState("");
-  const [ownerId, setOwnerId] = useState(members[0]?.id || "m1");
-  const [resultType, setResultType] = useState<GameResultType>("unknown");
+  const isEditMode = !!editGame;
+
+  const [name, setName] = useState(editGame?.name ?? "");
+  const [genre, setGenre] = useState<string>(editGame?.genre ?? GAME_GENRES[0]);
+  const [minPlayers, setMinPlayers] = useState(editGame?.minPlayers?.toString() ?? "");
+  const [maxPlayers, setMaxPlayers] = useState(editGame?.maxPlayers?.toString() ?? "");
+  const [playTime, setPlayTime] = useState(editGame?.playTimeMinutes?.toString() ?? "");
+  const [ownerId, setOwnerId] = useState(editGame?.ownerId ?? members[0]?.id ?? "m1");
+  const [resultType, setResultType] = useState<GameResultType>(editGame?.resultType ?? "unknown");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState("");
-  const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState(editGame?.imageUrl ?? "");
+  const [description, setDescription] = useState(editGame?.description ?? "");
   const [isUploading, setIsUploading] = useState(false);
 
   if (!isOpen) return null;
@@ -54,8 +58,8 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
         finalImageUrl = data.publicUrl;
       }
 
-      const newGame: BoardGame = {
-        id: `g-${Date.now()}`,
+      const gameData: BoardGame = {
+        id: editGame?.id ?? `g-${Date.now()}`,
         name,
         genre: genre as any,
         minPlayers: Number(minPlayers),
@@ -67,24 +71,42 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
         description: description || undefined,
       };
 
-      await addGame(newGame);
-      showAlert(`'${name}' 등록 완료! 🎲`, "success");
-
-      setName("");
-      setGenre(GAME_GENRES[0]);
-      setMinPlayers("");
-      setMaxPlayers("");
-      setPlayTime("");
-      setOwnerId(members[0]?.id || "m1");
-      setResultType("unknown");
-      setImageFile(null);
-      setImageUrl("");
-      setDescription("");
+      if (isEditMode && editGame) {
+        await updateGame(gameData);
+        showAlert(`'${name}' 수정 완료!`, "success");
+        onClose();
+      } else {
+        await addGame(gameData);
+        showAlert(`'${name}' 등록 완료!`, "success");
+        setName("");
+        setGenre(GAME_GENRES[0]);
+        setMinPlayers("");
+        setMaxPlayers("");
+        setPlayTime("");
+        setOwnerId(members[0]?.id || "m1");
+        setResultType("unknown");
+        setImageFile(null);
+        setImageUrl("");
+        setDescription("");
+      }
     } catch (err: any) {
       console.error("Game registration error:", err);
-      showAlert(`등록 실패: ${err.message}`, "error");
+      showAlert(`${isEditMode ? "수정" : "등록"} 실패: ${err.message}`, "error");
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editGame) return;
+    if (window.confirm(`정말 '${editGame.name}'을(를) 삭제하시겠습니까?`)) {
+      try {
+        await deleteGame(editGame.id);
+        showAlert("게임이 삭제되었습니다.", "success");
+        onClose();
+      } catch (err: any) {
+        showAlert(`삭제 실패: ${err.message}`, "error");
+      }
     }
   };
 
@@ -93,7 +115,7 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
     <div className="fullscreen-modal-overlay">
       {/* 모달 전용 상단 헤더 (고정) */}
       <header className="modal-header">
-        <h2 className="modal-title">새로운 게임 등록</h2>
+        <h2 className="modal-title">{isEditMode ? "게임 정보 수정" : "새로운 게임 등록"}</h2>
         <button className="close-btn" onClick={onClose}>
           <X size={28} />
         </button>
@@ -257,8 +279,13 @@ export default function GameRegistrationModal({ isOpen, onClose }: Props) {
           </div>
 
           <div className="modal-actions">
+            {isEditMode && (
+              <button type="button" className="delete-btn" onClick={handleDelete}>
+                <Trash2 size={16} /> 삭제
+              </button>
+            )}
             <button type="submit" className="submit-btn" disabled={isUploading}>
-              {isUploading ? "업로드 중..." : "등록하기"}
+              {isUploading ? "업로드 중..." : (isEditMode ? "수정 완료" : "등록하기")}
             </button>
           </div>
         </form>
