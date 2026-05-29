@@ -16,7 +16,7 @@
   position: relative;
   overflow: hidden;
 
-  /* 이미지가 너무 밝을 경우를 대비해 살짝 어두운 오버레이 추가 */
+  /* 이미지가 너무 밝을 경우를 대비해 아주 살짝만 어두운 오버레이 기본 적용 (블러 없음) */
   &::before {
     content: '';
     position: absolute;
@@ -26,6 +26,16 @@
     bottom: 0;
     background: rgba(0, 0, 0, 0.0);
     z-index: 1;
+    transition: all 0.3s ease;
+  }
+
+  /* 로딩 화면일 때만 강하게 dim & blur */
+  &--loading {
+    &::before {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
   }
 }
 

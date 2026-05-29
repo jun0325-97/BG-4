@@ -143,9 +143,22 @@
   }
 
   .record-detail {
-    padding: 0 1.2rem 1.2rem;
-    border-top: 1.5px dashed $color-border;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    padding: 0 1.2rem;
+    border-top: 0;
     background-color: $color-card-bg;
+    transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.25s ease;
+
+    &--open {
+      max-height: 2000px;
+      opacity: 1;
+      pointer-events: auto;
+      padding: 0 1.2rem 1.2rem;
+      border-top: 1.5px dashed $color-border;
+    }
 
     .record-photo {
       width: 100%;

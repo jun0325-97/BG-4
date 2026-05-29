@@ -1,11 +1,10 @@
-// src/components/common/GameRegistrationModal.tsx
-
-import { useState } from "react";
-import { X, Image as ImageIcon, Trash2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { X, Image as ImageIcon, Trash2, Search } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
 import { BoardGame, GameResultType, GAME_GENRES } from "../../types";
+import { POPULAR_GAMES, PopularGame } from "../../utils/popularGames";
 import "./GameRegistrationModal.scss";
 
 interface Props {
@@ -17,8 +16,14 @@ interface Props {
 
 export default function GameRegistrationModal({ isOpen, onClose, editGame }: Props) {
   const { members, addGame, updateGame, deleteGame } = useStore();
-  const { showAlert } = useAlertStore();
+  const { showAlert, showConfirm } = useAlertStore();
   const isEditMode = !!editGame;
+
+  // 자체 DB 검색 관련 상태
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<PopularGame[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [name, setName] = useState(editGame?.name ?? "");
   const [genre, setGenre] = useState<string>(editGame?.genre ?? GAME_GENRES[0]);
@@ -32,7 +37,51 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
   const [description, setDescription] = useState(editGame?.description ?? "");
   const [isUploading, setIsUploading] = useState(false);
 
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // 검색어 변경 시 즉시 로컬 DB 필터링
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const query = searchQuery.replace(/\s+/g, "").toLowerCase();
+    const results = POPULAR_GAMES.filter(game => 
+      game.name.replace(/\s+/g, "").toLowerCase().includes(query)
+    );
+    setSearchResults(results);
+  }, [searchQuery]);
+
   if (!isOpen) return null;
+
+  const handleSelect = (game: PopularGame) => {
+    setShowDropdown(false);
+    setSearchQuery(""); // 선택 후 검색어 초기화
+
+    setName(game.name);
+    setGenre(game.genre);
+    setMinPlayers(game.minPlayers.toString());
+    setMaxPlayers(game.maxPlayers.toString());
+    setPlayTime(game.playTimeMinutes.toString());
+    
+    if (game.imageUrl) {
+      setImageUrl(game.imageUrl);
+      setImageFile(null); // 외부 URL이므로 파일은 비움
+    }
+    if (game.description) {
+      setDescription(game.description);
+    }
+    showAlert(`'${game.name}' 정보를 자동으로 채웠습니다!`, "success");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,9 +146,9 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!editGame) return;
-    if (window.confirm(`정말 '${editGame.name}'을(를) 삭제하시겠습니까?`)) {
+    showConfirm(`정말 '${editGame.name}'을(를) 삭제하시겠습니까?`, async () => {
       try {
         await deleteGame(editGame.id);
         showAlert("게임이 삭제되었습니다.", "success");
@@ -107,13 +156,11 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
       } catch (err: any) {
         showAlert(`삭제 실패: ${err.message}`, "error");
       }
-    }
+    });
   };
 
   return (
-    // 💡 overlay 자체가 이제 화면 전체를 덮는 캔버스가 될 거야
     <div className="fullscreen-modal-overlay">
-      {/* 모달 전용 상단 헤더 (고정) */}
       <header className="modal-header">
         <h2 className="modal-title">{isEditMode ? "게임 정보 수정" : "새로운 게임 등록"}</h2>
         <button className="close-btn" onClick={onClose}>
@@ -121,9 +168,46 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
         </button>
       </header>
 
-      {/* 스크롤이 가능한 폼 영역 */}
       <div className="modal-body">
         <form onSubmit={handleSubmit} className="registration-form">
+          
+          {/* 자체 DB 자동완성 검색 영역 */}
+          {!isEditMode && (
+            <div className="form-group bgg-search-wrapper" ref={dropdownRef}>
+              <label>🔍 인기 보드게임 한글 자동 검색</label>
+              <div className="search-input-box">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder="보드게임 이름 입력 (예: 스플렌더)"
+                />
+                <button type="button" className="search-btn" disabled>
+                  <Search size={20} />
+                </button>
+              </div>
+
+              {showDropdown && searchQuery.trim() !== "" && (
+                <div className="bgg-dropdown">
+                  {searchResults.length > 0 ? (
+                    searchResults.map(game => (
+                      <div key={game.name} className="bgg-item" onClick={() => handleSelect(game)}>
+                        <span className="item-name">{game.name}</span>
+                        <span className="item-year">{game.genre}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="bgg-empty">목록에 없는 게임입니다. 아래에 직접 입력해주세요.</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="form-group image-input-group">
             <label>게임 표지 이미지 (선택)</label>
             <div className="image-preview-wrapper">
@@ -133,11 +217,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
                 ) : (
                   <div className="empty-preview">
                     <ImageIcon size={40} />
-                    <span>
-                      클릭하여 사진첩에서
-                      <br />
-                      이미지를 업로드하세요
-                    </span>
+                    <span>클릭하여 사진첩에서<br />이미지를 업로드하세요</span>
                   </div>
                 )}
               </div>
@@ -145,7 +225,8 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
                 <button
                   type="button"
                   className="remove-image-btn"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setImageFile(null);
                     setImageUrl("");
                   }}
@@ -161,7 +242,6 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // 용량 제한 3MB
                   if (file.size > 3 * 1024 * 1024) {
                     showAlert("이미지 용량은 3MB 이하여야 합니다.", "error");
                     return;
@@ -198,7 +278,6 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
 
           <div className="form-group">
             <label>장르</label>
-            {/* 💡 input 대신 select로 변경! */}
             <select value={genre} onChange={(e) => setGenre(e.target.value)}>
               {GAME_GENRES.map((g) => (
                 <option key={g} value={g}>
@@ -269,9 +348,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
               value={resultType}
               onChange={(e) => setResultType(e.target.value as GameResultType)}
             >
-              <option value="unknown">
-                🤔 아직 안 해봐서 몰라요 (나중에 결정)
-              </option>
+              <option value="unknown">🤔 아직 안 해봐서 몰라요 (나중에 결정)</option>
               <option value="ranked">점수/순위 기록 (예: 스플렌더)</option>
               <option value="winner_only">1등만 기록 (예: 아발론)</option>
               <option value="no_result">승패 없음 (예: 머더미스터리)</option>
@@ -285,7 +362,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
               </button>
             )}
             <button type="submit" className="submit-btn" disabled={isUploading}>
-              {isUploading ? "업로드 중..." : (isEditMode ? "수정 완료" : "등록하기")}
+              {isUploading ? "처리 중..." : (isEditMode ? "수정 완료" : "등록하기")}
             </button>
           </div>
         </form>

@@ -1,6 +1,8 @@
 // src/pages/MyPage/MyPage.tsx
 
+import { useState } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { Settings } from "lucide-react";
 import {
   Radar,
   RadarChart,
@@ -9,7 +11,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useStore } from "../../store/useStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { getTitleByRank } from "../../utils/getTitleByRank";
+import { getKoreanName } from "../../utils/getKoreanName";
 import "./MyPage.scss";
 
 import imgRed from "../../assets/images/img-red-1.png";
@@ -177,9 +181,11 @@ const THEME_COLORS = {
 };
 
 export default function MyPage() {
+  const [isEditingFavorite, setIsEditingFavorite] = useState(false);
   const { memberId } = useParams<{ memberId: string }>();
   const navigate = useNavigate();
-  const { members, records, boardGames } = useStore();
+  const { members, records, boardGames, updateMemberFavoriteGame } = useStore();
+  const { user } = useAuthStore();
   const member = members.find((m) => m.color === memberId);
 
   if (!member) return <Navigate to="/" replace />;
@@ -191,6 +197,26 @@ export default function MyPage() {
   // 현재 멤버의 실제 통계 데이터 연산
   const stats = calculateMemberStats(member.id, records, boardGames, members);
   const chartColor = THEME_COLORS[member.color as keyof typeof THEME_COLORS];
+
+  const currentUsername = user?.email?.split("@")[0] || "";
+  const currentKoreanName = getKoreanName(currentUsername);
+  const isMe = member.name === currentKoreanName;
+
+  const favoriteGameObj = member.favoriteGameId 
+    ? boardGames.find((g) => g.id === member.favoriteGameId) 
+    : null;
+  const favoriteGameName = favoriteGameObj ? favoriteGameObj.name : "아직 설정되지 않음";
+
+  const handleFavoriteChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newId = e.target.value === "" ? null : e.target.value;
+    try {
+      await updateMemberFavoriteGame(member.id, newId);
+      setIsEditingFavorite(false);
+    } catch (err) {
+      console.error(err);
+      alert("최애 게임 저장에 실패했습니다. DB에 favorite_game_id 컬럼이 있는지 확인해주세요.");
+    }
+  };
 
   return (
     <div className="mypage-container">
@@ -213,46 +239,74 @@ export default function MyPage() {
           <span className="value highlight-win">{stats.overallWinRate}%</span>
         </div>
         <div className="stat-box">
-          <span className="label">총 플레이</span>
-          <span className="value">{stats.totalPlays}회</span>
-        </div>
-        <div className="stat-box">
           <span className="label">최대 연승</span>
           <span className="value nemesis-value">{stats.maxStreak}연승</span>
         </div>
-        <div className="stat-box">
-          <span className="label">누적 시간</span>
-          <span className="value">{stats.playTime}분</span>
-        </div>
       </div>
 
-      <div className="stat-box full-width">
-        <span className="label">가장 많이 플레이한 최애 게임</span>
-        <span className="value highlight-game">🎲 {stats.favoriteGame}</span>
+      <div className="stat-box full-width favorite-game-card">
+        <div className="favorite-game-header">
+          <span className="label">최애 게임</span>
+          {isMe && (
+            <button 
+              className="edit-favorite-btn"
+              onClick={() => setIsEditingFavorite(!isEditingFavorite)}
+              aria-label="최애 게임 설정"
+            >
+              <Settings size={14} /> 
+            </button>
+          )}
+        </div>
+        
+        {isEditingFavorite ? (
+          <select 
+            value={member.favoriteGameId || ""} 
+            onChange={handleFavoriteChange}
+            className="favorite-game-select"
+            autoFocus
+            onBlur={() => setIsEditingFavorite(false)}
+          >
+            <option value="">선택하지 않음</option>
+            {boardGames.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
+        ) : (
+          <span className="value highlight-game">
+            {member.favoriteGameId ? `🎲 ${favoriteGameName}` : "선택하지 않음"}
+          </span>
+        )}
       </div>
 
       {/* 장르별 승률 레이더 차트 */}
       <section className="chart-section">
         <h2 className="section-title">장르별 승률 분석</h2>
-        <div className="radar-wrapper">
-          <ResponsiveContainer width="100%" height={250}>
-            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={stats.radar}>
-              <PolarGrid stroke="#eeeeee" />
-              <PolarAngleAxis
-                dataKey="genre"
-                tick={{ fill: "#666", fontSize: 12, fontWeight: 700 }}
-              />
-              {/* 테마 색상으로 차트 채우기! */}
-              <Radar
-                name={member.name}
-                dataKey="win"
-                stroke={chartColor}
-                fill={chartColor}
-                fillOpacity={0.6}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+        {stats.totalPlays === 0 ? (
+          <div className="chart-empty">
+            <span className="chart-empty__icon">🎲</span>
+            <p className="chart-empty__text">아직 플레이 기록이 없어요</p>
+            <p className="chart-empty__sub">게임을 플레이하면 장르별 승률을 분석해드릴게요!</p>
+          </div>
+        ) : (
+          <div className="radar-wrapper">
+            <ResponsiveContainer width="100%" height={250}>
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={stats.radar}>
+                <PolarGrid stroke="#eeeeee" />
+                <PolarAngleAxis
+                  dataKey="genre"
+                  tick={{ fill: "#666", fontSize: 12, fontWeight: 700 }}
+                />
+                <Radar
+                  name={member.name}
+                  dataKey="win"
+                  stroke={chartColor}
+                  fill={chartColor}
+                  fillOpacity={0.6}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </section>
 
       {/* 💡 새로 추가된: 내 책장 보기 버튼 */}

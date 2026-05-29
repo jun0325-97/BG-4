@@ -25,6 +25,7 @@ interface AppState {
   addGame: (newGame: BoardGame) => Promise<void>;
   updateGame: (updated: BoardGame) => Promise<void>;
   deleteGame: (id: string) => Promise<void>;
+  updateMemberFavoriteGame: (memberId: string, gameId: string | null) => Promise<void>;
 }
 
 // ── URL -> Storage Path 변환 헬퍼 ─────────────────────────────
@@ -42,6 +43,7 @@ function rowToMember(row: any): Member {
     name: row.name,
     color: row.color,
     winRate: 50, // 실시간 계산으로 덮어씌워짐
+    favoriteGameId: row.favorite_game_id ?? null,
   };
 }
 
@@ -309,6 +311,21 @@ export const useStore = create<AppState>((set, get) => ({
     if (error) throw error;
     set((state) => ({
       records: state.records.filter((r) => r.id !== id),
+    }));
+  },
+
+  updateMemberFavoriteGame: async (memberId: string, gameId: string | null) => {
+    // DB 업데이트
+    const { error } = await supabase
+      .from('members')
+      .update({ favorite_game_id: gameId })
+      .eq('id', memberId);
+    if (error) throw error;
+    
+    set((state) => ({
+      members: state.members.map((m) =>
+        m.id === memberId ? { ...m, favoriteGameId: gameId } : m
+      ),
     }));
   },
 

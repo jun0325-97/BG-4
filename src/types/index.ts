@@ -39,6 +39,7 @@ export interface Member {
   name: string;
   color: MemberColor;
   winRate: number;
+  favoriteGameId?: string | null;
 }
 
 

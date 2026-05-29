@@ -4,17 +4,8 @@ import { Menu, X, ChevronDown, ChevronUp, LogOut } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { supabase } from "../../utils/supabase";
+import { getKoreanName } from "../../utils/getKoreanName";
 import "./Header.scss";
-
-const getKoreanName = (username: string) => {
-  switch (username.toLowerCase()) {
-    case "hansol": return "한솔";
-    case "yoonhyuk": return "윤혁";
-    case "gayoung": return "가영";
-    case "youngjun": return "영준";
-    default: return "";
-  }
-};
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

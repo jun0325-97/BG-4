@@ -103,9 +103,8 @@ export default function Archive() {
               </div>
             </div>
 
-            {/* 아코디언 내용 (클릭 시 펼쳐지는 상세 정보) */}
-            {openRecordId === record.id && (
-              <div className="record-detail">
+            {/* 아코디언 내용 — 항상 DOM에 존재, CSS max-height 트랜지션으로 슬라이드 */}
+            <div className={`record-detail ${openRecordId === record.id ? "record-detail--open" : ""}`}>
                 {record.photoUrl && (
                   <div className="record-photo">
                     <img src={record.photoUrl} alt="모임 인증샷" />
@@ -184,8 +183,7 @@ export default function Archive() {
                   );
                 })}
               </div>
-            )}
-          </div>
+            </div>
         ))}
       </div>
 

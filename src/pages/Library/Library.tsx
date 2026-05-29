@@ -2,14 +2,42 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User, Pencil, Dices } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User, Pencil, Dices, LayoutGrid, LayoutList } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { BoardGame } from "../../types";
+import { getKoreanName } from "../../utils/getKoreanName";
 import GameRegistrationModal from "../../components/common/GameRegistrationModal";
 import GamePickerModal from "../../components/common/GamePickerModal";
 import "./Library.scss";
+
+// 리스트 뷰 스켈레톤 카드
+function SkeletonCard() {
+  return (
+    <div className="game-card game-card--skeleton">
+      <div className="skeleton skeleton--thumb" />
+      <div className="skeleton-info">
+        <div className="skeleton skeleton--title" />
+        <div className="skeleton skeleton--meta" />
+      </div>
+      <div className="skeleton skeleton--badge" />
+    </div>
+  );
+}
+
+// 그리드 뷰 스켈레톤 카드
+function SkeletonGridCard() {
+  return (
+    <div className="game-grid-card game-grid-card--skeleton">
+      <div className="skeleton skeleton--cover" />
+      <div className="skeleton-grid-info">
+        <div className="skeleton skeleton--title" />
+        <div className="skeleton skeleton--meta" />
+      </div>
+    </div>
+  );
+}
 
 const ITEMS_PER_PAGE = 20;
 
@@ -23,26 +51,17 @@ function formatTime(minutes: number) {
   return minutes >= 120 ? `${minutes}분 이상` : `${minutes}분`;
 }
 
-const getKoreanName = (username: string) => {
-  switch (username.toLowerCase()) {
-    case "hansol": return "한솔";
-    case "yoonhyuk": return "윤혁";
-    case "gayoung": return "가영";
-    case "youngjun": return "영준";
-    default: return "";
-  }
-};
-
 export default function Library() {
-  const { boardGames, members, records, deleteGame } = useStore();
+  const { boardGames, members, records, deleteGame, isLoading } = useStore();
   const { user } = useAuthStore();
-  const { showAlert } = useAlertStore();
+  const { showAlert, showConfirm } = useAlertStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<BoardGame | null>(null);
   const [editingGame, setEditingGame] = useState<BoardGame | null>(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(false); // 상세 필터 토글 상태
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isPickerModalOpen, setIsPickerModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
@@ -110,7 +129,7 @@ export default function Library() {
       return;
     }
 
-    if (window.confirm("정말 이 게임을 라이브러리에서 삭제하시겠습니까?")) {
+    showConfirm("정말 이 게임을 라이브러리에서 삭제하시겠습니까?", async () => {
       try {
         await deleteGame(gameId);
         showAlert("게임이 삭제되었습니다.", "success");
@@ -118,7 +137,7 @@ export default function Library() {
       } catch (err: any) {
         showAlert(`삭제 실패: ${err.message}`, "error");
       }
-    }
+    });
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,53 +209,105 @@ export default function Library() {
         </select>
       </div>
 
-      {/* 보드게임 리스트 */}
-      <div className="game-list">
-        {/* currentGames 배열에 데이터가 있을 때만 map을 돌리고, 없으면 empty-state를 보여주기! */}
-        {currentGames.length > 0 ? (
-          currentGames.map((game) => {
-            const owner = members.find((m) => m.id === game.ownerId);
-            return (
+      {/* 리스트 컨트롤 (뷰 모드 토글 등) */}
+      <div className="list-controls">
+        <div className="view-toggle">
+          <button
+            className={`view-toggle__btn ${viewMode === "grid" ? "active" : ""}`}
+            onClick={() => setViewMode("grid")}
+            aria-label="그리드 뷰"
+          >
+            <LayoutGrid size={20} />
+          </button>
+          <button
+            className={`view-toggle__btn ${viewMode === "list" ? "active" : ""}`}
+            onClick={() => setViewMode("list")}
+            aria-label="리스트 뷰"
+          >
+            <LayoutList size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* 보드게임 목록 — 그리드 / 리스트 분기 */}
+      {viewMode === "grid" ? (
+        <div className="game-grid">
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, i) => <SkeletonGridCard key={i} />)
+          ) : currentGames.length > 0 ? (
+            currentGames.map((game) => (
               <div
                 key={game.id}
-                className="game-card"
+                className="game-grid-card"
                 onClick={() => setSelectedGame(game)}
               >
-                {/* 썸네일 영역 */}
-                <div className="game-thumbnail">
+                <div className="game-grid-card__cover">
                   {game.imageUrl ? (
                     <img src={game.imageUrl} alt={game.name} />
                   ) : (
                     <div className="no-image">
-                      <ImageIcon size={20} />
+                      <ImageIcon size={28} />
                     </div>
                   )}
                 </div>
+                <div className="game-grid-card__info">
+                  <h3 className="game-grid-card__name">{game.name}</h3>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="empty-state" style={{ gridColumn: "1 / -1" }}>검색 결과가 없습니다.</div>
+          )}
+        </div>
+      ) : (
+        <div className="game-list">
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+          ) : currentGames.length > 0 ? (
+            currentGames.map((game) => {
+              const owner = members.find((m) => m.id === game.ownerId);
+              return (
+                <div
+                  key={game.id}
+                  className="game-card"
+                  onClick={() => setSelectedGame(game)}
+                >
+                  {/* 썸네일 영역 */}
+                  <div className="game-thumbnail">
+                    {game.imageUrl ? (
+                      <img src={game.imageUrl} alt={game.name} />
+                    ) : (
+                      <div className="no-image">
+                        <ImageIcon size={20} />
+                      </div>
+                    )}
+                  </div>
 
-                <div className="game-info">
-                  <h3 className="game-name">{game.name}</h3>
-                  <div className="game-meta-inline">
-                    <span className="meta-item">
-                      <Users size={12} /> {formatPlayers(game.minPlayers, game.maxPlayers)}
-                    </span>
-                    <span className="meta-item">
-                      <Clock size={12} /> {formatTime(game.playTimeMinutes)}
+                  <div className="game-info">
+                    <h3 className="game-name">{game.name}</h3>
+                    <div className="game-meta-inline">
+                      <span className="meta-item">
+                        <Users size={12} /> {formatPlayers(game.minPlayers, game.maxPlayers)}
+                      </span>
+                      <span className="meta-item">
+                        <Clock size={12} /> {formatTime(game.playTimeMinutes)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="game-owner">
+                    <span className="owner-badge" data-color={owner?.color}>
+                      {owner?.name}
                     </span>
                   </div>
                 </div>
-
-                <div className="game-owner">
-                  <span className="owner-badge" data-color={owner?.color}>
-                    {owner?.name}
-                  </span>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="empty-state">검색 결과가 없습니다.</div>
-        )}
-      </div>
+              );
+            })
+          ) : (
+            <div className="empty-state">검색 결과가 없습니다.</div>
+          )}
+        </div>
+      )}
 
       {/* 페이지네이션 버튼들 */}
       {totalPages > 1 && (

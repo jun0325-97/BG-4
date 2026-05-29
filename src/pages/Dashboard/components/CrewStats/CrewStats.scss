@@ -1,0 +1,189 @@
+// src/pages/Dashboard/components/CrewStats/CrewStats.scss
+
+@use "sass:color";
+@use "../../../../styles/variables" as *;
+
+// ─────────────────────────────────────────────────────────────
+// 섹션 래퍼
+// ─────────────────────────────────────────────────────────────
+
+.crew-highlight {
+  margin: 0 -1rem;
+
+  .crew-highlight__swiper {
+    padding: 0.5rem 0 0.75rem !important;
+    overflow: visible !important;
+  }
+
+  // Swiper 내장 pagination 숨김
+  .swiper-pagination {
+    display: none !important;
+  }
+
+  // 비활성 슬라이드: 흐리고 작게
+  .swiper-slide {
+    transition: transform 0.35s ease, opacity 0.35s ease;
+    opacity: 0.6;
+    transform: scale(0.93);
+  }
+
+  // 활성 슬라이드: 선명하고 크게
+  .swiper-slide-active {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 글래스 카드 공통
+// ─────────────────────────────────────────────────────────────
+
+.hl-card {
+  border-radius: 20px;
+  height: 152px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.25rem 1.15rem 1.2rem;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+
+  &:active { cursor: grabbing; }
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  // 배경 워터마크 이모지
+  &__watermark {
+    position: absolute;
+    top: -14px;
+    right: -6px;
+    font-size: 7rem;
+    line-height: 1;
+    opacity: 0.09;
+    pointer-events: none;
+    user-select: none;
+    filter: saturate(0);
+    transition: opacity 0.35s;
+  }
+
+  // 활성 슬라이드에서 워터마크 살짝 선명
+  .swiper-slide-active & {
+    &__watermark { opacity: 0.13; }
+  }
+
+  // 텍스트 블록
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    z-index: 1;
+    max-width: calc(100% - 52px);
+  }
+
+  &__label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.35);
+  }
+
+  &__value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #1a1a1a;
+    margin: 0;
+    word-break: keep-all;
+  }
+
+  &__sub {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.32);
+    margin-top: 0.1rem;
+  }
+
+  // 아이콘 뱃지
+  &__icon-badge {
+    position: absolute;
+    bottom: 1.15rem;
+    right: 1.1rem;
+    font-size: 1.55rem;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 카드 테마별 그라디언트
+// ─────────────────────────────────────────────────────────────
+
+.hl-card--red {
+  background: linear-gradient(135deg,
+    rgba($color-red, 0.2) 0%,
+    rgba($color-red, 0.06) 55%,
+    rgba(255, 255, 255, 0.28) 100%);
+  border-color: rgba($color-red, 0.2);
+  .hl-card__value { color: color.scale($color-red, $lightness: -18%); }
+}
+
+.hl-card--blue {
+  background: linear-gradient(135deg,
+    rgba($color-blue, 0.2) 0%,
+    rgba($color-blue, 0.06) 55%,
+    rgba(255, 255, 255, 0.28) 100%);
+  border-color: rgba($color-blue, 0.2);
+  .hl-card__value { color: color.scale($color-blue, $lightness: -12%); }
+}
+
+.hl-card--green {
+  background: linear-gradient(135deg,
+    rgba($color-green, 0.2) 0%,
+    rgba($color-green, 0.06) 55%,
+    rgba(255, 255, 255, 0.28) 100%);
+  border-color: rgba($color-green, 0.2);
+  .hl-card__value { color: color.scale($color-green, $lightness: -10%); }
+}
+
+.hl-card--yellow {
+  background: linear-gradient(135deg,
+    rgba($color-yellow, 0.28) 0%,
+    rgba($color-yellow, 0.08) 55%,
+    rgba(255, 255, 255, 0.3) 100%);
+  border-color: rgba($color-yellow, 0.3);
+  .hl-card__value { color: color.scale($color-yellow, $lightness: -32%); }
+}
+
+.hl-card--purple {
+  background: linear-gradient(135deg,
+    rgba(124, 92, 191, 0.2) 0%,
+    rgba(124, 92, 191, 0.06) 55%,
+    rgba(255, 255, 255, 0.28) 100%);
+  border-color: rgba(124, 92, 191, 0.2);
+  .hl-card__value { color: #4a2a9e; }
+}
+
+// MVP 골드
+.hl-card--gold {
+  background: linear-gradient(135deg,
+    rgba(255, 198, 0, 0.28) 0%,
+    rgba(255, 155, 0, 0.1) 55%,
+    rgba(255, 255, 255, 0.32) 100%);
+  border-color: rgba(255, 185, 0, 0.35);
+  box-shadow:
+    0 8px 32px rgba(255, 180, 0, 0.16),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+  .hl-card__label { color: rgba(140, 95, 0, 0.55); }
+  .hl-card__value { color: #7a5200; }
+  .hl-card__sub   { color: rgba(140, 95, 0, 0.45); }
+}

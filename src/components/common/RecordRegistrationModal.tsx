@@ -33,7 +33,7 @@ export default function RecordRegistrationModal({
   editRecord,
 }: RecordRegistrationModalProps) {
   const { members, boardGames, addRecord, updateRecord, deleteRecord } = useStore();
-  const { showAlert } = useAlertStore();
+  const { showAlert, showConfirm } = useAlertStore();
 
   const isEditMode = !!editRecord;
 
@@ -209,9 +209,9 @@ export default function RecordRegistrationModal({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!editRecord) return;
-    if (window.confirm("정말 이 모임 기록을 삭제하시겠습니까? 관련 게임 기록도 모두 삭제됩니다.")) {
+    showConfirm("정말 이 모임 기록을 삭제하시겠습니까? 관련 게임 기록도 모두 삭제됩니다.", async () => {
       try {
         await deleteRecord(editRecord.id);
         showAlert("모임 기록이 삭제되었습니다.", "success");
@@ -219,7 +219,7 @@ export default function RecordRegistrationModal({
       } catch (err: any) {
         showAlert(`삭제 실패: ${err.message}`, "error");
       }
-    }
+    });
   };
 
   return (

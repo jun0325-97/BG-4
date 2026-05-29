@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useStore } from "../../store/useStore";
 import "./Dashboard.scss";
+import CrewStats from "./components/CrewStats/CrewStats";
 import RaceTrack from "./components/RaceTrack/RaceTrack";
 import MemberCards from "./components/MemberCards/MemberCards";
 import { PlayLog } from "../../types";
@@ -61,6 +62,10 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      <section className="stats-section">
+        <CrewStats />
+      </section>
+
       <section className="race-section">
         <RaceTrack members={dynamicMembers} />
       </section>

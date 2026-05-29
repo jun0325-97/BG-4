@@ -184,7 +184,6 @@ $race-easing: cubic-bezier(0.4, 0, 0.7, 1); // 빠르게 달리다 마지막 구
     border-radius: 6px;
     pointer-events: none;
     z-index: 0;
-    transition: width $race-duration $race-easing;
   }
 
   // ── 색상별 fill + 격자 테마 ──
@@ -239,9 +238,6 @@ $race-easing: cubic-bezier(0.4, 0, 0.7, 1); // 빠르게 달리다 마지막 구
   transform: translate(-50%, -50%);
   z-index: 5;
   user-select: none;
-
-  // ★ fill 의 transition 과 반드시 동일해야 함
-  transition: left $race-duration $race-easing;
 
   // ── 이동 중 ──
   &.car--moving .meeple-wrapper {

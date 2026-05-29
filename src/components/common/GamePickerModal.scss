@@ -98,7 +98,7 @@
 
       &.active {
         background: $color-yellow;
-        border-color: darken($color-yellow, 10%);
+        // border-color: darken($color-yellow, 10%);
         color: $color-text-main;
       }
 

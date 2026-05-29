@@ -82,3 +82,82 @@
     }
   }
 }
+
+// ─── 확인/취소 컨펌 모달 ─────────────────────────
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.confirm-modal-content {
+  background-color: #fff;
+  border-radius: 18px;
+  padding: 28px 24px 20px;
+  min-width: 300px;
+  max-width: 88%;
+  text-align: center;
+  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  @include retro-border;
+  border-width: 2.5px;
+  border-color: #e9a23b;
+
+  .confirm-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: #f59f00;
+  }
+
+  .confirm-message {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $color-text-main;
+    line-height: 1.5;
+    word-break: keep-all;
+    margin-bottom: 22px;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 10px;
+
+    .confirm-cancel-btn,
+    .confirm-ok-btn {
+      flex: 1;
+      padding: 10px 0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .confirm-cancel-btn {
+      background-color: #f1f3f5;
+      color: $color-text-sub;
+      border-color: $color-border;
+
+      &:hover {
+        background-color: #e9ecef;
+      }
+    }
+
+    .confirm-ok-btn {
+      background-color: #c92a2a;
+      color: #fff;
+      border-color: #c92a2a;
+
+      &:hover {
+        background-color: #a61e1e;
+      }
+    }
+  }
+}

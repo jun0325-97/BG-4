@@ -99,6 +99,94 @@
     }
   }
 
+  // BGG 자동완성 검색 관련 스타일
+  .bgg-search-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .search-input-box {
+      display: flex;
+      gap: 0.5rem;
+
+      input {
+        flex: 1;
+      }
+
+      .search-btn {
+        padding: 0 1rem;
+        background-color: $color-blue;
+        color: #fff;
+        @include retro-border;
+        border-radius: 8px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.1s;
+        
+        &:hover {
+          transform: translateY(-2px);
+        }
+        
+        &:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+          transform: none;
+        }
+      }
+    }
+
+    .bgg-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      @include retro-border;
+      border-radius: 8px;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+      .bgg-item {
+        padding: 0.8rem;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: #f1f3f5;
+        }
+
+        .item-name {
+          font-weight: 800;
+          color: $color-text-main;
+        }
+
+        .item-year {
+          font-size: 0.8rem;
+          color: #888;
+        }
+      }
+      
+      .bgg-loading, .bgg-empty {
+        padding: 1rem;
+        text-align: center;
+        color: #888;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
   .form-row {
     display: flex;
     flex-wrap: wrap;
