@@ -8,7 +8,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #f5ead8; /* $color-background */
+  background-color: #ffffff;
   z-index: 9999;
 }
 
@@ -52,7 +52,7 @@
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.4rem;
-  color: #8c7b68; /* Theme text color */
+  color: #1a1a1a; /* Refined dark color */
   animation: pulse-text 1.5s infinite ease-in-out;
   margin-left: 0.4rem; /* adjust for letter-spacing */
 }
