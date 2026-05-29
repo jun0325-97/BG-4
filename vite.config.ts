@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['vite.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: "BMS Club",
         short_name: "BMS Club",
@@ -20,7 +20,7 @@ export default defineConfig({
         display: "standalone",
         icons: [
           {
-            src: "/vite.svg",
+            src: "/favicon.svg",
             sizes: "192x192 512x512",
             type: "image/svg+xml",
             purpose: "any maskable"
