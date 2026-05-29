@@ -1,14 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <!-- Soft shadow for 3D depth -->
-  <rect x="12" y="14" width="76" height="76" rx="20" fill="#e0e0e0" />
-  
-  <!-- Main dice body -->
-  <rect x="10" y="10" width="76" height="76" rx="20" fill="#ffffff" stroke="#1a1a1a" stroke-width="4"/>
-  
-  <!-- Dice Dots (5) -->
-  <circle cx="48" cy="48" r="8" fill="#1a1a1a"/> <!-- Center -->
-  <circle cx="28" cy="28" r="8" fill="#1a1a1a"/> <!-- Top Left -->
-  <circle cx="68" cy="68" r="8" fill="#1a1a1a"/> <!-- Bottom Right -->
-  <circle cx="28" cy="68" r="8" fill="#1a1a1a"/> <!-- Bottom Left -->
-  <circle cx="68" cy="28" r="8" fill="#1a1a1a"/> <!-- Top Right -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130" width="120" height="130">
+  <defs>
+    <!-- Simple flat colors referencing the provided image -->
+    <linearGradient id="topFace" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8f9fa"/>
+      <stop offset="100%" stop-color="#e9ecef"/>
+    </linearGradient>
+    <linearGradient id="leftFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dee2e6"/>
+      <stop offset="100%" stop-color="#ced4da"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ced4da"/>
+      <stop offset="100%" stop-color="#adb5bd"/>
+    </linearGradient>
+
+    <!-- Soft outer shadow -->
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- 3D Faces with thicker strokes to create softer, rounder outer corners -->
+    <path d="M 60 15 L 100 38 L 60 61 L 20 38 Z" fill="url(#topFace)" stroke="url(#topFace)" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 20 38 L 60 61 L 60 107 L 20 84 Z" fill="url(#leftFace)" stroke="url(#leftFace)" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 60 61 L 100 38 L 100 84 L 60 107 Z" fill="url(#rightFace)" stroke="url(#rightFace)" stroke-width="10" stroke-linejoin="round"/>
+    
+    <!-- Inner Edge Highlights (soft, flat style) -->
+    <path d="M 60 61 L 60 107" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    <path d="M 60 61 L 20 38" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 60 61 L 100 38" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+
+    <!-- Dots -->
+    <!-- Top Face: 1 Red Dot -->
+    <!-- slightly moved up and reduced size -->
+    <ellipse cx="60" cy="35" rx="9" ry="5.2" fill="#ff0000"/>
+
+    <!-- Left Face: 2 Dark Dots -->
+    <!-- mathematically perfect isometric left face circle projection (rotated 60deg) -->
+    <ellipse cx="52" cy="65.6" rx="7" ry="4" fill="#2d3436" transform="rotate(60 52 65.6)"/>
+    <ellipse cx="28" cy="79.4" rx="7" ry="4" fill="#2d3436" transform="rotate(60 28 79.4)"/>
+
+    <!-- Right Face: 3 Dark Dots -->
+    <!-- mathematically perfect isometric right face circle projection (rotated -60deg) -->
+    <ellipse cx="68" cy="65.6" rx="7" ry="4" fill="#2d3436" transform="rotate(-60 68 65.6)"/>
+    <ellipse cx="80" cy="72.5" rx="7" ry="4" fill="#2d3436" transform="rotate(-60 80 72.5)"/>
+    <ellipse cx="92" cy="79.4" rx="7" ry="4" fill="#2d3436" transform="rotate(-60 92 79.4)"/>
+  </g>
 </svg>

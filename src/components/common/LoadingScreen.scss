@@ -12,52 +12,19 @@
   z-index: 9999;
 }
 
-.dice-container {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.dice {
-  width: 48px;
-  height: 48px;
-  animation: dice-spin-bounce 1.5s infinite ease-in-out;
+.dice-center {
+  width: 90px;
+  height: 90px;
+  animation: dice-spin-center 2.5s linear infinite;
   /* Add drop shadow for depth */
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
 }
 
-.dice-1 {
-  animation-delay: 0s;
-}
-
-.dice-2 {
-  animation-delay: 0.15s;
-}
-
-.dice-3 {
-  animation-delay: 0.3s;
-}
-
-@keyframes dice-spin-bounce {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
+@keyframes dice-spin-center {
+  0% {
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateY(-24px) rotate(180deg) scale(1.1);
+  100% {
+    transform: rotate(360deg);
   }
-}
-
-.loading-text {
-  font-size: 1.2rem;
-  font-weight: 700;
-  font-family: 'Montserrat', sans-serif;
-  letter-spacing: 0.4rem;
-  color: #1a1a1a; /* Refined dark color */
-  animation: pulse-text 1.5s infinite ease-in-out;
-  margin-left: 0.4rem; /* adjust for letter-spacing */
-}
-
-@keyframes pulse-text {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
 }
