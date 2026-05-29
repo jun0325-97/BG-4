@@ -16,8 +16,6 @@
   width: 90px;
   height: 90px;
   animation: dice-spin-center 2.5s linear infinite;
-  /* Add drop shadow for depth */
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
 }
 
 @keyframes dice-spin-center {

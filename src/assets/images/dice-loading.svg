@@ -14,9 +14,9 @@
       <stop offset="100%" stop-color="#adb5bd"/>
     </linearGradient>
 
-    <!-- Soft outer shadow -->
+    <!-- Soft outer shadow (non-directional for spinning) -->
     <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.15"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#000000" flood-opacity="0.12"/>
     </filter>
   </defs>
 
