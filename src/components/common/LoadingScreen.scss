@@ -1,0 +1,63 @@
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5ead8; /* $color-background */
+  z-index: 9999;
+}
+
+.dice-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.dice {
+  width: 48px;
+  height: 48px;
+  animation: dice-spin-bounce 1.5s infinite ease-in-out;
+  /* Add drop shadow for depth */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.dice-1 {
+  animation-delay: 0s;
+}
+
+.dice-2 {
+  animation-delay: 0.15s;
+}
+
+.dice-3 {
+  animation-delay: 0.3s;
+}
+
+@keyframes dice-spin-bounce {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-24px) rotate(180deg) scale(1.1);
+  }
+}
+
+.loading-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.4rem;
+  color: #8c7b68; /* Theme text color */
+  animation: pulse-text 1.5s infinite ease-in-out;
+  margin-left: 0.4rem; /* adjust for letter-spacing */
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
