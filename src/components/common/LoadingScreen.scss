@@ -13,16 +13,21 @@
 }
 
 .dice-center {
-  width: 90px;
-  height: 90px;
-  animation: dice-spin-center 2.5s linear infinite;
+  width: 50px;
+  height: 50px;
+  /* SVG 내부 주사위 중심(60, 61)에 맞게 회전축을 미세 조정 (120x130 viewBox 기준) */
+  transform-origin: 50% 47%;
+  animation: dice-spin-center 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
 @keyframes dice-spin-center {
   0% {
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
   }
   100% {
-    transform: rotate(360deg);
+    transform: rotate(360deg) scale(1);
   }
 }

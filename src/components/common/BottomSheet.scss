@@ -1,9 +1,11 @@
 // src/components/common/BottomSheet.scss
 @use "../../styles/variables" as *;
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -25,7 +27,7 @@
   border-radius: 20px 20px 0 0;
   border: 2px solid $color-border;
   border-bottom: none;
-  z-index: 201;
+  z-index: 998;
   animation: slideUp 0.3s cubic-bezier(0.33, 1, 0.68, 1);
   max-height: 85vh;
   overflow-y: auto;

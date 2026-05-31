@@ -30,7 +30,11 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
   const [minPlayers, setMinPlayers] = useState(editGame?.minPlayers?.toString() ?? "");
   const [maxPlayers, setMaxPlayers] = useState(editGame?.maxPlayers?.toString() ?? "");
   const [playTime, setPlayTime] = useState(editGame?.playTimeMinutes?.toString() ?? "");
-  const [ownerId, setOwnerId] = useState(editGame?.ownerId ?? members[0]?.id ?? "m1");
+  const [ownerId, setOwnerId] = useState(() => {
+    if (editGame?.ownerId) return editGame.ownerId;
+    const hansol = members.find((m) => m.name === "한솔");
+    return hansol?.id ?? members[0]?.id ?? "m1";
+  });
   const [resultType, setResultType] = useState<GameResultType>(editGame?.resultType ?? "unknown");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState(editGame?.imageUrl ?? "");
@@ -55,7 +59,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
       return;
     }
     const query = searchQuery.replace(/\s+/g, "").toLowerCase();
-    const results = POPULAR_GAMES.filter(game => 
+    const results = POPULAR_GAMES.filter(game =>
       game.name.replace(/\s+/g, "").toLowerCase().includes(query)
     );
     setSearchResults(results);
@@ -72,7 +76,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
     setMinPlayers(game.minPlayers.toString());
     setMaxPlayers(game.maxPlayers.toString());
     setPlayTime(game.playTimeMinutes.toString());
-    
+
     if (game.imageUrl) {
       setImageUrl(game.imageUrl);
       setImageFile(null); // 외부 URL이므로 파일은 비움
@@ -132,7 +136,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
         setMinPlayers("");
         setMaxPlayers("");
         setPlayTime("");
-        setOwnerId(members[0]?.id || "m1");
+        // setOwnerId는 초기화하지 않고 이전 선택값 유지
         setResultType("unknown");
         setImageFile(null);
         setImageUrl("");
@@ -170,11 +174,11 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
 
       <div className="modal-body">
         <form onSubmit={handleSubmit} className="registration-form">
-          
+
           {/* 자체 DB 자동완성 검색 영역 */}
           {!isEditMode && (
             <div className="form-group bgg-search-wrapper" ref={dropdownRef}>
-              <label>🔍 인기 보드게임 한글 자동 검색</label>
+              <label>🔍 보드게임 검색</label>
               <div className="search-input-box">
                 <input
                   type="text"

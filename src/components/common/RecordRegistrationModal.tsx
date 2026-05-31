@@ -484,7 +484,7 @@ export default function RecordRegistrationModal({
           <div className="form-group">
             <label>한 줄 메모</label>
             <textarea
-              placeholder="예: 부산 가는 KTX 안에서 스페이스 크루함"
+              placeholder=""
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               rows={3}

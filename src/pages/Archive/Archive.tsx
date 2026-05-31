@@ -137,7 +137,27 @@ export default function Archive() {
                       </div>
 
                       <div className="results-grid">
-                        {log.results && log.results.length > 0 ? (
+                        {log.resultType === "winner_only" ? (
+                          // 참여자 전원 표시: 승자 🏆, 패자 🥄
+                          (log.participatingMembers || log.results.map(r => r.memberId)).map((memberId) => {
+                            const member = MEMBERS.find((m) => m.id === memberId);
+                            const res = log.results.find((r) => r.memberId === memberId);
+                            const isWinner = res?.isWinner === true;
+                            return (
+                              <div
+                                key={memberId}
+                                className="player-result-tag"
+                                data-color={member?.color}
+                              >
+                                <span className="player-name">{member?.name}</span>
+                                {isWinner && (
+                                  <Trophy size={14} className="winner-crown" />
+                                )}
+                              </div>
+                            );
+                          })
+                        ) : log.results && log.results.length > 0 ? (
+                          // ranked 또는 기타 결과 있는 경우
                           log.results.map((res) => {
                             const member = MEMBERS.find((m) => m.id === res.memberId);
                             return (
@@ -152,9 +172,6 @@ export default function Archive() {
                                 {log.resultType === "ranked" && (
                                   <span className="score">{res.score}점</span>
                                 )}
-                                {res.isWinner && (
-                                  <Trophy size={14} className="winner-crown" />
-                                )}
                                 {res.rank && (
                                   <span className="rank-badge">{res.rank}등</span>
                                 )}
@@ -162,6 +179,7 @@ export default function Archive() {
                             );
                           })
                         ) : (
+                          // no_result: 참여자만 표시
                           (log.participatingMembers || MEMBERS.map(m => m.id)).map((memberId) => {
                             const member = MEMBERS.find((m) => m.id === memberId);
                             return (

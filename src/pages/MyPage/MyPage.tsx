@@ -1,6 +1,6 @@
 // src/pages/MyPage/MyPage.tsx
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { Settings } from "lucide-react";
 import {
@@ -56,7 +56,7 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
   let totalPlayTime = 0;
   let totalOverallWins = 0;
   const gamePlayCounts: Record<string, number> = {};
-  
+
   let currentStreak = 0;
   let maxStreak = 0;
 
@@ -195,15 +195,18 @@ export default function MyPage() {
   const { title } = getTitleByRank(rank);
 
   // 현재 멤버의 실제 통계 데이터 연산
-  const stats = calculateMemberStats(member.id, records, boardGames, members);
+  const stats = useMemo(
+    () => calculateMemberStats(member.id, records, boardGames, members),
+    [member.id, records, boardGames, members]
+  );
   const chartColor = THEME_COLORS[member.color as keyof typeof THEME_COLORS];
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
   const isMe = member.name === currentKoreanName;
 
-  const favoriteGameObj = member.favoriteGameId 
-    ? boardGames.find((g) => g.id === member.favoriteGameId) 
+  const favoriteGameObj = member.favoriteGameId
+    ? boardGames.find((g) => g.id === member.favoriteGameId)
     : null;
   const favoriteGameName = favoriteGameObj ? favoriteGameObj.name : "아직 설정되지 않음";
 
@@ -225,7 +228,7 @@ export default function MyPage() {
         <div className="avatar-area">
           <img src={CHARACTER_IMAGES[member.color]} alt={member.name} className="character-img" />
         </div>
-        
+
         <div className="info-area">
           <span className="title">{title}</span>
           <h1 className="name">{member.name}</h1>
@@ -248,19 +251,19 @@ export default function MyPage() {
         <div className="favorite-game-header">
           <span className="label">최애 게임</span>
           {isMe && (
-            <button 
+            <button
               className="edit-favorite-btn"
               onClick={() => setIsEditingFavorite(!isEditingFavorite)}
               aria-label="최애 게임 설정"
             >
-              <Settings size={14} /> 
+              <Settings size={14} />
             </button>
           )}
         </div>
-        
+
         {isEditingFavorite ? (
-          <select 
-            value={member.favoriteGameId || ""} 
+          <select
+            value={member.favoriteGameId || ""}
             onChange={handleFavoriteChange}
             className="favorite-game-select"
             autoFocus
@@ -273,7 +276,7 @@ export default function MyPage() {
           </select>
         ) : (
           <span className="value highlight-game">
-            {member.favoriteGameId ? `🎲 ${favoriteGameName}` : "선택하지 않음"}
+            {member.favoriteGameId ? ` ${favoriteGameName}` : "선택하지 않음"}
           </span>
         )}
       </div>

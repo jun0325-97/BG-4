@@ -38,5 +38,6 @@ html {
 /* 🧱 모든 페이지의 공통 여백 (상단, 좌우, 하단 FAB 영역 확보 + iOS 하단 홈바 대응) */
 .main-content {
   padding: 1.25rem 1rem calc(5rem + env(safe-area-inset-bottom)) 1rem;
+  overflow: hidden;
 }
 

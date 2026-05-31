@@ -115,7 +115,7 @@ export default function Header() {
               >
                 <span
                   className="dot"
-                  style={{ backgroundColor: member.color }}
+                  data-color={member.color}
                 ></span>
                 {member.name} {member.name === currentKoreanName && "(나)"}
               </Link>

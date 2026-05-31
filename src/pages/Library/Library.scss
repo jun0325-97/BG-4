@@ -51,7 +51,7 @@
         transform: translateY(-2px);
         box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
       }
-      
+
       &:active {
         transform: translateY(0);
         box-shadow: 0 0 0 rgba(0, 0, 0, 0.15);
@@ -213,8 +213,13 @@
 
 // ── 스켈레톤 shimmer ──────────────────────────────────
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: 400px 0;
+  }
 }
 
 .skeleton {
@@ -271,7 +276,7 @@
 .game-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.8rem;
+  gap: 1.2rem;
   row-gap: 1.2rem;
 
   .empty-state {
@@ -302,9 +307,7 @@
     position: relative;
     overflow: hidden;
     margin-bottom: 0.4rem;
-    @include retro-border;
-    @include retro-shadow;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1); // 조금 약한 쉐도우
+    box-shadow: 2px 2px 8px 2px rgba(0, 0, 0, 0.2); // 조금 약한 쉐도우
 
     img {
       width: 100%;
@@ -337,7 +340,7 @@
     color: $color-text-main;
     margin: 0;
     width: 100%;
-    
+
     // 두 줄 말줄임표 처리 (필요시)
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -365,6 +368,7 @@
     }
   }
 }
+
 .game-card {
   display: flex;
   justify-content: space-between;

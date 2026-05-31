@@ -1,6 +1,4 @@
-import React from 'react';
 import './LoadingScreen.scss';
-
 import diceLoading from '../../assets/images/dice-loading.svg';
 
 export default function LoadingScreen() {

@@ -75,7 +75,7 @@
   background-color: $color-card-bg;
   padding-top: 5rem;
   // gap: 1rem;
-  border-left: 1.5px solid $color-border;
+  // border-left: 1px solid $color-border;
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000; // 사이드바는 최상단에 위치
 
@@ -175,8 +175,32 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        border: 1.5px solid $color-border;
+        border: 1px solid $color-border;
         flex-shrink: 0;
+
+        &[data-color="red"] {
+          background-color: $color-red;
+        }
+
+        &[data-color="blue"] {
+          background-color: $color-blue;
+        }
+
+        &[data-color="green"] {
+          background-color: $color-green;
+        }
+
+        &[data-color="yellow"] {
+          background-color: $color-yellow;
+        }
+
+        &[data-color="pink"] {
+          background-color: $color-pink;
+        }
+
+        &[data-color="purple"] {
+          background-color: $color-purple;
+        }
       }
     }
   }
@@ -199,9 +223,9 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 8px;
-    padding: 12px;
+    padding: 8px;
     border-radius: 8px;
     transition: background-color 0.2s;
 

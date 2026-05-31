@@ -95,13 +95,13 @@ export default function CrewStats() {
   const slides: SlideData[] = [
     ...(stats.mvpMember
       ? [{
-          id: "mvp",
-          icon: "🏆",
-          label: "이번 달 MVP",
-          value: stats.mvpMember.name,
-          sub: `${stats.mvpWins}승으로 이번 달 1위!`,
-          theme: (stats.mvpMember.color === "yellow" ? "gold" : stats.mvpMember.color) as SlideData["theme"],
-        }]
+        id: "mvp",
+        icon: "🏆",
+        label: "이번 달 MVP",
+        value: stats.mvpMember.name,
+        sub: `${stats.mvpWins}승으로 이번 달 1위!`,
+        theme: (stats.mvpMember.color === "yellow" ? "gold" : stats.mvpMember.color) as SlideData["theme"],
+      }]
       : []),
     {
       id: "meets",
@@ -124,41 +124,23 @@ export default function CrewStats() {
       icon: "⏳",
       label: "PLAY TIME",
       value: stats.totalTime,
-      sub: "크루가 쏟아부은 시간",
+      sub: "열심히 플레이한 시간",
       theme: "purple",
     },
-    {
-      id: "month",
-      icon: "📅",
-      label: "THIS MONTH",
-      value: `${stats.thisMonthGatherings}회`,
-      sub: "이번 달 모임 횟수",
-      theme: "green",
-    },
-    ...(stats.mostPlayedGame
-      ? [{
-          id: "bestpick",
-          icon: "🚀",
-          label: "BEST PICK",
-          value: stats.mostPlayedGame,
-          sub: `총 ${stats.mostPlayedCount}회 플레이`,
-          theme: "yellow" as SlideData["theme"],
-        }]
-      : []),
   ];
 
   if (slides.length === 0) return null;
 
   // Swiper loop 버그 및 경고 방지: 슬라이드 개수가 적을 때 직접 복제본을 만들어 제공
-  const swiperSlides = slides.length > 0 && slides.length <= 4 
-    ? [...slides, ...slides] 
+  const swiperSlides = slides.length > 0 && slides.length <= 4
+    ? [...slides, ...slides]
     : slides;
 
   return (
     <section className="crew-highlight">
       <Swiper
         modules={[Autoplay]}
-        slidesPerView={1.22}
+        slidesPerView={"auto"}
         spaceBetween={12}
         centeredSlides={true}
         grabCursor={true}
@@ -187,8 +169,7 @@ export default function CrewStats() {
                 <p className="hl-card__value">{slide.value}</p>
                 <span className="hl-card__sub">{slide.sub}</span>
               </div>
-              {/* 아이콘 뱃지 */}
-              <div className="hl-card__icon-badge">{slide.icon}</div>
+
             </div>
           </SwiperSlide>
         ))}
