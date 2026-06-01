@@ -233,7 +233,7 @@ export const useStore = create<AppState>((set, get) => ({
     const { data, error } = await supabase
       .from('board_games')
       .select('*')
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false });
     if (error) throw error;
     set({ boardGames: (data ?? []).map(rowToBoardGame) });
   },
@@ -343,7 +343,7 @@ export const useStore = create<AppState>((set, get) => ({
       description: newGame.description ?? null,
     });
     if (error) throw error;
-    set((state) => ({ boardGames: [...state.boardGames, newGame] }));
+    set((state) => ({ boardGames: [newGame, ...state.boardGames] }));
   },
 
   updateGame: async (updated) => {

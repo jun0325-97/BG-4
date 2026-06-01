@@ -1,6 +1,6 @@
 // src/pages/Library/Library.tsx
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User, Pencil, Dices, LayoutGrid, LayoutList } from "lucide-react";
 import { useStore } from "../../store/useStore";
@@ -39,7 +39,7 @@ function SkeletonGridCard() {
   );
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 21;
 
 // 인원 표시 헬퍼: min===max면 단일 표시
 function formatPlayers(min: number, max: number) {
@@ -109,11 +109,26 @@ export default function Library() {
   const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE) || 1;
 
   // 3. 현재 페이지 데이터 자르기
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentGames = filteredGames.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
+  const currentGames = filteredGames.slice(0, currentPage * ITEMS_PER_PAGE);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && currentPage < totalPages) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [currentPage, totalPages]);
 
   const handleDeleteGame = async (gameId: string) => {
     // 이 게임이 플레이 기록에 사용되고 있는지 먼저 확인
@@ -211,6 +226,11 @@ export default function Library() {
 
       {/* 리스트 컨트롤 (뷰 모드 토글 등) */}
       <div className="list-controls">
+        <div className="list-controls__info">
+          {filters.owner !== "any" && members.find((m) => m.color === filters.owner)
+            ? `${members.find((m) => m.color === filters.owner)?.name}의 보드게임 총 ${filteredGames.length}개`
+            : `총 ${filteredGames.length}개`}
+        </div>
         <div className="view-toggle">
           <button
             className={`view-toggle__btn ${viewMode === "grid" ? "active" : ""}`}
@@ -309,18 +329,11 @@ export default function Library() {
         </div>
       )}
 
-      {/* 페이지네이션 버튼들 */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              className={`page-btn ${currentPage === page ? "active" : ""}`}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </button>
-          ))}
+      {/* 무한 스크롤 트리거 */}
+      {currentPage < totalPages && (
+        <div ref={observerTarget} className="infinite-scroll-trigger">
+          {/* 스피너 아이콘 (Lucide의 RefreshCw 등을 회전시켜 사용해도 됨) */}
+          <div className="spinner"></div>
         </div>
       )}
 

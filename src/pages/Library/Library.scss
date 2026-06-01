@@ -164,8 +164,15 @@
 // ── 뷰 모드 토글 컨트롤 ─────────────────────────────────
 .list-controls {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
+
+  &__info {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $color-text-sub;
+  }
 
   .view-toggle {
     display: flex;
@@ -491,26 +498,28 @@
   }
 }
 
-.pagination {
+.infinite-scroll-trigger {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  align-items: center;
+  padding: 1.5rem 0;
 
-  .page-btn {
-    width: 32px;
-    height: 32px;
-    @include retro-border;
-    background-color: #fff;
-    border-radius: 6px;
-    font-weight: 800;
-    font-size: 0.85rem;
-    cursor: pointer;
-    color: $color-text-main;
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba($color-yellow, 0.3);
+    border-top-color: $color-yellow;
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+  }
+}
 
-    &.active {
-      background-color: $color-yellow;
-    }
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

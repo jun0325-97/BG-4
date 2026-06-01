@@ -188,17 +188,16 @@ export default function MyPage() {
   const { user } = useAuthStore();
   const member = members.find((m) => m.color === memberId);
 
-  if (!member) return <Navigate to="/" replace />;
+  const stats = useMemo(
+    () => member ? calculateMemberStats(member.id, records, boardGames, members) : null,
+    [member?.id, records, boardGames, members]
+  );
+
+  if (!member || !stats) return <Navigate to="/" replace />;
 
   const sortedMembers = [...members].sort((a, b) => b.winRate - a.winRate);
   const rank = sortedMembers.findIndex((m) => m.id === member.id) + 1;
   const { title } = getTitleByRank(rank);
-
-  // 현재 멤버의 실제 통계 데이터 연산
-  const stats = useMemo(
-    () => calculateMemberStats(member.id, records, boardGames, members),
-    [member.id, records, boardGames, members]
-  );
   const chartColor = THEME_COLORS[member.color as keyof typeof THEME_COLORS];
 
   const currentUsername = user?.email?.split("@")[0] || "";
