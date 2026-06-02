@@ -68,7 +68,7 @@ export default function Header() {
       <header className={`global-header ${isVisible ? "visible" : "hidden"}`}>
         <div className="logo">
           <Link to="/" onClick={closeMenu}>
-            <span className="logo-bms">BMS</span><span className="logo-crew"> Crew</span>
+            <span className="logo-bms">BMS</span><span className="logo-crew"> Club</span>
           </Link>
         </div>
 
