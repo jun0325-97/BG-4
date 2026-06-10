@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { supabase } from "../../utils/supabase";
@@ -129,6 +129,24 @@ export default function Vote() {
       console.error("Failed to submit vote:", err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // ── 투표 리셋 ──
+  const handleResetVote = async () => {
+    if (!activeVote) return;
+    const confirmed = window.confirm("투표를 초기화하시겠습니까? 모든 투표 기록이 삭제됩니다.");
+    if (!confirmed) return;
+
+    try {
+      await supabase.from("game_vote_entries").delete().eq("vote_id", activeVote.id);
+      await supabase.from("game_votes").delete().eq("id", activeVote.id);
+      setActiveVote(null);
+      setVoteEntries([]);
+      setSelectedGames([]);
+      setMeetingDate("");
+    } catch (err) {
+      console.error("Failed to reset vote:", err);
     }
   };
 
@@ -354,6 +372,10 @@ export default function Vote() {
                   </div>
                 ))}
               </div>
+              <button className="reset-after-result-btn" onClick={handleResetVote}>
+                <RotateCcw size={14} />
+                투표 초기화
+              </button>
             </div>
           )}
         </>

@@ -333,6 +333,31 @@
     gap: 0.5rem;
   }
 
+  .reset-after-result-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.65rem;
+    background: none;
+    border: 1px solid rgba($color-border, 0.8);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: $color-text-sub;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: rgba($color-red, 0.06);
+      border-color: rgba($color-red, 0.3);
+      color: $color-red;
+    }
+  }
+
   .result-item {
     display: flex;
     align-items: center;
