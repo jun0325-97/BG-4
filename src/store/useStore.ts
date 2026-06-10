@@ -10,6 +10,7 @@ interface AppState {
   boardGames: BoardGame[];
   records: GatheringRecord[];
   isLoading: boolean;
+  isInitialFetched: boolean;
   error: string | null;
 
   // 초기 데이터 로드
@@ -203,6 +204,7 @@ export const useStore = create<AppState>((set, get) => ({
   boardGames: [],
   records: [],
   isLoading: false,
+  isInitialFetched: false,
   error: null,
 
   fetchAll: async () => {
@@ -213,6 +215,7 @@ export const useStore = create<AppState>((set, get) => ({
         get().fetchBoardGames(),
         get().fetchRecords(),
       ]);
+      set({ isInitialFetched: true });
     } catch (e: any) {
       set({ error: e.message });
     } finally {

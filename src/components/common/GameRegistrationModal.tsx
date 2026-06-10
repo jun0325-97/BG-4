@@ -354,7 +354,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
             >
               <option value="unknown">🤔 아직 안 해봐서 몰라요 (나중에 결정)</option>
               <option value="ranked">점수/순위 기록 (예: 스플렌더)</option>
-              <option value="winner_only">1등만 기록 (예: 아발론)</option>
+              <option value="winner_only">승패만 기록 (예: 아발론)</option>
               <option value="no_result">승패 없음 (예: 머더미스터리)</option>
             </select>
           </div>

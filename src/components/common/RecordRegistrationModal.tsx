@@ -1,6 +1,6 @@
 // src/components/common/RecordRegistrationModal.tsx
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { X, Plus, Trash2, Users, Image as ImageIcon } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -36,6 +36,10 @@ export default function RecordRegistrationModal({
   const { showAlert, showConfirm } = useAlertStore();
 
   const isEditMode = !!editRecord;
+
+  const sortedBoardGames = useMemo(() => {
+    return [...boardGames].sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  }, [boardGames]);
 
   const [date, setDate] = useState(
     editRecord?.date ?? new Date().toISOString().split("T")[0]
@@ -389,7 +393,7 @@ export default function RecordRegistrationModal({
                       required
                     >
                       <option value="">-- 보드게임 선택 --</option>
-                      {boardGames.map((game) => (
+                      {sortedBoardGames.map((game) => (
                         <option key={game.id} value={game.id}>
                           {game.name} ({game.genre})
                         </option>

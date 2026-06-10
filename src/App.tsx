@@ -19,9 +19,9 @@ import LoadingScreen from "./components/common/LoadingScreen";
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, isInitialized } = useAuthStore();
 
-  const { isLoading } = useStore();
+  const { isLoading, isInitialFetched } = useStore();
 
-  if (!isInitialized || (session && isLoading)) {
+  if (!isInitialized || (session && isLoading && !isInitialFetched)) {
     return <LoadingScreen />;
   }
 

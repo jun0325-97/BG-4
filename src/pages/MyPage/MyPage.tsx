@@ -14,6 +14,7 @@ import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getTitleByRank } from "../../utils/getTitleByRank";
 import { getKoreanName } from "../../utils/getKoreanName";
+import { getDynamicMembers } from "../../utils/calculateWinRates";
 import "./MyPage.scss";
 
 import imgRed from "../../assets/images/img-red-1.png";
@@ -195,7 +196,8 @@ export default function MyPage() {
 
   if (!member || !stats) return <Navigate to="/" replace />;
 
-  const sortedMembers = [...members].sort((a, b) => b.winRate - a.winRate);
+  const dynamicMembers = useMemo(() => getDynamicMembers(members, records), [members, records]);
+  const sortedMembers = [...dynamicMembers].sort((a, b) => b.winRate - a.winRate);
   const rank = sortedMembers.findIndex((m) => m.id === member.id) + 1;
   const { title } = getTitleByRank(rank);
   const chartColor = THEME_COLORS[member.color as keyof typeof THEME_COLORS];
@@ -269,14 +271,23 @@ export default function MyPage() {
             onBlur={() => setIsEditingFavorite(false)}
           >
             <option value="">선택하지 않음</option>
-            {boardGames.map((g) => (
+            {[...boardGames].sort((a, b) => a.name.localeCompare(b.name, 'ko')).map((g) => (
               <option key={g.id} value={g.id}>{g.name}</option>
             ))}
           </select>
         ) : (
-          <span className="value highlight-game">
-            {member.favoriteGameId ? ` ${favoriteGameName}` : "선택하지 않음"}
-          </span>
+          <div className="favorite-game-display">
+            {favoriteGameObj?.imageUrl && (
+              <img 
+                src={favoriteGameObj.imageUrl} 
+                alt={favoriteGameName} 
+                className="favorite-game-thumb" 
+              />
+            )}
+            <span className="value highlight-game">
+              {member.favoriteGameId ? ` ${favoriteGameName}` : "선택하지 않음"}
+            </span>
+          </div>
         )}
       </div>
 

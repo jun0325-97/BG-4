@@ -358,7 +358,7 @@ export default function Library() {
               <div className="modal-info-list">
                 <div className="modal-genre-badge">
                   <span className="badge">{selectedGame.genre}</span>
-                  {currentUser && currentUser.id === selectedGame.ownerId && (
+                  {currentUser && (
                     <div className="modal-genre-actions">
                       <button
                         className="modal-icon-btn"
