@@ -1,11 +1,12 @@
 // src/components/common/RecordRegistrationModal.tsx
 
 import { useState, useMemo } from "react";
-import { X, Plus, Trash2, Users, Image as ImageIcon } from "lucide-react";
+import { X, Plus, Trash2, Users, Image as ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
 import { GatheringRecord, PlayLog, PlayerResult, Member } from "../../types";
+import imageCompression from "browser-image-compression";
 import "./RecordRegistrationModal.scss";
 
 interface RecordRegistrationModalProps {
@@ -121,6 +122,24 @@ export default function RecordRegistrationModal({
     setPlayLogs((prev) => prev.filter((_, i) => i !== logIndex));
   };
 
+  // ── 게임 순서 변경 ───────────────────────────────────────
+  const handleMoveLog = (logIndex: number, direction: 'up' | 'down') => {
+    setPlayLogs((prev) => {
+      const newLogs = [...prev];
+      const targetIndex = direction === 'up' ? logIndex - 1 : logIndex + 1;
+      
+      // 범위 체크
+      if (targetIndex < 0 || targetIndex >= newLogs.length) return newLogs;
+      
+      // 스왑
+      const temp = newLogs[logIndex];
+      newLogs[logIndex] = newLogs[targetIndex];
+      newLogs[targetIndex] = temp;
+      
+      return newLogs;
+    });
+  };
+
   // ── 참여 멤버 토글 ───────────────────────────────────────
   const handleToggleMember = (logIndex: number, memberId: string) => {
     setPlayLogs(prev => prev.map((log, i) => {
@@ -156,12 +175,26 @@ export default function RecordRegistrationModal({
 
     try {
       if (photoFile) {
+        // 1. 이미지 압축 (최대 1MB, 1200px)
+        let uploadFile = photoFile;
+        try {
+          const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1200,
+            useWebWorker: true,
+          };
+          uploadFile = await imageCompression(photoFile, options);
+        } catch (error) {
+          console.error("이미지 압축 실패:", error);
+          // 압축 실패 시 원본 사용
+        }
+
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `records/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("images")
-          .upload(fileName, photoFile);
+          .upload(fileName, uploadFile);
 
         if (uploadError) {
           console.error("Storage upload error:", uploadError);
@@ -170,6 +203,14 @@ export default function RecordRegistrationModal({
 
         const { data } = supabase.storage.from("images").getPublicUrl(fileName);
         finalPhotoUrl = data.publicUrl;
+      }
+
+      // 2. 고아 이미지 정리 로직
+      if (isEditMode && editRecord && editRecord.photoUrl && editRecord.photoUrl !== finalPhotoUrl) {
+        const parts = editRecord.photoUrl.split('/public/images/');
+        if (parts.length > 1) {
+          await supabase.storage.from('images').remove([parts[1]]);
+        }
       }
 
       if (isEditMode && editRecord) {
@@ -371,6 +412,29 @@ export default function RecordRegistrationModal({
                           </div>
                         )}
                       </div>
+
+                      {playLogs.length > 1 && (
+                        <div className="order-actions">
+                          <button
+                            type="button"
+                            className="move-log-btn"
+                            onClick={() => handleMoveLog(logIndex, 'up')}
+                            disabled={logIndex === 0}
+                            title="위로 이동"
+                          >
+                            <ArrowUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className="move-log-btn"
+                            onClick={() => handleMoveLog(logIndex, 'down')}
+                            disabled={logIndex === playLogs.length - 1}
+                            title="아래로 이동"
+                          >
+                            <ArrowDown size={14} />
+                          </button>
+                        </div>
+                      )}
 
                       {playLogs.length > 1 && (
                         <button

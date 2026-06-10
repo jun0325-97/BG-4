@@ -5,6 +5,7 @@ import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
 import { BoardGame, GameResultType, GAME_GENRES } from "../../types";
 import { POPULAR_GAMES, PopularGame } from "../../utils/popularGames";
+import imageCompression from "browser-image-compression";
 import "./GameRegistrationModal.scss";
 
 interface Props {
@@ -95,12 +96,26 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
 
     try {
       if (imageFile) {
+        // 1. 이미지 압축 (최대 1MB, 1200px)
+        let uploadFile = imageFile;
+        try {
+          const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1200,
+            useWebWorker: true,
+          };
+          uploadFile = await imageCompression(imageFile, options);
+        } catch (error) {
+          console.error("이미지 압축 실패:", error);
+          // 압축 실패 시 원본 사용
+        }
+
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("images")
-          .upload(`games/${fileName}`, imageFile);
+          .upload(`games/${fileName}`, uploadFile);
 
         if (uploadError) {
           console.error("Storage upload error:", uploadError);
@@ -109,6 +124,16 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
 
         const { data } = supabase.storage.from("images").getPublicUrl(`games/${fileName}`);
         finalImageUrl = data.publicUrl;
+      }
+
+      // 2. 고아 이미지 정리 로직 (기존 이미지가 Supabase Storage에 있는 경우에만)
+      if (isEditMode && editGame && editGame.imageUrl && editGame.imageUrl !== finalImageUrl) {
+        if (editGame.imageUrl.includes('/public/images/')) {
+          const parts = editGame.imageUrl.split('/public/images/');
+          if (parts.length > 1) {
+            await supabase.storage.from('images').remove([parts[1]]);
+          }
+        }
       }
 
       const gameData: BoardGame = {

@@ -112,7 +112,7 @@ export default function Archive() {
                 )}
                 {record.memo && (
                   <div className="record-memo">
-                    <p>"{record.memo}"</p>
+                    <p>{record.memo}</p>
                   </div>
                 )}
                 {record.playLogs.map((log, index) => {
@@ -191,7 +191,7 @@ export default function Archive() {
                                 <span className="player-name">
                                   {member?.name}
                                 </span>
-                                <span className="no-result-text" style={{ fontSize: '0.8rem', color: '#666', marginLeft: '4px' }}>참여 🤝</span>
+                                <span className="no-result-text" style={{ fontSize: '0.8rem', color: '#666', marginLeft: '4px' }}>🤝</span>
                               </div>
                             );
                           })

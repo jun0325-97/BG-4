@@ -392,6 +392,40 @@
         }
       }
 
+      .order-actions {
+        display: flex;
+        align-items: center;
+        background: rgba($color-border, 0.1);
+        border: 1px solid $color-border;
+        border-radius: 6px;
+        overflow: hidden;
+
+        .move-log-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 3px 6px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: $color-text-main;
+          transition: background 0.15s, opacity 0.15s;
+
+          &:hover:not(:disabled) {
+            background: rgba($color-border, 0.2);
+          }
+
+          &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+          }
+
+          &:first-child {
+            border-right: 1px solid $color-border;
+          }
+        }
+      }
+
       .remove-log-btn {
         display: flex;
         align-items: center;
