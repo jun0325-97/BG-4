@@ -1,0 +1,388 @@
+@use "../../styles/variables" as *;
+
+.vote-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vote-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: $color-text-sub;
+  font-weight: 600;
+}
+
+// ── 투표 없을 때 설정 화면 ──
+.vote-setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+
+  .setup-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: $color-text-main;
+    margin: 0 0 0.5rem;
+  }
+
+  .setup-desc {
+    font-size: 0.85rem;
+    color: $color-text-sub;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+  }
+
+  .setup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 280px;
+
+    input[type="date"] {
+      padding: 0.75rem;
+      border: 1px solid $color-border;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-align: center;
+      outline: none;
+      background: #fff;
+
+      &:focus {
+        border-color: $color-blue;
+      }
+    }
+
+    .setup-btn {
+      padding: 0.8rem;
+      background-color: $color-yellow;
+      color: $color-text-main;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover:not(:disabled) { opacity: 0.85; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
+    }
+  }
+}
+
+// ── 투표 헤더 (D-Day) ──
+.vote-header {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $color-border;
+  padding: 1.2rem;
+
+  .vote-header-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .vote-dday {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    background: $color-blue;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .vote-date-info {
+    h2 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: $color-text-main;
+      margin: 0;
+    }
+    .vote-date {
+      font-size: 0.82rem;
+      color: $color-text-sub;
+      font-weight: 600;
+    }
+  }
+}
+
+// ── 멤버 투표 상태 칩 ──
+.vote-status {
+  display: flex;
+  gap: 0.5rem;
+
+  .status-chip {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.5rem;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid $color-border;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $color-text-sub;
+    transition: all 0.2s;
+
+    &.voted {
+      background: rgba($color-blue, 0.08);
+      border-color: rgba($color-blue, 0.3);
+      color: $color-blue;
+    }
+
+    .status-pending { font-size: 0.7rem; }
+  }
+}
+
+// ── 게임 선택 영역 ──
+.vote-selection {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $color-border;
+  padding: 1.2rem;
+
+  .selection-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: $color-text-main;
+      margin: 0;
+    }
+
+    .selection-count {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: $color-blue;
+      background: rgba($color-blue, 0.08);
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+    }
+  }
+
+  .genre-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba($color-border, 0.5);
+
+    .genre-chip {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: inherit;
+      border: 1px solid $color-border;
+      border-radius: 20px;
+      background: #fff;
+      color: $color-text-sub;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+
+      &.active {
+        background: $color-text-main;
+        color: #fff;
+        border-color: $color-text-main;
+      }
+    }
+  }
+
+  .game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 400px;
+    overflow-y: auto;
+
+    .game-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 0.9rem;
+      background: #fff;
+      border: 1px solid $color-border;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: $color-text-main;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+
+      &.selected {
+        background: rgba($color-yellow, 0.15);
+        border-color: $color-yellow;
+        font-weight: 700;
+        .check-icon { color: $color-yellow; }
+      }
+
+      &.disabled { opacity: 0.35; cursor: not-allowed; }
+    }
+  }
+
+  .submit-vote-btn {
+    width: 100%;
+    padding: 0.85rem;
+    margin-top: 1rem;
+    background: $color-yellow;
+    color: $color-text-main;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover:not(:disabled) { opacity: 0.85; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+}
+
+// ── 투표 완료 대기 ──
+.vote-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+
+  .waiting-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+
+  p {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $color-text-main;
+    margin: 0;
+  }
+
+  .waiting-sub {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: $color-text-sub;
+    margin-top: 0.3rem !important;
+  }
+}
+
+// ── 투표 결과 ──
+.vote-results {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $color-border;
+  padding: 1.2rem;
+
+  .results-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: $color-text-main;
+    margin: 0 0 1rem;
+  }
+
+  .results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    background: rgba($color-background, 0.5);
+    border-radius: 10px;
+
+    .result-rank {
+      font-size: 1.2rem;
+      min-width: 2rem;
+      text-align: center;
+    }
+
+    .result-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+
+      .result-game {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: $color-text-main;
+      }
+
+      .result-voters {
+        font-size: 0.75rem;
+        color: $color-text-sub;
+      }
+    }
+
+    .result-count {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: $color-blue;
+    }
+  }
+}
+
+// ── 대시보드 배너 ──
+.vote-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $color-border;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover { background: rgba($color-yellow, 0.06); }
+
+  .banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+  .banner-content {
+    flex: 1;
+
+    .banner-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: $color-text-main;
+    }
+
+    .banner-sub {
+      font-size: 0.78rem;
+      color: $color-text-sub;
+      font-weight: 500;
+      margin-top: 0.15rem;
+    }
+  }
+
+  .banner-arrow {
+    color: $color-text-sub;
+    flex-shrink: 0;
+  }
+}

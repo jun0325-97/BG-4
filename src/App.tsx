@@ -12,6 +12,7 @@ const Dashboard = React.lazy(() => import("./pages/Dashboard/Dashboard"));
 const Library = React.lazy(() => import("./pages/Library/Library"));
 const Archive = React.lazy(() => import("./pages/Archive/Archive"));
 const MyPage = React.lazy(() => import("./pages/MyPage/MyPage"));
+const Vote = React.lazy(() => import("./pages/Vote/Vote"));
 const Login = React.lazy(() => import("./pages/Login/Login"));
 
 import LoadingScreen from "./components/common/LoadingScreen";
@@ -74,6 +75,7 @@ export default function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/library" element={<Library />} />
               <Route path="/archive" element={<Archive />} />
+              <Route path="/vote" element={<Vote />} />
               <Route path="/mypage/:memberId" element={<MyPage />} />
             </Route>
           </Routes>

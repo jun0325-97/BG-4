@@ -95,6 +95,9 @@ export default function Header() {
         <Link to="/archive" onClick={closeMenu}>
           Diary
         </Link>
+        <Link to="/vote" onClick={closeMenu}>
+          Vote
+        </Link>
 
         <div className="mypage-menu-container">
           <button

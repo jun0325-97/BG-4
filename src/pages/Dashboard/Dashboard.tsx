@@ -4,6 +4,7 @@ import "./Dashboard.scss";
 import CrewStats from "./components/CrewStats/CrewStats";
 import RaceTrack from "./components/RaceTrack/RaceTrack";
 import MemberCards from "./components/MemberCards/MemberCards";
+import VoteBanner from "../../components/common/VoteBanner";
 import { getDynamicMembers } from "../../utils/calculateWinRates";
 
 export default function Dashboard() {
@@ -15,6 +16,10 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      <section className="vote-banner-section">
+        <VoteBanner />
+      </section>
+
       <section className="stats-section">
         <CrewStats />
       </section>
