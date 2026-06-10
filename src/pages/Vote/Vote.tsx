@@ -199,7 +199,7 @@ export default function Vote() {
       {!activeVote && (
         <div className="vote-setup">
           <div className="setup-icon">🗳️</div>
-          <h2>다음 모임 투표</h2>
+          <h2>다음에 뭐하지?</h2>
           <p className="setup-desc">
             다음 모임 날짜를 설정하고
             <br />
@@ -233,7 +233,7 @@ export default function Vote() {
                 D{dDay !== null && dDay > 0 ? `-${dDay}` : "-Day"}
               </span>
               <div className="vote-date-info">
-                <h2>다음 모임 투표</h2>
+                <h2>다음에 뭐하지?</h2>
                 <span className="vote-date">
                   {activeVote.meeting_date.replace(/-/g, ".")}
                 </span>
