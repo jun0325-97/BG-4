@@ -311,9 +311,39 @@
     color: $color-text-sub;
     margin-top: 0.3rem !important;
   }
+
+  .edit-vote-btn {
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    background: #fff;
+    border: 1px solid rgba($color-blue, 0.5);
+    border-radius: 20px;
+    color: $color-blue;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: rgba($color-blue, 0.08);
+      border-color: $color-blue;
+    }
+  }
 }
 
 // ── 투표 결과 ──
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .vote-results {
   background: #fff;
   border-radius: 12px;
@@ -333,67 +363,69 @@
     gap: 0.5rem;
   }
 
-  .reset-after-result-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    width: 100%;
-    margin-top: 1rem;
-    padding: 0.65rem;
-    background: none;
-    border: 1px solid rgba($color-border, 0.8);
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: $color-text-sub;
-    cursor: pointer;
-    transition: all 0.15s;
-
-    &:hover {
-      background: rgba($color-red, 0.06);
-      border-color: rgba($color-red, 0.3);
-      color: $color-red;
-    }
-  }
-
   .result-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    padding: 0.8rem;
-    background: rgba($color-background, 0.5);
+    padding: 0.8rem 1rem;
+    background: #fff;
+    border: 1px solid $color-border;
     border-radius: 10px;
+    overflow: hidden;
+    z-index: 1;
+    opacity: 0;
+    animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+
+    .result-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      z-index: -1;
+    }
+
+    &.rank-1 { border-color: rgba($color-yellow, 0.8); }
+    &.rank-1 .result-progress { background: rgba($color-yellow, 0.4); }
+    &.rank-2 .result-progress { background: rgba($color-yellow, 0.2); }
+    &.rank-3 .result-progress { background: rgba($color-yellow, 0.1); }
+    &.rank-4 .result-progress { background: rgba($color-border, 0.4); }
+    &.rank-5 .result-progress { background: rgba($color-border, 0.2); }
 
     .result-rank {
-      font-size: 1.2rem;
-      min-width: 2rem;
-      text-align: center;
+      font-size: 1rem;
+      font-weight: 800;
+      min-width: 1.5rem;
+      color: $color-text-sub;
+    }
+    
+    &.rank-1 .result-rank { color: $color-text-main; }
+
+    .result-thumbnail {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid rgba($color-border, 0.3);
+      background: #fff;
     }
 
     .result-info {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.15rem;
 
       .result-game {
-        font-size: 0.9rem;
-        font-weight: 700;
+        font-size: 0.95rem;
+        font-weight: 800;
         color: $color-text-main;
-      }
-
-      .result-voters {
-        font-size: 0.75rem;
-        color: $color-text-sub;
       }
     }
 
     .result-count {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 800;
-      color: $color-blue;
+      color: $color-text-main;
     }
   }
 }

@@ -150,6 +150,31 @@ export default function Vote() {
     }
   };
 
+  // ── 내 투표 수정 (취소 후 재선택) ──
+  const handleEditMyVote = async () => {
+    if (!activeVote || !currentMember) return;
+    const confirmed = window.confirm("투표를 수정하시겠습니까?");
+    if (!confirmed) return;
+
+    try {
+      // 1. 기존 내 투표 항목 찾아서 selectedGames에 넣기
+      const myEntries = voteEntries.filter(e => e.member_id === currentMember.id);
+      setSelectedGames(myEntries.map(e => e.game_id));
+
+      // 2. DB에서 내 투표 기록 삭제
+      await supabase
+        .from("game_vote_entries")
+        .delete()
+        .eq("vote_id", activeVote.id)
+        .eq("member_id", currentMember.id);
+
+      // 3. 상태 업데이트
+      await fetchActiveVote();
+    } catch (err) {
+      console.error("Failed to edit vote:", err);
+    }
+  };
+
   // ── 계산 값들 ──
   const hasVoted = currentMember
     ? voteEntries.some((e) => e.member_id === currentMember.id)
@@ -171,7 +196,7 @@ export default function Vote() {
       if (member) voterMap[entry.game_id].push(member.name);
     });
 
-    return Object.entries(countMap)
+    const sorted = Object.entries(countMap)
       .map(([gameId, count]) => ({
         gameId,
         count,
@@ -179,6 +204,21 @@ export default function Vote() {
         game: boardGames.find((g) => g.id === gameId),
       }))
       .sort((a, b) => b.count - a.count);
+
+    let currentRank = 1;
+    let prevCount = -1;
+    let tiesCount = 0;
+
+    return sorted.map((item) => {
+      if (item.count === prevCount) {
+        tiesCount++;
+      } else {
+        currentRank = currentRank + tiesCount;
+        tiesCount = 1;
+        prevCount = item.count;
+      }
+      return { ...item, rank: currentRank };
+    });
   }, [allVoted, voteEntries, members, boardGames]);
 
   // ── 장르 필터 ──
@@ -257,6 +297,10 @@ export default function Vote() {
                 </span>
               </div>
             </div>
+            <button className="vote-reset-btn" onClick={handleResetVote} title="전체 투표 초기화">
+              <RotateCcw size={14} />
+              전체 초기화
+            </button>
           </div>
 
           {/* 멤버 투표 상태 */}
@@ -341,6 +385,9 @@ export default function Vote() {
               <p className="waiting-sub">
                 다른 멤버들의 투표를 기다리는 중...
               </p>
+              <button className="edit-vote-btn" onClick={handleEditMyVote}>
+                투표 수정하기
+              </button>
             </div>
           )}
 
@@ -349,33 +396,34 @@ export default function Vote() {
             <div className="vote-results">
               <h3 className="results-title">🎉 투표 결과</h3>
               <div className="results-list">
-                {voteResults.map((result, idx) => (
-                  <div key={result.gameId} className="result-item">
-                    <span className="result-rank">
-                      {idx === 0
-                        ? "🥇"
-                        : idx === 1
-                          ? "🥈"
-                          : idx === 2
-                            ? "🥉"
-                            : `${idx + 1}`}
-                    </span>
-                    <div className="result-info">
-                      <span className="result-game">
-                        {result.game?.name || "알 수 없는 게임"}
-                      </span>
-                      <span className="result-voters">
-                        {result.voters.join(", ")}
-                      </span>
+                {voteResults.slice(0, 5).map((result, idx) => {
+                  const maxVotes = members.length;
+                  const ratio = (result.count / maxVotes) * 100;
+                  return (
+                    <div 
+                      key={result.gameId} 
+                      className={`result-item rank-${result.rank}`}
+                      style={{ animationDelay: `${idx * 0.1}s` }}
+                    >
+                      <div className="result-progress" style={{ width: `${ratio}%` }} />
+                      <span className="result-rank">{result.rank}위</span>
+                      {result.game?.imageUrl && (
+                        <img
+                          src={result.game.imageUrl}
+                          alt={result.game.name}
+                          className="result-thumbnail"
+                        />
+                      )}
+                      <div className="result-info">
+                        <span className="result-game">
+                          {result.game?.name || "알 수 없는 게임"}
+                        </span>
+                      </div>
+                      <span className="result-count">{result.count}표</span>
                     </div>
-                    <span className="result-count">{result.count}표</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-              <button className="reset-after-result-btn" onClick={handleResetVote}>
-                <RotateCcw size={14} />
-                투표 초기화
-              </button>
             </div>
           )}
         </>
