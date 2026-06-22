@@ -210,7 +210,7 @@ function calculateSpecialBadges(
   if (maxDuel > 0) {
     const topDuel = duelCounts.filter((x) => x.count === maxDuel);
     if (topDuel.length === 1 && topDuel[0].id === memberId) {
-      badges.push({ key: "duel-expert", label: "맞짱 전문가" });
+      badges.push({ key: "duel-expert", label: "맞짱 러버" });
     }
   }
 
@@ -281,7 +281,7 @@ export default function MyPage() {
 
         <div className="info-area">
           <div className="badges-row">
-            <span className="title">{title}</span>
+            <span className="title" data-color={member.color}>{title}</span>
             {stats.genreTitle && (
               <span className="genre-title" data-color={member.color}>{stats.genreTitle}</span>
             )}
