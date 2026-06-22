@@ -89,16 +89,18 @@ export default function Archive() {
                 <span>{formatRecordTitle(record.date, record.emoji)}</span>
               </div>
               <div className="icon-wrapper">
-                <button
-                  className="edit-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingRecord(record);
-                  }}
-                  title="기록 수정"
-                >
-                  <Edit2 size={16} />
-                </button>
+                {openRecordId === record.id && (
+                  <button
+                    className="edit-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingRecord(record);
+                    }}
+                    title="기록 수정"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                )}
                 {openRecordId === record.id ? <ChevronUp /> : <ChevronDown />}
               </div>
             </div>
@@ -147,7 +149,7 @@ export default function Archive() {
                               <div
                                 key={memberId}
                                 className="player-result-tag"
-                                data-color={member?.color}
+                                data-color={isWinner ? member?.color : undefined}
                               >
                                 <span className="player-name">{member?.name}</span>
                                 {isWinner && (
@@ -186,7 +188,6 @@ export default function Archive() {
                               <div
                                 key={memberId}
                                 className="player-result-tag"
-                                data-color={member?.color}
                               >
                                 <span className="player-name">
                                   {member?.name}
