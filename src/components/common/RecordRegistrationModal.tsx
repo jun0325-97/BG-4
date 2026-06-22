@@ -1,6 +1,6 @@
 // src/components/common/RecordRegistrationModal.tsx
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { X, Plus, Trash2, Users, Image as ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -70,6 +70,8 @@ export default function RecordRegistrationModal({
   );
   // 클릭한 로그 인덱스에 대해 참여멤버 피커 열림
   const [openParticipantPicker, setOpenParticipantPicker] = useState<number | null>(null);
+  // 새 업이트 카드로 자동 스크롤 용 ref
+  const newLogRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
 
@@ -112,9 +114,13 @@ export default function RecordRegistrationModal({
     );
   };
 
-  // ── 게임 추가 ───────────────────────────────────────────
+  // ── 게임 추가 (자동 스크롤 포함) ─────────────────────────
   const handleAddLog = () => {
     setPlayLogs((prev) => [...prev, emptyLog(members)]);
+    // 다음 렌더링 후 새 카드로 스크롤
+    setTimeout(() => {
+      newLogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
   };
 
   // ── 게임 삭제 ───────────────────────────────────────────
@@ -368,8 +374,10 @@ export default function RecordRegistrationModal({
 
             {playLogs.map((log, logIndex) => {
               const selectedGame = boardGames.find((g) => g.id === log.gameId);
+              // 마지막 카드에만 ref 연결
+              const isLast = logIndex === playLogs.length - 1;
               return (
-                <div key={log.id} className="play-log-card">
+                <div key={log.id} className="play-log-card" ref={isLast ? newLogRef : undefined}>
                   {/* 카드 헤더: 게임 번호 + 참여멤버 피커 + 삭제 */}
                   <div className="log-card-header">
                     <span className="log-num">GAME {logIndex + 1}</span>

@@ -373,15 +373,30 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
 
           <div className="form-group">
             <label>결과 기록 방식</label>
-            <select
-              value={resultType}
-              onChange={(e) => setResultType(e.target.value as GameResultType)}
-            >
-              <option value="unknown">🤔 아직 안 해봐서 몰라요 (나중에 결정)</option>
-              <option value="ranked">점수/순위 기록 (예: 스플렌더)</option>
-              <option value="winner_only">승패만 기록 (예: 아발론)</option>
-              <option value="no_result">승패 없음 (예: 머더미스터리)</option>
-            </select>
+            <div className="result-type-segment">
+              {[
+                { value: "unknown", icon: "🤔", label: "나중에" },
+                { value: "ranked",  icon: "🏆", label: "점수/순위" },
+                { value: "winner_only", icon: "⚔️", label: "승패만" },
+                { value: "no_result", icon: "🤝", label: "승패없음" },
+              ].map(({ value, icon, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`result-type-btn ${resultType === value ? "active" : ""}`}
+                  onClick={() => setResultType(value as GameResultType)}
+                >
+                  <span className="rt-icon">{icon}</span>
+                  <span className="rt-label">{label}</span>
+                </button>
+              ))}
+            </div>
+            <p className="result-type-hint">
+              {resultType === "unknown" && "아직 안 해봐서 몰라요 — 나중에 수정 가능"}
+              {resultType === "ranked" && "예: 스플렌더, 카탄 — 점수·순위를 입력"}
+              {resultType === "winner_only" && "예: 아발론, 머더미스터리 — 승자/패자 구분"}
+              {resultType === "no_result" && "예: 협력게임 — 승패 없이 참여 기록만"}
+            </p>
           </div>
 
           <div className="modal-actions">

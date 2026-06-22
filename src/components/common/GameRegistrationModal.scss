@@ -300,4 +300,62 @@
       color: $color-text-main;
     }
   }
+
+  // ── 결과 유형 세그먼트 버튼 ───────────────────────────────
+  .result-type-segment {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    @include retro-border;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .result-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0.65rem 0.2rem;
+    background: #fff;
+    border: none;
+    border-right: 1.5px solid $color-border;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover:not(.active) {
+      background: rgba($color-yellow, 0.12);
+    }
+
+    &.active {
+      background: $color-yellow;
+    }
+
+    .rt-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .rt-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: $color-text-main;
+      white-space: nowrap;
+    }
+  }
+
+  .result-type-hint {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $color-text-sub;
+    padding: 0.3rem 0.2rem;
+    min-height: 1.2em;
+  }
 }

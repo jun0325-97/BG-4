@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Check, RotateCcw } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
 import { getKoreanName } from "../../utils/getKoreanName";
 import { GAME_GENRES } from "../../types";
@@ -24,6 +25,7 @@ interface VoteEntry {
 export default function Vote() {
   const { members, boardGames } = useStore();
   const { user } = useAuthStore();
+  const { showConfirm, showAlert } = useAlertStore();
 
   const [activeVote, setActiveVote] = useState<VoteSession | null>(null);
   const [voteEntries, setVoteEntries] = useState<VoteEntry[]>([]);
@@ -133,46 +135,53 @@ export default function Vote() {
   };
 
   // ── 투표 리셋 ──
-  const handleResetVote = async () => {
+  const handleResetVote = () => {
     if (!activeVote) return;
-    const confirmed = window.confirm("투표를 초기화하시겠습니까? 모든 투표 기록이 삭제됩니다.");
-    if (!confirmed) return;
-
-    try {
-      await supabase.from("game_vote_entries").delete().eq("vote_id", activeVote.id);
-      await supabase.from("game_votes").delete().eq("id", activeVote.id);
-      setActiveVote(null);
-      setVoteEntries([]);
-      setSelectedGames([]);
-      setMeetingDate("");
-    } catch (err) {
-      console.error("Failed to reset vote:", err);
-    }
+    showConfirm(
+      "투표를 초기화하시겠습니까?\n모든 투표 기록이 삭제됩니다.",
+      async () => {
+        try {
+          await supabase.from("game_vote_entries").delete().eq("vote_id", activeVote.id);
+          await supabase.from("game_votes").delete().eq("id", activeVote.id);
+          setActiveVote(null);
+          setVoteEntries([]);
+          setSelectedGames([]);
+          setMeetingDate("");
+          showAlert("투표가 초기화되었습니다.", "success");
+        } catch (err) {
+          console.error("Failed to reset vote:", err);
+          showAlert("초기화 중 오류가 발생했습니다.", "error");
+        }
+      }
+    );
   };
 
   // ── 내 투표 수정 (취소 후 재선택) ──
-  const handleEditMyVote = async () => {
+  const handleEditMyVote = () => {
     if (!activeVote || !currentMember) return;
-    const confirmed = window.confirm("투표를 수정하시겠습니까?");
-    if (!confirmed) return;
+    showConfirm(
+      "투표를 수정하시겠습니까?\n기존 선택이 초기화되고 다시 고를 수 있어요.",
+      async () => {
+        try {
+          // 1. 기존 내 투표 항목 찾아서 selectedGames에 넣기
+          const myEntries = voteEntries.filter(e => e.member_id === currentMember.id);
+          setSelectedGames(myEntries.map(e => e.game_id));
 
-    try {
-      // 1. 기존 내 투표 항목 찾아서 selectedGames에 넣기
-      const myEntries = voteEntries.filter(e => e.member_id === currentMember.id);
-      setSelectedGames(myEntries.map(e => e.game_id));
+          // 2. DB에서 내 투표 기록 삭제
+          await supabase
+            .from("game_vote_entries")
+            .delete()
+            .eq("vote_id", activeVote.id)
+            .eq("member_id", currentMember.id);
 
-      // 2. DB에서 내 투표 기록 삭제
-      await supabase
-        .from("game_vote_entries")
-        .delete()
-        .eq("vote_id", activeVote.id)
-        .eq("member_id", currentMember.id);
-
-      // 3. 상태 업데이트
-      await fetchActiveVote();
-    } catch (err) {
-      console.error("Failed to edit vote:", err);
-    }
+          // 3. 상태 업데이트
+          await fetchActiveVote();
+        } catch (err) {
+          console.error("Failed to edit vote:", err);
+          showAlert("수정 중 오류가 발생했습니다.", "error");
+        }
+      }
+    );
   };
 
   // ── 계산 값들 ──

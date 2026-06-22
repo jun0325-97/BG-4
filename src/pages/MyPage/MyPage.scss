@@ -48,14 +48,49 @@
     align-items: flex-start;
     gap: 0.35rem;
 
+    .badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
     .title {
       font-size: 0.75rem;
       font-weight: 700;
       color: $color-text-sub;
-      background-color: #f4f4f5; // 아주 깔끔하고 모던한 회색
+      background-color: #f4f4f5;
       padding: 4px 10px;
-      border-radius: 8px; // 둥근 사각형 느낌으로 알약보다 모던함
+      border-radius: 8px;
       letter-spacing: 0.02em;
+    }
+
+    .genre-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.02em;
+
+      &[data-color="red"]    { background-color: rgba($color-red, 0.12);    color: darken(#ff5757, 15%); }
+      &[data-color="blue"]   { background-color: rgba($color-blue, 0.12);   color: darken(#5271ff, 10%); }
+      &[data-color="green"]  { background-color: rgba($color-green, 0.15);  color: darken(#7ed957, 20%); }
+      &[data-color="yellow"] { background-color: rgba($color-yellow, 0.35); color: darken(#c8a000, 5%);  }
+    }
+
+    // 비교 기반 특별 뱃지 — 더 진한 포인트 색상
+    .special-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.02em;
+      border: 1.5px solid currentColor;
+
+      &[data-color="red"]    { background-color: rgba($color-red, 0.08);    color: darken(#ff5757, 12%); border-color: rgba($color-red, 0.3); }
+      &[data-color="blue"]   { background-color: rgba($color-blue, 0.08);   color: darken(#5271ff, 8%);  border-color: rgba($color-blue, 0.3); }
+      &[data-color="green"]  { background-color: rgba($color-green, 0.1);   color: darken(#7ed957, 18%); border-color: rgba($color-green, 0.35); }
+      &[data-color="yellow"] { background-color: rgba($color-yellow, 0.25); color: darken(#c8a000, 3%);  border-color: rgba($color-yellow, 0.5); }
     }
 
     .name {

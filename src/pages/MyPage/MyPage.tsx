@@ -134,7 +134,7 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
     const s = stats[category as keyof typeof stats];
     const score = s.plays === 0 ? 0 : Math.round((s.wins / s.plays) * 100);
 
-    if (s.plays > 0 && score > highestScore) {
+    if (s.plays > 0 && score > 0 && score > highestScore) {
       highestScore = score;
       bestGenre = category;
     }
@@ -173,6 +173,50 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
   };
 }
 
+// ── 특별 뱃지 계산 (전체 멤버 비교 기반) ─────────────────────────
+interface SpecialBadge {
+  key: string;
+  label: string;
+}
+
+function calculateSpecialBadges(
+  memberId: string,
+  members: any[],
+  boardGames: any[]
+): SpecialBadge[] {
+  const badges: SpecialBadge[] = [];
+
+  // ── 1. 게임 대주주: 보유 게임 수 최다 ─────────────
+  const ownedCounts = members.map((m) => ({
+    id: m.id,
+    count: boardGames.filter((g) => g.ownerId === m.id).length,
+  }));
+  const maxOwned = Math.max(...ownedCounts.map((x) => x.count));
+  if (maxOwned > 0) {
+    const topOwners = ownedCounts.filter((x) => x.count === maxOwned);
+    if (topOwners.length === 1 && topOwners[0].id === memberId) {
+      badges.push({ key: "game-tycoon", label: "게임 대주주" });
+    }
+  }
+
+  // ── 2. 맞짱 전문가: 2인 전용 게임(min=max=2) 보유 최다 ─
+  const duelCounts = members.map((m) => ({
+    id: m.id,
+    count: boardGames.filter(
+      (g) => g.ownerId === m.id && g.minPlayers === 2 && g.maxPlayers === 2
+    ).length,
+  }));
+  const maxDuel = Math.max(...duelCounts.map((x) => x.count));
+  if (maxDuel > 0) {
+    const topDuel = duelCounts.filter((x) => x.count === maxDuel);
+    if (topDuel.length === 1 && topDuel[0].id === memberId) {
+      badges.push({ key: "duel-expert", label: "맞짱 전문가" });
+    }
+  }
+
+  return badges;
+}
+
 // 차트 색상을 멤버 고유색에 맞추기 위한 매핑
 const THEME_COLORS = {
   red: "#ff5757",
@@ -201,6 +245,11 @@ export default function MyPage() {
   const rank = sortedMembers.findIndex((m) => m.id === member.id) + 1;
   const { title } = getTitleByRank(rank);
   const chartColor = THEME_COLORS[member.color as keyof typeof THEME_COLORS];
+
+  const specialBadges = useMemo(
+    () => calculateSpecialBadges(member.id, members, boardGames),
+    [member.id, members, boardGames]
+  );
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
@@ -231,7 +280,17 @@ export default function MyPage() {
         </div>
 
         <div className="info-area">
-          <span className="title">{title}</span>
+          <div className="badges-row">
+            <span className="title">{title}</span>
+            {stats.genreTitle && (
+              <span className="genre-title" data-color={member.color}>{stats.genreTitle}</span>
+            )}
+            {specialBadges.map((badge) => (
+              <span key={badge.key} className="special-badge" data-color={member.color}>
+                {badge.label}
+              </span>
+            ))}
+          </div>
           <h1 className="name">{member.name}</h1>
         </div>
       </header>
