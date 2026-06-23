@@ -188,11 +188,12 @@ export default function Archive() {
                               <div
                                 key={memberId}
                                 className="player-result-tag"
+                                data-color={member?.color}
                               >
                                 <span className="player-name">
                                   {member?.name}
                                 </span>
-                                <span className="no-result-text" style={{ fontSize: '0.8rem', color: '#666', marginLeft: '4px' }}>🤝</span>
+                                <span className="no-result-text" style={{ fontSize: '1rem', marginLeft: '2px' }}>🤝</span>
                               </div>
                             );
                           })
