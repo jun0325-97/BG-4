@@ -84,8 +84,12 @@ export default function Library() {
       if (searchTerm && !game.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
 
       if (filters.owner !== "any") {
-        const owner = members.find(m => m.color === filters.owner);
-        if (owner && game.ownerId !== owner.id) return false;
+        if (filters.owner === "gray") {
+          if (game.ownerId !== "cafe") return false;
+        } else {
+          const owner = members.find((m) => m.color === filters.owner);
+          if (owner && game.ownerId !== owner.id) return false;
+        }
       }
 
       if (filters.players !== "any") {
@@ -221,14 +225,15 @@ export default function Library() {
           {members.map(m => (
             <option key={m.id} value={m.color}>{m.name} 님</option>
           ))}
+          <option value="gray">공용/카페</option>
         </select>
       </div>
 
       {/* 리스트 컨트롤 (뷰 모드 토글 등) */}
       <div className="list-controls">
         <div className="list-controls__info">
-          {filters.owner !== "any" && members.find((m) => m.color === filters.owner)
-            ? `${members.find((m) => m.color === filters.owner)?.name}의 보드게임 총 ${filteredGames.length}개`
+          {filters.owner !== "any"
+            ? `${filters.owner === "gray" ? "공용/카페" : members.find((m) => m.color === filters.owner)?.name}의 보드게임 총 ${filteredGames.length}개`
             : `총 ${filteredGames.length}개`}
         </div>
         <div className="view-toggle">
@@ -285,7 +290,10 @@ export default function Library() {
             Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
           ) : currentGames.length > 0 ? (
             currentGames.map((game) => {
-              const owner = members.find((m) => m.id === game.ownerId);
+              const owner = game.ownerId === "cafe" 
+                ? { name: "공용/카페", color: "gray" } 
+                : members.find((m) => m.id === game.ownerId);
+                
               return (
                 <div
                   key={game.id}
@@ -392,7 +400,9 @@ export default function Library() {
                   <User size={20} />
                   <span>소유자: </span>
                   <span className="owner-name">
-                    {members.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
+                    {selectedGame.ownerId === "cafe" 
+                      ? "공용/카페" 
+                      : members.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
                   </span>
                 </div>
 

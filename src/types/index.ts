@@ -66,6 +66,7 @@ export interface GatheringRecord {
   date: string;
   emoji?: string;
   memo: string;
-  photoUrl?: string;
+  photoUrl?: string;      // 하위 호환: 기존 단일 사진
+  photoUrls?: string[];   // 신규: 다중 사진 (최대 3장)
   playLogs: PlayLog[];
 }

@@ -368,6 +368,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
                   {m.name}
                 </option>
               ))}
+              <option value="cafe">공용/카페</option>
             </select>
           </div>
 

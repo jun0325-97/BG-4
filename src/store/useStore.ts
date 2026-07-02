@@ -89,12 +89,20 @@ function rowsToGatheringRecord(
       };
     });
 
+  // photo_urls(신규) 우선, 없으면 photo_url(구) fallback
+  const photoUrls: string[] = Array.isArray(recRow.photo_urls) && recRow.photo_urls.length > 0
+    ? recRow.photo_urls
+    : recRow.photo_url
+    ? [recRow.photo_url]
+    : [];
+
   return {
     id: recRow.id,
     date: recRow.date,
     emoji: recRow.emoji ?? '🎲',
     memo: recRow.memo ?? '',
-    photoUrl: recRow.photo_url ?? undefined,
+    photoUrl: photoUrls[0],  // 하위 호환
+    photoUrls: photoUrls.length > 0 ? photoUrls : undefined,
     playLogs,
   };
 }
@@ -110,7 +118,8 @@ async function insertRecord(record: GatheringRecord): Promise<void> {
       date: record.date,
       emoji: record.emoji ?? '🎲',
       memo: record.memo,
-      photo_url: record.photoUrl ?? null,
+      photo_url: record.photoUrls?.[0] ?? record.photoUrl ?? null,
+      photo_urls: record.photoUrls ?? (record.photoUrl ? [record.photoUrl] : []),
     });
   if (recErr) throw recErr;
 
@@ -161,7 +170,8 @@ async function upsertRecord(record: GatheringRecord): Promise<void> {
       date: record.date,
       emoji: record.emoji ?? '🎲',
       memo: record.memo,
-      photo_url: record.photoUrl ?? null,
+      photo_url: record.photoUrls?.[0] ?? record.photoUrl ?? null,
+      photo_urls: record.photoUrls ?? (record.photoUrl ? [record.photoUrl] : []),
     })
     .eq('id', record.id);
   if (recErr) throw recErr;
@@ -229,7 +239,10 @@ export const useStore = create<AppState>((set, get) => ({
       .select('*')
       .order('id');
     if (error) throw error;
-    set({ members: (data ?? []).map(rowToMember) });
+    const fetched = (data ?? [])
+      .map(rowToMember)
+      .filter((m) => m.id !== "cafe");
+    set({ members: fetched });
   },
 
   fetchBoardGames: async () => {
@@ -300,11 +313,11 @@ export const useStore = create<AppState>((set, get) => ({
 
   deleteRecord: async (id) => {
     const record = get().records.find((r) => r.id === id);
-    if (record?.photoUrl) {
-      const path = extractStoragePath(record.photoUrl);
-      if (path) {
-        await supabase.storage.from('images').remove([path]);
-      }
+    // 연결된 모든 사진 Storage에서 삭제
+    const allUrls = record?.photoUrls ?? (record?.photoUrl ? [record.photoUrl] : []);
+    const paths = allUrls.map(extractStoragePath).filter(Boolean) as string[];
+    if (paths.length > 0) {
+      await supabase.storage.from('images').remove(paths);
     }
 
     const { error } = await supabase

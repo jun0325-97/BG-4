@@ -48,13 +48,13 @@
 
 .isometric-scene {
   width: 100%;
-  height: 280px;
+  height: 310px;
   display: flex;
   align-items: center;
   justify-content: center;
   perspective: 1200px;
-  padding-top: 40px; // 위쪽 공간을 넓혀서 뒷쪽 캐릭터가 잘리지 않도록
-  padding-bottom: 5px; // 아래쪽 여백 축소
+  padding-top: 60px; 
+  padding-bottom: 10px; 
 }
 
 // The flat 2D board that is rotated in 3D space

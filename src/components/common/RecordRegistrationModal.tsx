@@ -28,6 +28,9 @@ function emptyLog(members: Member[]): PlayLog {
   };
 }
 
+// 다중 사진 슬롯 타입
+interface PhotoSlot { previewUrl: string; file: File | null; }
+
 export default function RecordRegistrationModal({
   isOpen,
   onClose,
@@ -48,8 +51,17 @@ export default function RecordRegistrationModal({
   const [emoji, setEmoji] = useState(editRecord?.emoji ?? "🎲");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [memo, setMemo] = useState(editRecord?.memo ?? "");
-  const [photoUrl, setPhotoUrl] = useState(editRecord?.photoUrl ?? "");
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+  // 다중 사진 슬롯 상태
+  const [photoSlots, setPhotoSlots] = useState<PhotoSlot[]>(() => {
+    const existing = editRecord?.photoUrls?.length
+      ? editRecord.photoUrls
+      : editRecord?.photoUrl
+      ? [editRecord.photoUrl]
+      : [];
+    return existing.map(url => ({ previewUrl: url, file: null }));
+  });
+  const addPhotoRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
 
@@ -177,79 +189,70 @@ export default function RecordRegistrationModal({
     }
 
     setIsUploading(true);
-    let finalPhotoUrl = photoUrl;
+    const finalPhotoUrls: string[] = [];
 
     try {
-      if (photoFile) {
-        // 1. 이미지 압축 (최대 1MB, 1200px)
-        let uploadFile = photoFile;
-        try {
-          const options = {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1200,
-            useWebWorker: true,
-          };
-          uploadFile = await imageCompression(photoFile, options);
-        } catch (error) {
-          console.error("이미지 압축 실패:", error);
-          // 압축 실패 시 원본 사용
+      // 각 슬롯 처리: 새 파일이면 업로드, 기존 URL이면 그대로
+      for (const slot of photoSlots) {
+        if (!slot.previewUrl) continue;
+        if (slot.file) {
+          let uploadFile = slot.file;
+          try {
+            const options = { maxSizeMB: 1, maxWidthOrHeight: 1200, useWebWorker: true };
+            uploadFile = await imageCompression(slot.file, options);
+          } catch { /* 압축 실패 시 원본 사용 */ }
+
+          const fileExt = slot.file.name.split('.').pop();
+          const fileName = `records/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage.from("images").upload(fileName, uploadFile);
+          if (uploadError) throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+          const { data } = supabase.storage.from("images").getPublicUrl(fileName);
+          finalPhotoUrls.push(data.publicUrl);
+        } else {
+          finalPhotoUrls.push(slot.previewUrl);
         }
-
-        const fileExt = photoFile.name.split('.').pop();
-        const fileName = `records/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("images")
-          .upload(fileName, uploadFile);
-
-        if (uploadError) {
-          console.error("Storage upload error:", uploadError);
-          throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
-        }
-
-        const { data } = supabase.storage.from("images").getPublicUrl(fileName);
-        finalPhotoUrl = data.publicUrl;
       }
 
-      // 2. 고아 이미지 정리 로직
-      if (isEditMode && editRecord && editRecord.photoUrl && editRecord.photoUrl !== finalPhotoUrl) {
-        const parts = editRecord.photoUrl.split('/public/images/');
-        if (parts.length > 1) {
-          await supabase.storage.from('images').remove([parts[1]]);
+      // 고아 이미지 정리 (수정 모드: 삭제된 기존 사진)
+      if (isEditMode && editRecord) {
+        const oldUrls = editRecord.photoUrls ?? (editRecord.photoUrl ? [editRecord.photoUrl] : []);
+        for (const oldUrl of oldUrls) {
+          if (!finalPhotoUrls.includes(oldUrl)) {
+            const parts = oldUrl.split('/public/images/');
+            if (parts.length > 1) await supabase.storage.from('images').remove([parts[1]]);
+          }
         }
       }
 
       if (isEditMode && editRecord) {
-        // 수정 모드
         const updated: GatheringRecord = {
           ...editRecord,
           date,
           emoji,
           memo,
-          photoUrl: finalPhotoUrl,
+          photoUrl: finalPhotoUrls[0],
+          photoUrls: finalPhotoUrls.length > 0 ? finalPhotoUrls : undefined,
           playLogs,
         };
         await updateRecord(updated);
         showAlert("기록이 수정되었습니다!", "success");
         onClose();
       } else {
-        // 신규 추가 모드
         const newRecord: GatheringRecord = {
           id: `r-${Date.now()}`,
           date,
           emoji,
           memo,
-          photoUrl: finalPhotoUrl,
+          photoUrl: finalPhotoUrls[0],
+          photoUrls: finalPhotoUrls.length > 0 ? finalPhotoUrls : undefined,
           playLogs,
         };
         await addRecord(newRecord);
         showAlert("새로운 기록이 등록되었습니다!", "success");
-        // 연속 등록을 위해 폼 초기화
         setDate(new Date().toISOString().split("T")[0]);
         setEmoji("🎲");
         setMemo("");
-        setPhotoUrl("");
-        setPhotoFile(null);
+        setPhotoSlots([]);
         setPlayLogs([emptyLog(members)]);
       }
     } catch (err: any) {
@@ -258,6 +261,7 @@ export default function RecordRegistrationModal({
     } finally {
       setIsUploading(false);
     }
+
   };
 
   const handleDelete = () => {
@@ -320,43 +324,50 @@ export default function RecordRegistrationModal({
             </div>
           </div>
 
-          {/* 인증샷 */}
+          {/* 인증샷 — 다중 업로드 (3장) */}
           <div className="form-group photo-upload-group">
-            <label>모임 인증샷 (선택)</label>
-            <div className="file-upload-wrapper">
-              <label htmlFor="photo-upload" className="file-upload-btn">
-                <ImageIcon size={14} /> 사진 첨부하기
-              </label>
-              <input
-                id="photo-upload"
-                type="file"
-                accept="image/jpeg, image/png, image/webp"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    if (file.size > 3 * 1024 * 1024) {
-                      showAlert("이미지 용량은 3MB 이하여야 합니다.", "error");
-                      return;
-                    }
-                    setPhotoFile(file);
-                    setPhotoUrl(URL.createObjectURL(file));
-                  }
-                }}
-              />
-            </div>
-            {photoUrl && (
-              <div className="photo-preview-wrapper">
-                <img
-                  src={photoUrl}
-                  alt="인증샷 미리보기"
-                  className="photo-preview"
-                />
-                <button type="button" className="remove-photo-btn" onClick={() => { setPhotoFile(null); setPhotoUrl(""); }}>
-                  <X size={14} />
+            <label>모임 인증샷 <span className="photo-count-hint">(최대 3장)</span></label>
+            <div className="photo-slots-row">
+              {photoSlots.map((slot, i) => (
+                <div key={i} className="photo-slot">
+                  <img src={slot.previewUrl} alt={`사진 ${i + 1}`} />
+                  <button
+                    type="button"
+                    className="photo-slot__remove"
+                    onClick={() => setPhotoSlots(prev => prev.filter((_, idx) => idx !== i))}
+                    aria-label="사진 삭제"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+              {photoSlots.length < 3 && (
+                <button
+                  type="button"
+                  className="photo-add-btn"
+                  onClick={() => addPhotoRef.current?.click()}
+                >
+                  <ImageIcon size={20} />
+                  <span>{photoSlots.length === 0 ? '사진 추가' : '추가'}</span>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
+            <input
+              ref={addPhotoRef}
+              type="file"
+              accept="image/jpeg, image/png, image/webp"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) {
+                  showAlert("이미지 용량은 5MB 이하여야 합니다.", "error");
+                  return;
+                }
+                setPhotoSlots(prev => [...prev, { previewUrl: URL.createObjectURL(file), file }]);
+                e.target.value = '';
+              }}
+            />
           </div>
 
           {/* ── 게임 목록 (다중) ── */}
@@ -509,19 +520,6 @@ export default function RecordRegistrationModal({
                                         )
                                       }
                                       required
-                                    />
-                                    <input
-                                      type="number"
-                                      placeholder="점수(선택)"
-                                      defaultValue={res?.score ?? ""}
-                                      onChange={(e) =>
-                                        handleResultChange(
-                                          logIndex,
-                                          member.id,
-                                          "score",
-                                          e.target.value ? Number(e.target.value) : undefined
-                                        )
-                                      }
                                     />
                                   </div>
                                 )}

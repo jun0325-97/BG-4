@@ -2,16 +2,19 @@
 
 @use "../../styles/variables" as *;
 
+// ─────────────────────────────────────────────────────────────
+// 컨테이너
+// ─────────────────────────────────────────────────────────────
+
 .archive-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 
   .page-title {
     font-size: 1.6rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 0.5rem;
-    // margin-bottom: 1.5rem;
     color: $color-text-main;
     letter-spacing: -0.03em;
     display: flex;
@@ -31,33 +34,17 @@
       border-radius: 4px;
     }
   }
-
-  .log-thumbnail {
-    width: 40px;
-    height: 40px;
-    border-radius: 5px;
-    border: 1px solid $color-border;
-    overflow: hidden;
-    background: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-  }
 }
+
+// ─────────────────────────────────────────────────────────────
+// 연도 탭
+// ─────────────────────────────────────────────────────────────
 
 .year-tabs {
   display: flex;
   gap: 0.5rem;
-  // margin-bottom: 1.25rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
 
   .year-tab {
     padding: 0.4rem 1rem;
@@ -69,218 +56,599 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s;
-    @include retro-shadow;
 
     &.active {
       background-color: $color-yellow;
-      transform: none;
+    }
+
+    &--empty {
+      opacity: 0.4;
+      font-style: italic;
     }
   }
 }
 
-.record-list {
+// ─────────────────────────────────────────────────────────────
+// 월별 히트맵
+// ─────────────────────────────────────────────────────────────
+
+.month-heatmap {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid $color-border;
+  border-radius: 16px;
+  padding: 1rem 0.85rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.heatmap-cell {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  align-items: center;
+  gap: 4px;
+  padding: 0.5rem 0.25rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s;
+  position: relative;
+  min-height: 58px;
+
+  &--empty {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  &--active {
+    background: rgba($color-blue, 0.1);
+
+    .heatmap-cell__month {
+      color: $color-blue;
+      font-weight: 800;
+    }
+  }
+
+  &:not(&--empty):not(&--active):hover {
+    background: rgba(0, 0, 0, 0.04);
+    transform: translateY(-1px);
+  }
+
+  &__month {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: $color-text-sub;
+    letter-spacing: 0.02em;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $color-border;
+    flex-shrink: 0;
+
+    &[data-intensity="1"] { background: rgba($color-blue, 0.35); }
+    &[data-intensity="2"] { background: rgba($color-blue, 0.55); }
+    &[data-intensity="3"] { background: rgba($color-blue, 0.75); }
+    &[data-intensity="4"] { background: $color-blue; }
+  }
+
+  &__count {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: $color-text-sub;
+  }
 }
 
-.record-card {
-  @include retro-border;
-  background-color: $color-card-bg;
-  @include retro-shadow;
-  overflow: hidden;
+// ─────────────────────────────────────────────────────────────
+// 타임라인 피드
+// ─────────────────────────────────────────────────────────────
 
-  .record-header {
-    padding: 1rem;
-    cursor: pointer;
+.timeline-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-month-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// 월 구분선 — 날짜 컬럼 없어졌으므로 offset 제거
+.timeline-month-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.75rem 0;
+
+  span {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $color-text-sub;
+    white-space: nowrap;
+  }
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $color-border;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 타임라인 아이템 — 날짜 컬럼 없이 full width 카드
+// ─────────────────────────────────────────────────────────────
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+// ─────────────────────────────────────────────────────────────
+// 타임라인 카드
+// ─────────────────────────────────────────────────────────────
+
+.timeline-card {
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 0.9rem 0.65rem;
+  }
+
+  &__emoji {
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  &__meta {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    position: relative;
+    gap: 2px;
+    min-width: 0;
+  }
 
-    .date-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #232323;
+  // 날짜 배지 (카드 헤더 내 통합)
+  &__date {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: $color-text-main;
+    letter-spacing: -0.01em;
+  }
+
+  &__games-count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: $color-text-sub;
+  }
+
+  &__edit-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      color: $color-blue;
+      background: rgba($color-blue, 0.08);
+    }
+  }
+
+  // 메모
+  &__memo {
+    margin: 0 0.9rem 0.65rem;
+    padding: 0.55rem 0.75rem;
+    background: rgba($color-yellow, 0.15);
+    border-left: 3px solid $color-yellow;
+    border-radius: 4px 8px 8px 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $color-text-main;
+    line-height: 1.5;
+  }
+
+  // ── 사진 갤러리 ──────────────────────────────────────────
+  &__photos {
+    margin: 0 0.9rem 0.75rem;
+    display: grid;
+    gap: 0.4rem;
+    border-radius: 10px;
+    overflow: hidden;
+
+    // 사진 1장: 전체 너비
+    &--1 {
+      grid-template-columns: 1fr;
+
+      .timeline-card__photo-wrap {
+        height: 180px;
+      }
     }
 
-    .memo {
-      font-size: 1rem;
-      font-weight: 700;
-      color: $color-text-main;
-      padding-right: 2rem;
+    // 사진 2장: 반반
+    &--2 {
+      grid-template-columns: 1fr 1fr;
+
+      .timeline-card__photo-wrap {
+        height: 130px;
+      }
     }
 
-    .icon-wrapper {
-      position: absolute;
-      right: 1.2rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: $color-text-main;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    // 사진 3장: 왼쪽 크게 + 오른쪽 두 장 세로
+    &--3 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
 
-      .edit-btn {
-        background: none;
-        border: none;
-        color: #888;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 4px;
-        transition: color 0.2s;
+      .timeline-card__photo-wrap:first-child {
+        grid-row: 1 / 3;
+        height: 200px;
+      }
 
-        &:hover {
-          color: $color-blue;
-        }
+      .timeline-card__photo-wrap:not(:first-child) {
+        height: 96px;
       }
     }
   }
 
-  .record-detail {
-    max-height: 0;
+  &__photo-wrap {
+    position: relative;
     overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-    padding: 0 1.2rem;
-    border-top: 0;
-    background-color: $color-card-bg;
-    transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.25s ease;
+    cursor: pointer;
+    background: #f5f5f5;
 
-    &--open {
-      max-height: 2000px;
-      opacity: 1;
-      pointer-events: auto;
-      padding: 0 1.2rem 1.2rem;
-      border-top: 1.5px dashed $color-border;
-    }
-
-    .record-photo {
+    img {
       width: 100%;
-      height: 200px;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-top: 1.2rem;
-      margin-bottom: 1rem;
-      background-color: #f5f5f5;
-      border: 1.5px solid rgba($color-border, 0.2);
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
     }
 
-    .record-memo {
-      margin-top: 1rem;
-      margin-bottom: 0.6rem;
-      padding: 0.6rem 0.8rem;
-      background-color: rgba($color-yellow, 0.15);
-      border-left: 3px solid $color-yellow;
-      border-radius: 4px 8px 8px 4px;
+    &:hover img {
+      transform: scale(1.03);
+    }
+  }
 
-      p {
-        margin: 0;
-        font-size: 0.8rem;
-        font-weight: 400;
-        color: $color-text-main;
-        line-height: 1.5;
-      }
+  &__photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    font-size: 1.5rem;
+    opacity: 0;
+
+    .timeline-card__photo-wrap:hover & {
+      background: rgba(0, 0, 0, 0.25);
+      opacity: 1;
+    }
+  }
+
+  // 토글 버튼
+  &__toggle-btn {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-top: 1px dashed rgba($color-border, 0.6);
+    padding: 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $color-text-sub;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: inherit;
+
+    span {
+      font-size: 0.65rem;
     }
 
-    .game-log-item {
-      padding: 1rem 0;
-      border-bottom: 1px solid #eee;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      .game-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 0.8rem;
-
-        .game-num {
-          font-size: 0.7rem;
-          font-weight: 900;
-          background: #d5d5d5;
-          color: #fff;
-          padding: 2px 6px;
-          border-radius: 4px;
-        }
-
-        .game-name {
-          font-size: 1rem;
-          font-weight: 800;
-        }
-
-        .duration {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 0.8rem;
-          color: #888;
-          font-weight: 600;
-          margin-left: auto;
-        }
-      }
+    &:active {
+      background: transparent;
     }
+  }
+
+  // 게임 로그들
+  &__logs {
+    padding: 0 0.9rem 0.75rem;
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// 개별 게임 로그 엔트리
+// ─────────────────────────────────────────────────────────────
+
+.log-entry {
+  padding: 0.9rem;
+  margin-bottom: 0.75rem;
+  background: #fdfdfd;
+  border: 1px solid rgba($color-border, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+
+  &__thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid $color-border;
+    overflow: hidden;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__num {
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: #bbb;
+  }
+
+  &__name {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: $color-text-main;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__duration {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.72rem;
+    color: #aaa;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 결과 태그
+// ─────────────────────────────────────────────────────────────
 
 .results-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.45rem;
 
   .player-result-tag {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     padding: 4px 10px;
-    @include retro-border;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    border: 1.5px solid $color-border;
+    border-radius: 8px;
+    font-size: 0.78rem;
     font-weight: 700;
     color: $color-text-main;
-    background-color: #f4f4f5; // 기본 회색 배경
+    background: #f4f4f5;
+    transition: all 0.2s;
 
-    &[data-color="red"] {
-      background-color: rgba($color-red, 0.15);
+    &[data-color="red"]    { background: rgba($color-red, 0.1); border-color: rgba($color-red, 0.25); }
+    &[data-color="blue"]   { background: rgba($color-blue, 0.1); border-color: rgba($color-blue, 0.25); }
+    &[data-color="green"]  { background: rgba($color-green, 0.1); border-color: rgba($color-green, 0.25); }
+    &[data-color="yellow"] { background: rgba($color-yellow, 0.15); border-color: rgba($color-yellow, 0.35); }
+
+    // 승자(1등) 강조
+    &--winner {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+      box-shadow: 0 2px 6px rgba(255, 215, 0, 0.2);
+      transform: translateY(-1px);
+      
+      .player-name {
+        font-weight: 700;
+        color: #1a1a1a; // 짙은 금색 텍스트
+      }
+      
+      &[data-color] {
+        // 기존 색상 덮어쓰기 (승자 느낌 강조)
+        border-color: #ffd700;
+      }
     }
 
-    &[data-color="blue"] {
-      background-color: rgba($color-blue, 0.15);
+    // 패자 흐리게 (승자만 있는 게임에서)
+    &--loser {
+      opacity: 0.55;
+      background: transparent;
+      border-color: rgba($color-border, 0.5);
+      
+      .player-name {
+        font-weight: 600;
+      }
+      &[data-color] {
+        background: transparent;
+      }
     }
 
-    &[data-color="green"] {
-      background-color: rgba($color-green, 0.15);
-    }
+    .result-rank-emoji { font-size: 0.9rem; line-height: 1; margin-right: 2px; }
+    .player-name { font-weight: 700; letter-spacing: -0.02em; }
+    .score       { color: #777; font-size: 0.72rem; font-weight: 800; margin-left: 4px; }
+  }
+}
 
-    &[data-color="yellow"] {
-      background-color: rgba($color-yellow, 0.2);
-    }
+// ─────────────────────────────────────────────────────────────
+// 빈 상태
+// ─────────────────────────────────────────────────────────────
 
-    .score {
-      color: #666;
-      font-size: 0.75rem;
-    }
+.archive-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 0.5rem;
+  color: $color-text-sub;
 
-    .winner-crown {
-      color: #ffab00;
-    }
+  &__icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.25rem;
+  }
 
-    .rank-badge {
-      font-size: 0.75rem;
-      color: #555;
+  p {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  &__sub {
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 라이트박스
+// ─────────────────────────────────────────────────────────────
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+
+  // 닫기 버튼
+  .lightbox-close {
+    position: absolute;
+    top: max(1.25rem, env(safe-area-inset-top));
+    right: 1.25rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    z-index: 1;
+
+    &:hover { background: rgba(255, 255, 255, 0.25); }
+  }
+
+  // 이미지
+  .lightbox-content {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem 3.5rem;
+  }
+
+  .lightbox-img {
+    max-width: 100%;
+    max-height: calc(100dvh - 8rem);
+    object-fit: contain;
+    border-radius: 8px;
+    user-select: none;
+  }
+
+  // 이전/다음 버튼
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover { background: rgba(255, 255, 255, 0.28); }
+
+    &--prev { left: 0.75rem; }
+    &--next { right: 0.75rem; }
+  }
+
+  // 하단 도트 인디케이터
+  .lightbox-dots {
+    position: absolute;
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .lightbox-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &--active {
+      background: #fff;
     }
   }
 }

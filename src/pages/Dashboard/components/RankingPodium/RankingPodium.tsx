@@ -1,6 +1,6 @@
-// src/pages/Dashboard/components/RankingPodium/RankingPodium.tsx
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 import { Member } from "../../../../types";
 import "./RankingPodium.scss";
 
@@ -186,6 +186,16 @@ export default function RankingPodium({ members }: RankingPodiumProps) {
                   setArrivedIds((prev) => {
                     const next = new Set(prev);
                     next.add(player.id);
+                    
+                    // 1등 도착 시 폭죽 발사
+                    if (player.rank === 1 && !prev.has(player.id)) {
+                      confetti({
+                        particleCount: 150,
+                        spread: 80,
+                        origin: { y: 0.6 },
+                        colors: ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6']
+                      });
+                    }
                     return next;
                   });
                 }}
