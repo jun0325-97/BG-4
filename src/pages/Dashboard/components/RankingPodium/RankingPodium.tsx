@@ -4,10 +4,10 @@ import confetti from "canvas-confetti";
 import { Member } from "../../../../types";
 import "./RankingPodium.scss";
 
-import imgRed from "../../../../assets/images/img-red-1.png";
-import imgBlue from "../../../../assets/images/img-blue-1.png";
-import imgGreen from "../../../../assets/images/img-green-1.png";
-import imgYellow from "../../../../assets/images/img-yellow-1.png";
+import imgRed from "../../../../assets/images/img-red-2.png";
+import imgBlue from "../../../../assets/images/img-blue-2.png";
+import imgGreen from "../../../../assets/images/img-green-2.png";
+import imgYellow from "../../../../assets/images/img-yellow-2.png";
 
 const CHARACTER_IMAGES: Record<string, string> = {
   red: imgRed,
