@@ -1,0 +1,507 @@
+/* src/components/common/QuickPlayLogModal.scss */
+
+@use "../../styles/variables" as *;
+
+// ── 오버레이 ─────────────────────────────────────────────────
+.quick-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeOverlay 0.2s ease;
+
+  @media (min-width: 600px) {
+    align-items: center;
+    padding: 1.5rem;
+  }
+}
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── 모달 카드 ─────────────────────────────────────────────────
+.quick-modal {
+  background: #ffffff;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 460px;
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUpModal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+
+  @media (min-width: 600px) {
+    border-radius: 24px;
+    max-height: 85dvh;
+  }
+}
+
+@keyframes slideUpModal {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+// ── 헤더 ──────────────────────────────────────────────────────
+.quick-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.4rem 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+
+  .quick-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: $color-text-main;
+    letter-spacing: -0.02em;
+  }
+
+  .quick-close-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: $color-text-main;
+      transform: rotate(90deg);
+    }
+  }
+}
+
+// ── 본문 스크롤 영역 ──────────────────────────────────────────
+.quick-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
+// ── 섹션 공통 ─────────────────────────────────────────────────
+.qm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &--duration {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+  }
+}
+
+.qm-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #475569;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+// ── 날짜 선택 드롭다운 ────────────────────────────────────────
+.qm-select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $color-text-main;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: $color-blue;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+  }
+}
+
+// ── 게임 검색 ─────────────────────────────────────────────────
+.qm-game-search-wrap {
+  position: relative;
+}
+
+.qm-search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: $color-blue;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+  }
+
+  .qm-search-icon {
+    color: #94a3b8;
+    flex-shrink: 0;
+  }
+
+  .qm-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $color-text-main;
+    outline: none;
+
+    &::placeholder {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+  }
+
+  .qm-search-clear {
+    background: #e2e8f0;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #cbd5e1;
+      color: $color-text-main;
+    }
+  }
+}
+
+.qm-game-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 50;
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem 0;
+
+  .qm-game-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #f1f5f9;
+    }
+
+    &.selected {
+      background: rgba(66, 133, 244, 0.08);
+    }
+
+    .qm-game-thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .qm-game-thumb-placeholder {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .qm-game-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .qm-game-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: $color-text-main;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .qm-game-meta {
+      font-size: 0.73rem;
+      color: #64748b;
+    }
+
+    .qm-game-check {
+      color: $color-blue;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.qm-game-empty {
+  padding: 0.85rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-top: 6px;
+}
+
+// ── 참여 멤버 칩 ─────────────────────────────────────────────
+.qm-member-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.qm-member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    border-color: #94a3b8;
+  }
+
+  &.active {
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+    &[data-color="red"]    { background: $color-red; }
+    &[data-color="blue"]   { background: $color-blue; }
+    &[data-color="green"]  { background: $color-green; }
+    &[data-color="yellow"] { background: #d97706; color: #ffffff; }
+  }
+}
+
+// ── 게임 결과 ─────────────────────────────────────────────────
+.qm-no-result-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  margin: 0;
+}
+
+.qm-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.qm-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  gap: 0.75rem;
+
+  &[data-color="red"]    { border-left: 4px solid $color-red; }
+  &[data-color="blue"]   { border-left: 4px solid $color-blue; }
+  &[data-color="green"]  { border-left: 4px solid $color-green; }
+  &[data-color="yellow"] { border-left: 4px solid #d97706; }
+
+  .qm-member-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: $color-text-main;
+  }
+}
+
+// 우승 버튼
+.qm-winner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.won {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #d97706;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+  }
+}
+
+// 등수 입력
+.qm-rank-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  .qm-rank-input {
+    width: 56px;
+    padding: 0.35rem 0.5rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    color: $color-text-main;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &:focus {
+      border-color: $color-blue;
+    }
+  }
+
+  .qm-rank-unit {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+// ── 플레이 시간 ──────────────────────────────────────────────
+.qm-duration-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  .qm-duration-input {
+    width: 72px;
+    padding: 0.45rem 0.6rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-align: center;
+    color: $color-text-main;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &:focus {
+      border-color: $color-blue;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+    }
+  }
+
+  .qm-duration-unit {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+// ── 하단 버튼 ─────────────────────────────────────────────────
+.quick-modal-footer {
+  padding: 0.9rem 1.4rem 1.4rem;
+  border-top: 1px solid #f1f5f9;
+  flex-shrink: 0;
+
+  .qm-submit-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: $color-blue;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: -0.01em;
+
+    &:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(66, 133, 244, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.quick-empty {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  padding: 2rem 0;
+}

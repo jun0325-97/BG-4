@@ -1,6 +1,7 @@
 // src/pages/Archive/Archive.tsx
 
 import { useState, useMemo, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../store/useStore";
 import { Clock, Edit2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import RecordRegistrationModal from "../../components/common/RecordRegistrationModal";
@@ -169,13 +170,20 @@ interface TimelineCardProps {
   isFirst: boolean;
   isLast: boolean;
   isOverallFirst?: boolean;
+  isTarget?: boolean;
   onEdit: (record: GatheringRecord) => void;
   onPhotoClick: (photos: string[], index: number) => void;
 }
 
-function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallFirst, onEdit, onPhotoClick }: TimelineCardProps) {
-  const [isOpen, setIsOpen] = useState(!!isOverallFirst);
+function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallFirst, isTarget, onEdit, onPhotoClick }: TimelineCardProps) {
+  const [isOpen, setIsOpen] = useState(!!isOverallFirst || !!isTarget);
   
+  useEffect(() => {
+    if (isTarget) {
+      setIsOpen(true);
+    }
+  }, [isTarget]);
+
   // 카드 헤더 날짜: 연도 포함
   const [year] = record.date.split("-");
   const { month, day } = formatDate(record.date);
@@ -189,8 +197,11 @@ function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallF
     : [];
 
   return (
-    <div className={`timeline-item ${isFirst ? "timeline-item--first" : ""} ${isLast ? "timeline-item--last" : ""}`}>
-      <div className="timeline-card">
+    <div 
+      id={`record-${record.id}`}
+      className={`timeline-item ${isFirst ? "timeline-item--first" : ""} ${isLast ? "timeline-item--last" : ""} ${isTarget ? "timeline-item--target" : ""}`}
+    >
+      <div className={`timeline-card ${isTarget ? "timeline-card--target-highlight" : ""}`}>
         {/* 카드 헤더: 이모지 + 날짜 + 게임수 + 수정버튼 */}
         <div className="timeline-card__header">
           <span className="timeline-card__emoji">{record.emoji || "🎲"}</span>
@@ -338,6 +349,9 @@ function Lightbox({ photos, initialIndex, onClose }: LightboxProps) {
 
 // ── 메인 페이지 ────────────────────────────────────────────────
 export default function Archive() {
+  const [searchParams] = useSearchParams();
+  const targetId = searchParams.get("id");
+
   const {
     records: GATHERING_RECORDS,
     members: MEMBERS,
@@ -365,6 +379,26 @@ export default function Archive() {
       setSelectedYear(years[years.length - 1]);
     }
   }, [years, selectedYear]);
+
+  // 딥링크 targetId가 포함되어 넘어왔을 경우 처리
+  useEffect(() => {
+    if (!targetId || GATHERING_RECORDS.length === 0) return;
+    const targetRec = GATHERING_RECORDS.find((rec) => rec.id === targetId);
+    if (targetRec) {
+      const year = targetRec.date.split("-")[0];
+      const monthKey = targetRec.date.slice(0, 7);
+      setSelectedYear(year);
+      setActiveMonth(monthKey);
+
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`record-${targetId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [targetId, GATHERING_RECORDS]);
 
   const filteredRecords = useMemo(() => {
     return GATHERING_RECORDS.filter((rec) =>
@@ -484,6 +518,7 @@ export default function Archive() {
                     isFirst={idx === 0}
                     isLast={idx === group.records.length - 1}
                     isOverallFirst={groupIndex === 0 && idx === 0}
+                    isTarget={record.id === targetId}
                     onEdit={setEditingRecord}
                     onPhotoClick={(photos, index) => setLightbox({ photos, index })}
                   />

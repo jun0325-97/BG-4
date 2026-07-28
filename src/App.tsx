@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import React, { useEffect, Suspense } from "react";
 import Layout from "./components/layout/Layout";
 import AlertModal from "./components/common/AlertModal";
@@ -16,25 +16,42 @@ const Vote = React.lazy(() => import("./pages/Vote/Vote"));
 const Login = React.lazy(() => import("./pages/Login/Login"));
 
 import LoadingScreen from "./components/common/LoadingScreen";
+import DashboardSkeleton from "./pages/Dashboard/components/DashboardSkeleton/DashboardSkeleton";
+
+// 라우트 코드 청크(lazy import)를 불러오는 동안 보여줄 화면.
+// 대시보드는 주사위 스피너 대신 스켈레톤을 보여준다.
+function RouteFallback() {
+  const location = useLocation();
+  if (location.pathname === "/") {
+    return <DashboardSkeleton />;
+  }
+  return <LoadingScreen />;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, isInitialized } = useAuthStore();
-
   const { isLoading, isInitialFetched } = useStore();
+  const location = useLocation();
+  const isDashboardRoute = location.pathname === "/";
 
-  if (!isInitialized || (session && isLoading && !isInitialFetched)) {
-    return <LoadingScreen />;
+  if (!isInitialized) {
+    return isDashboardRoute ? <DashboardSkeleton /> : <LoadingScreen />;
   }
 
   if (!session) {
     return <Navigate to="/login" replace />;
   }
 
+  // 대시보드는 자체 스켈레톤 UI로 로딩을 표현하므로 여기서 막지 않는다.
+  if (!isDashboardRoute && isLoading && !isInitialFetched) {
+    return <LoadingScreen />;
+  }
+
   return <>{children}</>;
 }
 
 export default function App() {
-  const { setSession, setUser, setInitialized, isInitialized } = useAuthStore();
+  const { setSession, setUser, setInitialized } = useAuthStore();
   const { fetchAll } = useStore();
 
   useEffect(() => {
@@ -60,14 +77,10 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, [setSession, setUser, setInitialized, fetchAll]);
 
-  if (!isInitialized) {
-    return <LoadingScreen />;
-  }
-
   return (
     <>
       <BrowserRouter>
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/login" element={<Login />} />
 

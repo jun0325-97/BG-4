@@ -7,12 +7,14 @@ import FAB from "../common/FAB";
 import BottomSheet from "../common/BottomSheet";
 import GameRegistrationModal from "../common/GameRegistrationModal";
 import RecordRegistrationModal from "../common/RecordRegistrationModal";
-import { Gamepad2, PenLine } from "lucide-react";
+import QuickPlayLogModal from "../common/QuickPlayLogModal";
+import { Gamepad2, PenLine, Trophy } from "lucide-react";
 
 export default function Layout() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isQuickPlayLogOpen, setIsQuickPlayLogOpen] = useState(false);
 
   const handleOpenGameModal = () => {
     setIsBottomSheetOpen(false);
@@ -22,6 +24,11 @@ export default function Layout() {
   const handleOpenRecordModal = () => {
     setIsBottomSheetOpen(false);
     setIsRecordModalOpen(true);
+  };
+
+  const handleOpenQuickPlayLog = () => {
+    setIsBottomSheetOpen(false);
+    setIsQuickPlayLogOpen(true);
   };
 
   return (
@@ -44,6 +51,11 @@ export default function Layout() {
             <span>새로운 기록 추가</span>
           </button>
 
+          <button className="menu-item" onClick={handleOpenQuickPlayLog}>
+            <Trophy size={20} />
+            <span>게임 결과 추가</span>
+          </button>
+
           <button className="menu-item" onClick={handleOpenGameModal}>
             <Gamepad2 size={20} />
             <span>새로운 게임 등록</span>
@@ -59,6 +71,11 @@ export default function Layout() {
       <RecordRegistrationModal
         isOpen={isRecordModalOpen}
         onClose={() => setIsRecordModalOpen(false)}
+      />
+
+      <QuickPlayLogModal
+        isOpen={isQuickPlayLogOpen}
+        onClose={() => setIsQuickPlayLogOpen(false)}
       />
     </div>
   );

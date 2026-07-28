@@ -52,6 +52,14 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
     감각: { plays: 0, wins: 0 },
   };
 
+  const userCatGameCounts: Record<string, Record<string, number>> = {
+    전략: {},
+    설계: {},
+    심리: {},
+    논리: {},
+    감각: {},
+  };
+
   let totalPlays = 0;
   let totalRatedPlays = 0;
   let totalPlayTime = 0;
@@ -84,10 +92,11 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
 
       const myResult = log.results.find((r: any) => r.memberId === memberId);
       let winValue = 0;
+      let isWon = false;
 
       if (log.resultType === "ranked") {
         const myRank = myResult?.rank;
-        if (myRank) {
+        if (myRank && myRank > 0) {
           const n = participants.length;
           if (n <= 1) {
             winValue = 1.0;
@@ -96,24 +105,23 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
             winValue = Math.max(0, (n - safeRank) / (n - 1));
           }
 
-          // 연승 로직: 1등이면 연승 추가, 아니면 초기화
           if (myRank === 1) {
-            currentStreak++;
-            if (currentStreak > maxStreak) maxStreak = currentStreak;
-          } else {
-            currentStreak = 0;
+            isWon = true;
           }
         }
       } else if (log.resultType === "winner_only") {
-        winValue = myResult?.isWinner === true ? 1.0 : 0.0;
-
-        // 연승 로직: 승리 시 연승 추가, 아니면 초기화
         if (myResult?.isWinner === true) {
-          currentStreak++;
-          if (currentStreak > maxStreak) maxStreak = currentStreak;
-        } else if (myResult?.isWinner === false) {
-          currentStreak = 0;
+          winValue = 1.0;
+          isWon = true;
         }
+      }
+
+      // 💡 연승 로직: 승리 시 연승 +1, 승리가 아닌 모든 경우(패배/2등 이하/결과 미입력 등) 0으로 초기화
+      if (isWon) {
+        currentStreak++;
+        if (currentStreak > maxStreak) maxStreak = currentStreak;
+      } else {
+        currentStreak = 0;
       }
 
       totalOverallWins += winValue;
@@ -123,13 +131,23 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
         const c = category as keyof typeof stats;
         stats[c].plays++;
         stats[c].wins += winValue;
+        userCatGameCounts[c][game.name] = (userCatGameCounts[c][game.name] || 0) + 1;
       }
     });
   });
 
+  const GENRE_EMOJIS: Record<string, string> = {
+    전략: "♟️",
+    설계: "⚙️",
+    심리: "🎭",
+    논리: "🔍",
+    감각: "⚡",
+  };
+
   let bestGenre = "";
   let highestScore = -1;
 
+  // 레이더 차트 데이터 — 축 라벨에 이모지 포함
   const radar = Object.keys(stats).map((category) => {
     const s = stats[category as keyof typeof stats];
     const score = s.plays === 0 ? 0 : Math.round((s.wins / s.plays) * 100);
@@ -139,17 +157,50 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
       bestGenre = category;
     }
 
-    return { genre: category, win: score };
+    const emoji = GENRE_EMOJIS[category] || "";
+    return { genre: `${emoji} ${category}`, win: score };
+  });
+
+  // 장르별 세부 정보 및 대표 게임 구성 (승률 높은 순서 정렬)
+  const genreDetails = Object.keys(stats).map((cat) => {
+    const s = stats[cat as keyof typeof stats];
+    const score = s.plays === 0 ? 0 : Math.round((s.wins / s.plays) * 100);
+
+    // 1. 유저가 플레이했던 해당 장르 게임 (판수 순)
+    const userPlayed = Object.entries(userCatGameCounts[cat] || {})
+      .sort((a, b) => b[1] - a[1])
+      .map(([name]) => name);
+
+    // 2. 크루 보유 라이브러리 게임
+    const libraryGames = boardGames
+      .filter((g) => GENRE_MAPPING[g.genre] === cat)
+      .map((g) => g.name);
+
+    // 중복 제거 및 조합 (최대 2개)
+    const gameSet = new Set<string>();
+    userPlayed.forEach((n) => gameSet.add(n));
+    libraryGames.forEach((n) => gameSet.add(n));
+
+    return {
+      category: cat,
+      plays: s.plays,
+      score,
+      games: Array.from(gameSet).slice(0, 2),
+      hasUserPlayed: userPlayed.length > 0,
+    };
+  }).sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.plays - a.plays;
   });
 
   const overallWinRate = totalRatedPlays === 0 ? 0 : Math.round((totalOverallWins / totalRatedPlays) * 100);
 
   const GENRE_TITLES: Record<string, string> = {
     전략: "전략적 천재",
-    설계: "빌드 깎는 장인",
-    심리: "마스터 마인드",
-    논리: "명탐정",
-    감각: "타고난 감각의 소유자",
+    설계: "빌드 장인",
+    심리: "멘탈 브레이커",
+    논리: "논리 깡패",
+    감각: "감각 괴물",
   };
   const genreTitle = bestGenre ? GENRE_TITLES[bestGenre] : "보드게임 탐험가";
 
@@ -164,11 +215,12 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
 
   return {
     radar,
+    genreDetails,
     overallWinRate,
     playTime: totalPlayTime,
     totalPlays,
     favoriteGame,
-    maxStreak, // 천적 대신 최대 연승 기록
+    maxStreak, // 최대 연승 기록
     genreTitle,
   };
 }
@@ -238,18 +290,19 @@ export default function MyPage() {
     [member?.id, records, boardGames, members]
   );
 
+  const dynamicMembers = useMemo(() => getDynamicMembers(members, records), [members, records]);
+
+  const specialBadges = useMemo(
+    () => member ? calculateSpecialBadges(member.id, members, boardGames) : [],
+    [member?.id, members, boardGames]
+  );
+
   if (!member || !stats) return <Navigate to="/" replace />;
 
-  const dynamicMembers = useMemo(() => getDynamicMembers(members, records), [members, records]);
   const sortedMembers = [...dynamicMembers].sort((a, b) => b.winRate - a.winRate);
   const rank = sortedMembers.findIndex((m) => m.id === member.id) + 1;
   const { title } = getTitleByRank(rank);
   const chartColor = THEME_COLORS[member.color as keyof typeof THEME_COLORS];
-
-  const specialBadges = useMemo(
-    () => calculateSpecialBadges(member.id, members, boardGames),
-    [member.id, members, boardGames]
-  );
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
@@ -295,6 +348,62 @@ export default function MyPage() {
         </div>
       </header>
 
+      {/* 🌟 장르별 승률 레이더 차트 */}
+      <section className="chart-section">
+        <h2 className="section-title">장르별 승률 분석</h2>
+        {stats.totalPlays === 0 ? (
+          <div className="chart-empty">
+            <span className="chart-empty__icon">🎲</span>
+            <p className="chart-empty__text">아직 플레이 기록이 없어요</p>
+            <p className="chart-empty__sub">게임을 플레이하면 장르별 승률을 분석해드릴게요!</p>
+          </div>
+        ) : (
+          <>
+            <div className="radar-wrapper">
+              <ResponsiveContainer width="100%" height={250}>
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={stats.radar}>
+                  <PolarGrid stroke="#eeeeee" />
+                  <PolarAngleAxis
+                    dataKey="genre"
+                    tick={{ fill: "#1a1a1a", fontSize: 13, fontWeight: 900 }}
+                  />
+                  <Radar
+                    name={member.name}
+                    dataKey="win"
+                    stroke={chartColor}
+                    fill={chartColor}
+                    fillOpacity={0.6}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 🌟 승률 순위별 장르 콤팩트 요약 리스트 */}
+            <div className="genre-rank-list">
+              {stats.genreDetails.map((item, index) => (
+                <div key={item.category} className="genre-rank-row">
+                  <div className="genre-label-wrap">
+                    <span className="rank-num">{index + 1}.</span>
+                    <span className="cat-name">{item.category}</span>
+                    <span className="score-val">
+                      {item.plays > 0 ? `${item.score}%` : "-"}
+                    </span>
+                  </div>
+
+                  <div className="game-tags-row">
+                    {item.games.map((gName, gIdx) => (
+                      <span key={gIdx} className={`game-chip ${item.hasUserPlayed ? "played" : "preset"}`}>
+                        {gName}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+
       {/* 기본 & 추가 스탯 영역 그룹화 */}
       <div className="stats-grid">
         <div className="stat-box">
@@ -337,10 +446,10 @@ export default function MyPage() {
         ) : (
           <div className="favorite-game-display">
             {favoriteGameObj?.imageUrl && (
-              <img 
-                src={favoriteGameObj.imageUrl} 
-                alt={favoriteGameName} 
-                className="favorite-game-thumb" 
+              <img
+                src={favoriteGameObj.imageUrl}
+                alt={favoriteGameName}
+                className="favorite-game-thumb"
               />
             )}
             <span className="value highlight-game">
@@ -350,36 +459,7 @@ export default function MyPage() {
         )}
       </div>
 
-      {/* 장르별 승률 레이더 차트 */}
-      <section className="chart-section">
-        <h2 className="section-title">장르별 승률 분석</h2>
-        {stats.totalPlays === 0 ? (
-          <div className="chart-empty">
-            <span className="chart-empty__icon">🎲</span>
-            <p className="chart-empty__text">아직 플레이 기록이 없어요</p>
-            <p className="chart-empty__sub">게임을 플레이하면 장르별 승률을 분석해드릴게요!</p>
-          </div>
-        ) : (
-          <div className="radar-wrapper">
-            <ResponsiveContainer width="100%" height={250}>
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={stats.radar}>
-                <PolarGrid stroke="#eeeeee" />
-                <PolarAngleAxis
-                  dataKey="genre"
-                  tick={{ fill: "#666", fontSize: 12, fontWeight: 700 }}
-                />
-                <Radar
-                  name={member.name}
-                  dataKey="win"
-                  stroke={chartColor}
-                  fill={chartColor}
-                  fillOpacity={0.6}
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </section>
+
 
       {/* 💡 새로 추가된: 내 책장 보기 버튼 */}
       <section className="action-section">
