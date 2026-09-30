@@ -165,13 +165,13 @@ function TimelineCard({ record, members, boardGames, isLast, isOverallFirst, isT
       </div>
 
       {/* ── 오른쪽 카드 ── */}
-      <div 
-        className={`timeline-card ${isTarget ? "timeline-card--target-highlight" : ""}`}
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ cursor: "pointer" }}
-      >
+      <div className={`timeline-card ${isTarget ? "timeline-card--target-highlight" : ""}`}>
         {/* 카드 헤더: 게임 수 + 수정버튼 */}
-        <div className="timeline-card__header">
+        <div 
+          className="timeline-card__header"
+          onClick={() => setIsOpen(!isOpen)}
+          style={{ cursor: "pointer", userSelect: "none" }}
+        >
           <span className="timeline-card__games-count" style={{ display: "inline-flex", alignItems: "center" }}>
             총 {record.playLogs.length}게임 플레이
             <span style={{ marginLeft: "4px", display: "inline-flex", alignItems: "center", opacity: 0.6, position: "relative", top: "-1px" }}>
@@ -200,7 +200,7 @@ function TimelineCard({ record, members, boardGames, isLast, isOverallFirst, isT
               <div
                 key={i}
                 className="timeline-card__photo-wrap"
-                onDoubleClick={(e) => { e.stopPropagation(); onPhotoClick(photos, i); }}
+                onClick={(e) => { e.stopPropagation(); onPhotoClick(photos, i); }}
               >
                 <img src={url} alt={`모임 인증샷 ${i + 1}`} loading="lazy" />
                 <div className="timeline-card__photo-overlay">
