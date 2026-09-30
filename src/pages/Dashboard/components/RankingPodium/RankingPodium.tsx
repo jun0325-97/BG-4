@@ -100,18 +100,18 @@ export default function RankingPodium({ members }: RankingPodiumProps) {
           if (sorted[1] && isMounted) {
             controls[2].start({
               x: 0,
-              y: [-30, -120, 0], 
-              rotate: [0, 360], 
+              y: [-30, -160, 0], // 더 높이 날아감
+              rotate: [0, 720], // 2바퀴 팽글팽글
               transition: {
-                x: { type: "spring", stiffness: 150, damping: 15 } as any,
-                y: { duration: 0.5, times: [0, 0.4, 1], ease: ["easeOut", "easeIn"] },
-                rotate: { duration: 0.5, ease: "linear" }
+                x: { type: "spring", stiffness: 100, damping: 15 } as any,
+                y: { duration: 0.75, times: [0, 0.4, 1], ease: ["easeOut", "easeIn"] }, // 시간 연장
+                rotate: { duration: 0.75, ease: "linear" }
               }
             });
           }
         }, 120);
         
-        await new Promise(r => setTimeout(r, 450));
+        await new Promise(r => setTimeout(r, 750)); // 애니메이션 길어진 만큼 대기 시간도 연장
         if (!isMounted) return;
         
         if (!confettiFired) {
