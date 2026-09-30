@@ -2,29 +2,12 @@
 @use "../../styles/variables" as *;
 
 .global-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.25rem;
-  background-color: $color-card-bg;
-  color: $color-text-main;
-  border-bottom: 1.5px solid $color-border;
-  z-index: 100;
-  transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
-
-  &.hidden {
-    transform: translateY(-100%);
-  }
-
-  &.visible {
-    transform: translateY(0);
-  }
-
-  &:active {
-    transform: none;
-  }
+  padding: 1.2rem 1.25rem 0.8rem;
+  background: #ffffff;
+  z-index: 10;
 
   .logo {
     line-height: 1;
@@ -38,199 +21,18 @@
     }
 
     .logo-bms {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 800;
       letter-spacing: -0.06rem;
       color: $color-text-main;
     }
 
     .logo-crew {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 500;
-      margin-left: 0.2rem;
+      margin-left: 0.15rem;
       letter-spacing: -0.04rem;
-      color: $color-text-main;
-    }
-  }
-
-  // 항상 햄버거 버튼 표시 (PC, 모바일 동일)
-  .hamburger-btn {
-    display: block;
-    color: $color-text-main;
-    z-index: 101;
-  }
-
-}
-
-// 기본적으로 nav는 숨김 — 햄버거로만 열림
-.nav-links {
-  position: fixed;
-  top: 0;
-  right: -300px;
-  width: 260px;
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background-color: $color-card-bg;
-  padding-top: 5rem;
-  // gap: 1rem;
-  // border-left: 1px solid $color-border;
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000; // 사이드바는 최상단에 위치
-
-  &.open {
-    right: 0;
-  }
-
-  .close-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1.25rem;
-    background: none;
-    border: none;
-    color: $color-text-main;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    z-index: 1001;
-  }
-
-  a {
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 1.2rem 2rem;
-    border-radius: 0;
-    border-bottom: 2px solid rgba($color-border, 0.1);
-    color: $color-text-main;
-
-    &:hover {
-      background-color: rgba($color-yellow, 0.25);
-      color: $color-text-main;
-    }
-  }
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 999;
-}
-
-.mypage-menu-container {
-  width: 100%;
-
-  .mypage-toggle-btn {
-    width: 100%;
-    background: none;
-    border: none;
-    font-size: 1rem;
-    font-weight: 700;
-    color: $color-text-main;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    padding: 1.2rem 2rem;
-    cursor: pointer;
-    font-family: inherit;
-    border-bottom: 2px solid rgba($color-border, 0.1);
-
-    &:hover {
-      background-color: rgba($color-yellow, 0.25);
-    }
-  }
-
-  .submenu {
-    display: none;
-    flex-direction: column;
-    // padding-left: 1rem;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-
-    &.show {
-      display: flex;
-    }
-
-    .submenu-link {
-      font-size: 1rem;
-      font-weight: 700;
       color: $color-text-sub;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0.75rem 2rem;
-
-      &:hover {
-        background-color: rgba($color-yellow, 0.2);
-      }
-
-      .dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 1px solid $color-border;
-        flex-shrink: 0;
-
-        &[data-color="red"] {
-          background-color: $color-red;
-        }
-
-        &[data-color="blue"] {
-          background-color: $color-blue;
-        }
-
-        &[data-color="green"] {
-          background-color: $color-green;
-        }
-
-        &[data-color="yellow"] {
-          background-color: $color-yellow;
-        }
-
-        &[data-color="pink"] {
-          background-color: $color-pink;
-        }
-
-        &[data-color="purple"] {
-          background-color: $color-purple;
-        }
-      }
-    }
-  }
-}
-
-// 메뉴 최하단 고정 영역
-.nav-bottom-actions {
-  margin-top: auto;
-  padding: 2rem;
-  border-top: 1px solid rgba($color-border, 0.1);
-
-  .global-logout-btn {
-    width: 100%;
-    background: none;
-    border: none;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #fa5252;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: rgba(#fa5252, 0.1);
     }
   }
 }

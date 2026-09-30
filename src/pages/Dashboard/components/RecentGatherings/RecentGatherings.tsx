@@ -48,7 +48,7 @@ export default function RecentGatherings() {
           onClick={handleMoreClick}
           aria-label="모임 기록 전체보기"
         >
-          <ChevronRight size={18} className="chevron-icon" />
+          전체보기 <ChevronRight size={13} className="chevron-icon" />
         </button>
       </div>
 
@@ -62,14 +62,21 @@ export default function RecentGatherings() {
       ) : (
         <div className="gatherings-grid">
           {recentRecords.map((record) => {
-            // 1. 해당 모임에서 열린 중복 없는 게임 목록 (게임 종류)
-            const uniqueGameNames = Array.from(
-              new Set(
-                record.playLogs
-                  .map((log) => boardGames.find((bg) => bg.id === log.gameId)?.name)
-                  .filter((name): name is string => !!name)
-              )
-            );
+            // 1. 해당 모임에서 열린 게임의 플레이 빈도수 계산
+            const gameCounts: Record<string, number> = {};
+            record.playLogs.forEach((log) => {
+              const name = boardGames.find((bg) => bg.id === log.gameId)?.name;
+              if (name) {
+                gameCounts[name] = (gameCounts[name] || 0) + 1;
+              }
+            });
+            // 빈도수 내림차순 정렬 후 게임 이름만 추출
+            const sortedGames = Object.entries(gameCounts)
+              .sort((a, b) => b[1] - a[1])
+              .map((e) => e[0]);
+            
+            const topGames = sortedGames.slice(0, 3);
+            const remainingCount = sortedGames.length - 3;
 
             const { main: dateMain, dow: dateDow } = formatDateParts(record.date);
 
@@ -96,12 +103,19 @@ export default function RecentGatherings() {
                 {/* 게임 종목 리스트 (중복 제거됨) 및 메모 */}
                 <div className="card-main">
                   <div className="game-tags">
-                    {uniqueGameNames.length > 0 ? (
-                      uniqueGameNames.map((name, idx) => (
-                        <span key={idx} className="game-tag">
-                          {name}
-                        </span>
-                      ))
+                    {topGames.length > 0 ? (
+                      <>
+                        {topGames.map((name, idx) => (
+                          <span key={idx} className="game-tag">
+                            {name}
+                          </span>
+                        ))}
+                        {remainingCount > 0 && (
+                          <span className="game-tag game-tag--more">
+                            + {remainingCount}
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <span className="game-tag opacity-60">기록된 게임 없음</span>
                     )}

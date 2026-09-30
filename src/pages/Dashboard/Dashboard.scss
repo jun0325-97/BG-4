@@ -3,18 +3,32 @@
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding-bottom: 2rem;
-  min-height: 100vh;
-  transition: background-color 0.8s ease;
-  margin: -1rem; // 상단 여백 보정
-  padding: 1rem;
+  gap: 1rem;
+  margin: -1rem;
+  padding: 0;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+}
 
-  &.dashboard-day {
-    background-color: #f8f9fa; // 맑고 따뜻한 낮 톤
-  }
+// 히어로 섹션 — 트랙이 상단에 풀 영역으로
+.race-section--hero {
+  padding: 1rem 1rem 0;
 
-  &.dashboard-night {
-    background-color: #e4e7ed; // 차분하고 약간 서늘한 밤 공기 톤
+  .stadium {
+    border-radius: 24px;
   }
+}
+
+// 통계 슬라이더
+.stats-section {
+  padding: 0;
+}
+
+// 최근 모임 / 멤버 섹션 공통
+.member-section {
+  padding: 0 1rem;
+}
+
+// RecentGatherings는 자체 내부에서 padding 처리하므로 래퍼만
+section:not(.race-section--hero):not(.stats-section):not(.member-section) {
+  padding: 0 1rem;
 }

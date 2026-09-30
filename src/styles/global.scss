@@ -34,9 +34,9 @@ html {
   position: relative;
 }
 
-/* 🧱 모든 페이지의 공통 여백 (상단, 좌우, 하단 FAB 영역 확보 + iOS 하단 홈바 대응) */
+/* 🧱 모든 페이지의 공통 여백 (상단, 좌우, 하단 바텀탭 영역 확보 + iOS 하단 홈바 대응) */
 .main-content {
-  padding: 1.25rem 1rem calc(5rem + env(safe-area-inset-bottom)) 1rem;
+  padding: 1.25rem 1rem calc(72px + env(safe-area-inset-bottom)) 1rem;
   overflow-x: hidden; /* 가로 스크롤 방지, 세로는 정상 스크롤되도록 */
 }
 

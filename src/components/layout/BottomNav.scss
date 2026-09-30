@@ -1,0 +1,221 @@
+// src/components/layout/BottomNav.scss
+@use "../../styles/variables" as *;
+
+// ── 마이페이지 멤버 선택 팝업 ────────────────────────────────
+.mypage-popup {
+  position: fixed;
+  bottom: calc(68px + env(safe-area-inset-bottom));
+  right: 12px;
+  width: min(220px, 70vw);
+  background: #ffffff;
+  border: 1.5px solid $color-border;
+  border-radius: 18px 18px 6px 18px;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.12), 0 8px 20px rgba(0, 0, 0, 0.08);
+  z-index: 500;
+  overflow: hidden;
+  animation: popup-slide-up 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes popup-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  &__members {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+  }
+
+  &__member-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.1rem;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $color-text-main;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+    border-radius: 0;
+
+    &:hover {
+      background: rgba($color-yellow, 0.18);
+    }
+
+    &:active {
+      background: rgba($color-yellow, 0.32);
+    }
+
+    .member-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(0, 0, 0, 0.08);
+
+      &[data-color="red"]    { background: $color-red; }
+      &[data-color="blue"]   { background: $color-blue; }
+      &[data-color="green"]  { background: $color-green; }
+      &[data-color="yellow"] { background: $color-yellow; border-color: rgba(0,0,0,0.15); }
+      &[data-color="pink"]   { background: $color-pink; }
+      &[data-color="purple"] { background: $color-purple; }
+    }
+
+    .member-name {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .member-me-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fff;
+      background: $color-blue;
+      padding: 0.1rem 0.35rem;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  &__footer {
+    border-top: 1px solid rgba($color-border, 0.6);
+    padding: 0.5rem 0.8rem;
+  }
+
+  &__logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #fa5252;
+    cursor: pointer;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(#fa5252, 0.08);
+    }
+  }
+}
+
+// ── 바텀 탭바 ────────────────────────────────────────────────
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding: 0 1rem;
+  padding-bottom: env(safe-area-inset-bottom);
+  
+  // 더 세련된 글래스모피즘
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.03);
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between; // 좌-중앙-우 배치
+  z-index: 200;
+
+  &__group {
+    display: flex;
+    flex: 1;
+    justify-content: space-evenly;
+  }
+
+  &__tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    color: #94a3b8; // 더 고급스러운 그레이
+    transition: color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 56px;
+
+    span {
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+
+    &.active {
+      color: #0f172a; // 거의 블랙에 가까운 네이비
+    }
+
+    &:active {
+      transform: scale(0.92);
+    }
+  }
+
+  // 중앙 FAB 래퍼
+  &__fab-wrapper {
+    flex-shrink: 0;
+    margin: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    top: -4px; // 아주 살짝 위로 띄워 입체감
+  }
+
+  // 중앙 FAB 버튼
+  &__fab {
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #334155, #0f172a);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 
+      0 8px 20px rgba(15, 23, 42, 0.25),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 
+        0 12px 24px rgba(15, 23, 42, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+    }
+  }
+}

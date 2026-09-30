@@ -3,10 +3,12 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../store/useStore";
-import { Clock, Edit2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit2, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import RecordRegistrationModal from "../../components/common/RecordRegistrationModal";
 import { GatheringRecord } from "../../types";
 import "./Archive.scss";
+
+
 
 // ── 날짜 포맷 헬퍼 ────────────────────────────────────────────
 function formatDate(dateString: string) {
@@ -28,6 +30,8 @@ interface MonthHeatmapProps {
 }
 
 function MonthHeatmap({ records, selectedYear, activeMonth, onMonthClick }: MonthHeatmapProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const monthCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (let m = 1; m <= 12; m++) {
@@ -43,34 +47,47 @@ function MonthHeatmap({ records, selectedYear, activeMonth, onMonthClick }: Mont
     return counts;
   }, [records, selectedYear]);
 
-  const maxCount = Math.max(...Object.values(monthCounts), 1);
+  // 활성화된 월 탭으로 자동 가로 스크롤 (화면 튀는 현상 방지)
+  useEffect(() => {
+    if (activeMonth && scrollRef.current) {
+      const container = scrollRef.current;
+      const activeEl = container.querySelector(".month-pill--active") as HTMLElement;
+      if (activeEl) {
+        // scrollIntoView는 세로 스크롤(전체 페이지)까지 끌어올리므로
+        // 컨테이너 내부의 가로(scrollLeft)만 변경하여 중앙에 맞춤
+        const containerWidth = container.clientWidth;
+        const elOffset = activeEl.offsetLeft;
+        const elWidth = activeEl.offsetWidth;
+        
+        container.scrollTo({
+          left: elOffset - containerWidth / 2 + elWidth / 2,
+          behavior: "smooth"
+        });
+      }
+    }
+  }, [activeMonth, selectedYear]);
+
+
   const MONTH_NAMES = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
 
   return (
-    <div className="month-heatmap">
+    <div className="month-scroller" ref={scrollRef}>
       {MONTH_NAMES.map((label, i) => {
         const key = `${selectedYear}-${String(i + 1).padStart(2, "0")}`;
         const count = monthCounts[key] || 0;
-        const intensity = count === 0 ? 0 : Math.ceil((count / maxCount) * 4);
         const isActive = activeMonth === key;
         const hasData = count > 0;
 
         return (
           <button
             key={key}
-            className={`heatmap-cell ${isActive ? "heatmap-cell--active" : ""} ${!hasData ? "heatmap-cell--empty" : ""}`}
-            data-intensity={intensity}
+            className={`month-pill ${isActive ? "month-pill--active" : ""} ${!hasData ? "month-pill--empty" : ""}`}
             onClick={() => hasData && onMonthClick(key)}
             disabled={!hasData}
             aria-label={`${label} ${count}회`}
           >
-            <span className="heatmap-cell__month">{label}</span>
-            {count > 0 && (
-              <span className="heatmap-cell__dot" data-intensity={intensity} />
-            )}
-            {count > 0 && (
-              <span className="heatmap-cell__count">{count}회</span>
-            )}
+            <span className="month-pill__label">{label}</span>
+            {hasData && <span className="month-pill__dot" />}
           </button>
         );
       })}
@@ -78,96 +95,31 @@ function MonthHeatmap({ records, selectedYear, activeMonth, onMonthClick }: Mont
   );
 }
 
-// ── 게임 결과 태그 ──────────────────────────────────────────
-function ResultTags({
-  log,
-  members,
-}: {
-  log: GatheringRecord["playLogs"][0];
-  members: { id: string; name: string; color: string }[];
-}) {
-  const RANK_EMOJI: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
-
+// ── 승자 계산 헬퍼 ──────────────────────────────────────────
+function getWinners(
+  log: GatheringRecord["playLogs"][0],
+  members: { id: string; name: string; color: string }[]
+) {
   if (log.resultType === "winner_only") {
-    const participantIds = log.participatingMembers || log.results.map((r) => r.memberId);
-    
-    // 승자가 맨 앞에 오도록 정렬
-    const sortedParticipantIds = [...participantIds].sort((a, b) => {
-      const aIsWinner = log.results.find((r) => r.memberId === a)?.isWinner === true;
-      const bIsWinner = log.results.find((r) => r.memberId === b)?.isWinner === true;
-      if (aIsWinner && !bIsWinner) return -1;
-      if (!aIsWinner && bIsWinner) return 1;
-      return 0;
-    });
-
-    return (
-      <div className="results-grid">
-        {sortedParticipantIds.map((memberId) => {
-          const member = members.find((m) => m.id === memberId);
-          const res = log.results.find((r) => r.memberId === memberId);
-          const isWinner = res?.isWinner === true;
-          return (
-            <div
-              key={memberId}
-              className={`player-result-tag ${isWinner ? 'player-result-tag--winner' : 'player-result-tag--loser'}`}
-              data-color={isWinner ? member?.color : undefined}
-            >
-              {isWinner && <span className="result-rank-emoji">👑</span>}
-              <span className="player-name">{member?.name}</span>
-            </div>
-          );
-        })}
-      </div>
-    );
+    return log.results
+      .filter((r) => r.isWinner)
+      .map((r) => members.find((m) => m.id === r.memberId))
+      .filter((m): m is NonNullable<typeof m> => !!m);
   }
-
-  if (log.results && log.results.length > 0) {
-    // 등수 순 정렬 (ranked), 없으면 원래 순서
-    const sorted = log.resultType === "ranked"
-      ? [...log.results].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
-      : log.results;
-    return (
-      <div className="results-grid">
-        {sorted.map((res) => {
-          const member = members.find((m) => m.id === res.memberId);
-          return (
-            <div
-              key={res.memberId}
-              className="player-result-tag"
-              data-color={member?.color}
-              data-rank={res.rank}
-            >
-              {res.rank && <span className="result-rank-emoji">{RANK_EMOJI[res.rank] ?? `${res.rank}등`}</span>}
-              <span className="player-name">{member?.name}</span>
-            </div>
-          );
-        })}
-      </div>
-    );
+  if (log.resultType === "ranked") {
+    return log.results
+      .filter((r) => r.rank === 1)
+      .map((r) => members.find((m) => m.id === r.memberId))
+      .filter((m): m is NonNullable<typeof m> => !!m);
   }
-
-  const participantIds = log.participatingMembers || members.map((m) => m.id);
-  return (
-    <div className="results-grid">
-      {participantIds.map((memberId) => {
-        const member = members.find((m) => m.id === memberId);
-        return (
-          <div key={memberId} className="player-result-tag" data-color={member?.color}>
-            <span className="player-name">{member?.name}</span>
-            <span style={{ fontSize: "0.85rem" }}>🤝</span>
-          </div>
-        );
-      })}
-    </div>
-  );
+  return [];
 }
 
 // ── 타임라인 카드 ─────────────────────────────────────────────
 interface TimelineCardProps {
   record: GatheringRecord;
   members: { id: string; name: string; color: string }[];
-  boardGames: { id: string; name: string; imageUrl?: string }[];
-  isFirst: boolean;
+  boardGames: { id: string; name: string; imageUrl?: string; genre?: string }[];
   isLast: boolean;
   isOverallFirst?: boolean;
   isTarget?: boolean;
@@ -175,7 +127,7 @@ interface TimelineCardProps {
   onPhotoClick: (photos: string[], index: number) => void;
 }
 
-function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallFirst, isTarget, onEdit, onPhotoClick }: TimelineCardProps) {
+function TimelineCard({ record, members, boardGames, isLast, isOverallFirst, isTarget, onEdit, onPhotoClick }: TimelineCardProps) {
   const [isOpen, setIsOpen] = useState(!!isOverallFirst || !!isTarget);
   
   useEffect(() => {
@@ -185,7 +137,6 @@ function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallF
   }, [isTarget]);
 
   // 카드 헤더 날짜: 연도 포함
-  const [year] = record.date.split("-");
   const { month, day } = formatDate(record.date);
   const dow = getDayOfWeek(record.date);
 
@@ -199,19 +150,37 @@ function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallF
   return (
     <div 
       id={`record-${record.id}`}
-      className={`timeline-item ${isFirst ? "timeline-item--first" : ""} ${isLast ? "timeline-item--last" : ""} ${isTarget ? "timeline-item--target" : ""}`}
+      className={`timeline-item ${isLast ? "timeline-item--last" : ""} ${isTarget ? "timeline-item--target" : ""}`}
     >
-      <div className={`timeline-card ${isTarget ? "timeline-card--target-highlight" : ""}`}>
-        {/* 카드 헤더: 이모지 + 날짜 + 게임수 + 수정버튼 */}
+      {/* ── 리얼 타임라인 축 (왼쪽) ── */}
+      <div className="timeline-axis">
+        <div className="timeline-axis__node">
+          <span className="node-emoji">{record.emoji || "🎲"}</span>
+        </div>
+        <div className="timeline-axis__date">
+          <span className="date-main">{month}.{day}</span>
+          <span className="date-dow">{dow}</span>
+        </div>
+        <div className="timeline-axis__line" />
+      </div>
+
+      {/* ── 오른쪽 카드 ── */}
+      <div 
+        className={`timeline-card ${isTarget ? "timeline-card--target-highlight" : ""}`}
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ cursor: "pointer" }}
+      >
+        {/* 카드 헤더: 게임 수 + 수정버튼 */}
         <div className="timeline-card__header">
-          <span className="timeline-card__emoji">{record.emoji || "🎲"}</span>
-          <div className="timeline-card__meta">
-            <span className="timeline-card__date">{year}년 {month}월 {day}일 ({dow})</span>
-            <span className="timeline-card__games-count">{record.playLogs.length}게임</span>
-          </div>
+          <span className="timeline-card__games-count" style={{ display: "inline-flex", alignItems: "center" }}>
+            총 {record.playLogs.length}게임 플레이
+            <span style={{ marginLeft: "4px", display: "inline-flex", alignItems: "center", opacity: 0.6, position: "relative", top: "-1px" }}>
+              {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </span>
+          </span>
           <button
             className="timeline-card__edit-btn"
-            onClick={() => onEdit(record)}
+            onClick={(e) => { e.stopPropagation(); onEdit(record); }}
             title="기록 수정"
             aria-label="기록 수정"
           >
@@ -231,7 +200,7 @@ function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallF
               <div
                 key={i}
                 className="timeline-card__photo-wrap"
-                onClick={() => onPhotoClick(photos, i)}
+                onClick={(e) => { e.stopPropagation(); onPhotoClick(photos, i); }}
               >
                 <img src={url} alt={`모임 인증샷 ${i + 1}`} loading="lazy" />
                 <div className="timeline-card__photo-overlay">
@@ -242,45 +211,53 @@ function TimelineCard({ record, members, boardGames, isFirst, isLast, isOverallF
           </div>
         )}
 
-        {/* 로그 토글 버튼 */}
-        {record.playLogs.length > 0 && (
-          <button
-            className="timeline-card__toggle-btn"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? (
-              <>게임 기록 접기 <span>▲</span></>
-            ) : (
-              <>게임 기록 {record.playLogs.length}개 <span>▼</span></>
-            )}
-          </button>
-        )}
-
-        {/* 게임 로그 목록 */}
+        {/* 컴팩트 리스트 형태의 게임 로그 목록 */}
         {isOpen && (
           <div className="timeline-card__logs">
           {record.playLogs.map((log, idx) => {
             const game = boardGames.find((g) => g.id === log.gameId);
+            const winners = getWinners(log, members);
+            
+            let participantIds = log.participatingMembers || log.results.map(r => r.memberId);
+            if (!participantIds || participantIds.length === 0) {
+              participantIds = members.map(m => m.id);
+            }
+
             return (
-              <div key={log.id} className="log-entry">
-                <div className="log-entry__header">
-                  <div className="log-entry__thumb">
-                    {game?.imageUrl ? (
-                      <img src={game.imageUrl} alt={game.name} loading="lazy" />
+              <div key={log.id} className="log-row">
+                <span className="log-row__index">{idx + 1}</span>
+                
+                <div className="log-row__thumb">
+                  {game?.imageUrl ? (
+                    <img src={game.imageUrl} alt={game.name} loading="lazy" />
+                  ) : (
+                    <span>🎲</span>
+                  )}
+                </div>
+
+                <div className="log-row__info">
+                  <div className="log-row__game-title">
+                    <span className="name">{game?.name || "알 수 없는 게임"}</span>
+                    <span className="duration">{log.durationMinutes}분</span>
+                  </div>
+                  
+                  <div className="log-row__result">
+                    {log.resultType === "no_result" || (winners.length === 0 && game?.genre === "협력") ? (
+                      <span className="no-result">🤝 {game?.genre === "협력" ? "협력 게임" : "친선 (승패 없음)"}</span>
+                    ) : winners.length > 0 ? (
+                      <div className="winners">
+                        {winners.map((w) => (
+                          <div key={w.id} className="winner-badge" data-color={w.color}>
+                            <span className="crown">👑</span>
+                            <span className="winner-name">{w.name} 승리</span>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <span>🎲</span>
+                      <span className="no-result">결과 미상</span>
                     )}
                   </div>
-                  <div className="log-entry__info">
-                    <span className="log-entry__num">GAME {idx + 1}</span>
-                    <span className="log-entry__name">{game?.name || "알 수 없는 게임"}</span>
-                  </div>
-                  <div className="log-entry__duration">
-                    <Clock size={12} />
-                    <span>{log.durationMinutes}분</span>
-                  </div>
                 </div>
-                <ResultTags log={log} members={members} />
               </div>
             );
           })}
@@ -515,7 +492,6 @@ export default function Archive() {
                     record={record}
                     members={MEMBERS}
                     boardGames={BOARD_GAMES}
-                    isFirst={idx === 0}
                     isLast={idx === group.records.length - 1}
                     isOverallFirst={groupIndex === 0 && idx === 0}
                     isTarget={record.id === targetId}

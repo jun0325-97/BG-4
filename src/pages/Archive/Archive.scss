@@ -69,77 +69,72 @@
 }
 
 // ─────────────────────────────────────────────────────────────
-// 월별 히트맵
+// 월별 스크롤러 (히트맵 대체)
 // ─────────────────────────────────────────────────────────────
 
-.month-heatmap {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.5rem;
-  background: #ffffff;
-  border: 1px solid $color-border;
-  border-radius: 16px;
-  padding: 1rem 0.85rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+.month-scroller {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 1rem; 
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-.heatmap-cell {
+.month-pill {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 0.5rem 0.25rem;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
+  gap: 6px;
+  padding: 0.5rem 1.1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
-  transition: background 0.18s, transform 0.15s;
-  position: relative;
-  min-height: 58px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 
   &--empty {
-    opacity: 0.35;
+    opacity: 0.4;
     cursor: default;
   }
 
   &--active {
-    background: rgba($color-blue, 0.1);
+    background: #0f172a; 
+    border-color: #0f172a;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
 
-    .heatmap-cell__month {
-      color: $color-blue;
+    .month-pill__label {
+      color: #fff;
       font-weight: 800;
     }
   }
 
   &:not(&--empty):not(&--active):hover {
-    background: rgba(0, 0, 0, 0.04);
-    transform: translateY(-1px);
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
 
-  &__month {
-    font-size: 0.65rem;
+  &__label {
+    font-size: 0.85rem;
     font-weight: 700;
-    color: $color-text-sub;
-    letter-spacing: 0.02em;
+    color: $color-text-main;
   }
 
   &__dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: $color-border;
-    flex-shrink: 0;
-
-    &[data-intensity="1"] { background: rgba($color-blue, 0.35); }
-    &[data-intensity="2"] { background: rgba($color-blue, 0.55); }
-    &[data-intensity="3"] { background: rgba($color-blue, 0.75); }
-    &[data-intensity="4"] { background: $color-blue; }
-  }
-
-  &__count {
-    font-size: 0.6rem;
-    font-weight: 700;
-    color: $color-text-sub;
+    background: $color-blue;
   }
 }
 
@@ -151,6 +146,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  padding-top: 0.5rem;
 }
 
 .timeline-month-group {
@@ -159,122 +155,187 @@
   gap: 0;
 }
 
-// 월 구분선 — 날짜 컬럼 없어졌으므로 offset 제거
+// 월 구분선
 .timeline-month-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 1.25rem 0 0.75rem 0;
+  margin: 1.5rem 0 1.2rem 0;
 
   span {
-    font-size: 0.72rem;
+    font-size: 0.9rem;
     font-weight: 900;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: $color-text-sub;
-    white-space: nowrap;
+    color: $color-text-main;
   }
 
   &::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: $color-border;
+    background: linear-gradient(to right, rgba(0,0,0,0.08), transparent);
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// 타임라인 아이템 — 날짜 컬럼 없이 full width 카드
+// 타임라인 아이템 (리얼 타임라인)
 // ─────────────────────────────────────────────────────────────
 
 .timeline-item {
   position: relative;
-  padding-bottom: 0.75rem;
+  display: flex;
+  gap: 0.8rem;
+  padding-bottom: 2rem;
+
+  &--last {
+    .timeline-axis__line {
+      display: none; // 그룹의 마지막 아이템은 밑으로 이어지는 선 제거
+    }
+  }
 }
 
-// ─────────────────────────────────────────────────────────────
-// 타임라인 카드
-// ─────────────────────────────────────────────────────────────
+// ── 리얼 타임라인 축 (왼쪽) ──
+.timeline-axis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
+  flex-shrink: 0;
+  position: relative;
 
+  &__node {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+
+    .node-emoji {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+  }
+
+  &__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0.4rem;
+    background: #f4f4f5; // 배경과 동일하게 맞춰서 선 위를 덮음
+    padding: 2px 0;
+    z-index: 2;
+
+    .date-main {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: $color-text-main;
+      letter-spacing: -0.02em;
+    }
+
+    .date-dow {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: $color-text-sub;
+    }
+  }
+
+  &__line {
+    position: absolute;
+    top: 40px; 
+    bottom: -2rem; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: rgba(0,0,0,0.06);
+    z-index: 1;
+  }
+}
+
+// ── 오른쪽 카드 (글래스모피즘 & 단순화) ──
 .timeline-card {
-  background: #fff;
-  border: 1px solid $color-border;
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
   border-radius: 16px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.02);
+  padding-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      0 2px 6px rgba(0, 0, 0, 0.03);
+  }
 
   &--target-highlight {
-    border-color: $color-blue !important;
-    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.3), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba($color-blue, 0.3), 0 8px 24px rgba(0, 0, 0, 0.08) !important;
     animation: pulseHighlight 2s ease-in-out 3;
   }
 
   &__header {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.85rem 0.9rem 0.65rem;
-  }
-
-  &__emoji {
-    font-size: 1.4rem;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  &__meta {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
-  // 날짜 배지 (카드 헤더 내 통합)
-  &__date {
-    font-size: 0.82rem;
-    font-weight: 800;
-    color: $color-text-main;
-    letter-spacing: -0.01em;
+    justify-content: space-between;
+    padding: 1rem 1.1rem 0.5rem;
   }
 
   &__games-count {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: $color-text-sub;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: $color-blue;
+    letter-spacing: -0.01em;
   }
 
   &__edit-btn {
     background: none;
     border: none;
-    color: #aaa;
+    color: #cbd5e1;
     cursor: pointer;
     padding: 6px;
-    border-radius: 8px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s, background 0.2s;
+    transition: all 0.2s;
     flex-shrink: 0;
 
     &:hover {
       color: $color-blue;
-      background: rgba($color-blue, 0.08);
+      background: rgba($color-blue, 0.1);
     }
   }
 
-  // 메모
+  // ── 세련된 인용구(Quote) 스타일 메모 ──
   &__memo {
-    margin: 0 0.9rem 0.65rem;
-    padding: 0.55rem 0.75rem;
-    background: rgba($color-yellow, 0.15);
-    border-left: 3px solid $color-yellow;
-    border-radius: 4px 8px 8px 4px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: $color-text-main;
+    margin: 0 1.1rem 1rem;
+    padding: 0.8rem 1.1rem 0.8rem 1.6rem;
+    background: #f8fafc; // 아주 연한 쿨그레이
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
     line-height: 1.5;
+    position: relative;
+
+    &::before {
+      content: '"';
+      position: absolute;
+      top: 0.5rem;
+      left: 0.4rem;
+      font-size: 1.8rem;
+      color: rgba(0,0,0,0.08);
+      font-family: serif;
+      line-height: 1;
+    }
   }
 
   // ── 사진 갤러리 ──────────────────────────────────────────
@@ -355,31 +416,7 @@
     }
   }
 
-  // 토글 버튼
-  &__toggle-btn {
-    width: 100%;
-    background: transparent;
-    border: none;
-    border-top: 1px dashed rgba($color-border, 0.6);
-    padding: 0.75rem;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: $color-text-sub;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    font-family: inherit;
-
-    span {
-      font-size: 0.65rem;
-    }
-
-    &:active {
-      background: transparent;
-    }
-  }
+  // ── 사진 갤러리 ──────────────────────────────────────────
 
   // 게임 로그들
   &__logs {
@@ -388,39 +425,38 @@
 }
 
 // ─────────────────────────────────────────────────────────────
-// 개별 게임 로그 엔트리
+// 컴팩트 게임 로그 리스트 (log-row)
 // ─────────────────────────────────────────────────────────────
 
-.log-entry {
-  padding: 0.9rem;
-  margin-bottom: 0.75rem;
-  background: #fdfdfd;
-  border: 1px solid rgba($color-border, 0.7);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+.log-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 
   &:last-child {
-    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.6rem;
+  &__index {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #cbd5e1;
+    min-width: 14px;
+    text-align: right;
   }
 
   &__thumb {
-    width: 38px;
-    height: 38px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
-    border: 1px solid $color-border;
     overflow: hidden;
-    background: #f5f5f5;
+    background: #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
     flex-shrink: 0;
 
     img {
@@ -431,102 +467,87 @@
   }
 
   &__info {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  &__num {
-    font-size: 0.6rem;
-    font-weight: 900;
-    letter-spacing: 0.05em;
-    color: #bbb;
-  }
-
-  &__name {
-    font-size: 0.92rem;
-    font-weight: 800;
-    color: $color-text-main;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__duration {
+  &__game-title {
     display: flex;
     align-items: center;
-    gap: 3px;
-    font-size: 0.72rem;
-    color: #aaa;
-    font-weight: 600;
-    flex-shrink: 0;
+    gap: 6px;
+    
+    .name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: $color-text-main;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .duration {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
   }
-}
 
-// ─────────────────────────────────────────────────────────────
-// 결과 태그
-// ─────────────────────────────────────────────────────────────
+  &__result {
+    font-size: 0.75rem;
+    margin-top: 0.15rem;
 
-.results-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-
-  .player-result-tag {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border: 1.5px solid $color-border;
-    border-radius: 8px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: $color-text-main;
-    background: #f4f4f5;
-    transition: all 0.2s;
-
-    &[data-color="red"]    { background: rgba($color-red, 0.1); border-color: rgba($color-red, 0.25); }
-    &[data-color="blue"]   { background: rgba($color-blue, 0.1); border-color: rgba($color-blue, 0.25); }
-    &[data-color="green"]  { background: rgba($color-green, 0.1); border-color: rgba($color-green, 0.25); }
-    &[data-color="yellow"] { background: rgba($color-yellow, 0.15); border-color: rgba($color-yellow, 0.35); }
-
-    // 승자(1등) 강조
-    &--winner {
-      border-color: #ffd700;
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
-      box-shadow: 0 2px 6px rgba(255, 215, 0, 0.2);
-      transform: translateY(-1px);
-      
-      .player-name {
-        font-weight: 700;
-        color: #1a1a1a; // 짙은 금색 텍스트
-      }
-      
-      &[data-color] {
-        // 기존 색상 덮어쓰기 (승자 느낌 강조)
-        border-color: #ffd700;
-      }
+    .no-result {
+      color: #64748b;
+      font-weight: 700;
+      background: #f1f5f9;
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      display: inline-block;
     }
 
-    // 패자 흐리게 (승자만 있는 게임에서)
-    &--loser {
-      opacity: 0.55;
-      background: transparent;
-      border-color: rgba($color-border, 0.5);
-      
-      .player-name {
-        font-weight: 600;
-      }
-      &[data-color] {
-        background: transparent;
+    .winners {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+
+      .winner-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        letter-spacing: -0.01em;
+
+        .crown {
+          font-size: 0.8rem;
+          margin-top: -2px;
+        }
+
+        &[data-color="red"] { 
+          background: rgba($color-red, 0.12); 
+          color: darken($color-red, 10%); 
+        }
+        &[data-color="blue"] { 
+          background: rgba($color-blue, 0.12); 
+          color: darken($color-blue, 10%); 
+        }
+        &[data-color="green"] { 
+          background: rgba($color-green, 0.12); 
+          color: darken($color-green, 10%); 
+        }
+        &[data-color="yellow"] { 
+          background: rgba($color-yellow, 0.2); 
+          color: #b45309; // 진한 오렌지/브라운 톤
+        }
       }
     }
-
-    .result-rank-emoji { font-size: 0.9rem; line-height: 1; margin-right: 2px; }
-    .player-name { font-weight: 700; letter-spacing: -0.02em; }
-    .score       { color: #777; font-size: 0.72rem; font-weight: 800; margin-left: 4px; }
   }
 }
 

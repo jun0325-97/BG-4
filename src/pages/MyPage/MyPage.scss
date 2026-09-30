@@ -220,18 +220,19 @@
   }
 }
 
-  .chart-section {
-    padding: 1.5rem;
-    @include retro-border;
-    background-color: $color-card-bg;
-    @include retro-shadow;
+.chart-section {
+  padding: 2.2rem 1.5rem;
+  @include retro-border;
+  background-color: $color-card-bg;
+  @include retro-shadow;
+  border-radius: 12px;
 
-    .section-title {
-      font-size: 1rem;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 0.6rem;
-    }
+  .section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 0.8rem;
+  }
 
     .radar-wrapper {
       width: 100%;

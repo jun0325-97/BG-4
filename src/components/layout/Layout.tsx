@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
-import FAB from "../common/FAB";
+import BottomNav from "./BottomNav";
 import BottomSheet from "../common/BottomSheet";
 import GameRegistrationModal from "../common/GameRegistrationModal";
 import RecordRegistrationModal from "../common/RecordRegistrationModal";
@@ -39,7 +39,7 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <FAB onClick={() => setIsBottomSheetOpen(true)} />
+      <BottomNav onFabClick={() => setIsBottomSheetOpen(true)} />
 
       <BottomSheet
         isOpen={isBottomSheetOpen}

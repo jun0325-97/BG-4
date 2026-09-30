@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { motion, useAnimation } from "framer-motion";
 import confetti from "canvas-confetti";
 import { Member } from "../../../../types";
 import "./RankingPodium.scss";
@@ -16,232 +17,199 @@ const CHARACTER_IMAGES: Record<string, string> = {
   yellow: imgYellow,
 };
 
-const TILE_SIZE = 40;
-
-// The winding S-curve path on a 7x5 grid with gaps between rows
-// Start at top-right (6,0) [Back], end at bottom-left (0,4) [Front]
-const PATH = [
-  [6, 0], [5, 0], [4, 0], [3, 0], [2, 0], [1, 0], [0, 0], // Back row (R -> L)
-  [0, 1],                                                 // Down on the left
-  [0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2], // Middle row (L -> R)
-  [6, 3],                                                 // Down on the right
-  [6, 4], [5, 4], [4, 4], [3, 4], [2, 4], [1, 4], [0, 4]  // Front row (R -> L)
-];
-
-// 특수 칸 설정 (바닥에 그려질 아이콘과 고유 색상)
-const SPECIAL_TILES: Record<number, { icon: string; color: string }> = {
-  5: { icon: "❓", color: "#ffcccc" },     // 찬스
-  11: { icon: "🗝️", color: "#fce38a" },   // 황금열쇠
-  16: { icon: "🌴", color: "#eaffcf" },   // 무인도
-};
-
-const MEMBER_OFFSETS: Record<string, { x: number; y: number }> = {
-  red: { x: -8, y: -8 },
-  blue: { x: 8, y: -8 },
-  green: { x: -8, y: 8 },
-  yellow: { x: 8, y: 8 },
-};
+// 포디움 높이 (px) [1등, 2등, 3등, 4등]
+const PODIUM_HEIGHTS = [140, 110, 85, 65];
+// 시상대 렌더링 순서: 3등, 1등, 2등, 4등 (왼쪽부터)
+const DISPLAY_ORDER = [2, 0, 1, 3];
 
 interface RankingPodiumProps {
   members: Member[];
 }
 
 export default function RankingPodium({ members }: RankingPodiumProps) {
-  const [animate, setAnimate] = useState(false);
-  const [arrivedIds, setArrivedIds] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
+  const [confettiFired, setConfettiFired] = useState(false);
+  const [is2ndCelebrating, setIs2ndCelebrating] = useState(false);
+  
+  const sorted = [...members].sort((a, b) => b.winRate - a.winRate);
+
+  const ctrl1 = useAnimation();
+  const ctrl2 = useAnimation();
+  const ctrl3 = useAnimation();
+  const ctrl4 = useAnimation();
+  const controls = { 1: ctrl1, 2: ctrl2, 3: ctrl3, 4: ctrl4 };
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimate(true), 200);
-    return () => clearTimeout(timer);
+    let isMounted = true;
+    const runSequence = async () => {
+      await new Promise(r => setTimeout(r, 200));
+      if (!isMounted) return;
+
+      // 공통 통통 튀며 걸어오는 애니메이션
+      const walkAnim = (targetX: number, targetY: number) => ({
+        x: targetX,
+        y: [0, -30, 0, -30, targetY],
+        rotate: [0, 15, -15, 15, 0],
+        opacity: 1,
+        transition: {
+          x: { type: "spring", stiffness: 120, damping: 15 } as any,
+          y: { duration: 0.6, times: [0, 0.25, 0.5, 0.75, 1] },
+          rotate: { duration: 0.6, times: [0, 0.25, 0.5, 0.75, 1] }
+        }
+      });
+
+      // 4등 등장
+      if (sorted[3]) {
+        controls[4].start(walkAnim(0, 0));
+        await new Promise(r => setTimeout(r, 300));
+      }
+      
+      // 3등 등장
+      if (sorted[2]) {
+        controls[3].start(walkAnim(0, 0));
+        await new Promise(r => setTimeout(r, 300));
+      }
+
+      // 2등 등장 -> 1등 자리로 (정확히 중앙인 -97px, 위로 -30px)
+      if (sorted[1]) {
+        controls[2].start(walkAnim(-97, -30));
+        await new Promise(r => setTimeout(r, 650)); 
+        if (isMounted) setIs2ndCelebrating(true); 
+        await new Promise(r => setTimeout(r, 1400));
+      }
+
+      // 1등 맹렬히 돌진하며 2등 걷어차기
+      if (sorted[0]) {
+        if (isMounted) setIs2ndCelebrating(false);
+        
+        // 1등 돌진
+        controls[1].start({ 
+          x: 0, 
+          y: [0, -10, 0],
+          rotate: [25, 25, 0], 
+          opacity: 1, 
+          transition: { 
+            x: { type: "spring", stiffness: 600, damping: 25 } as any,
+            y: { duration: 0.3 },
+            rotate: { duration: 0.3 }
+          } 
+        });
+        
+        // 충돌 순간 (약 120ms 후) 2등 차여서 날아감
+        setTimeout(() => {
+          if (sorted[1] && isMounted) {
+            controls[2].start({
+              x: 0,
+              y: [-30, -120, 0], 
+              rotate: [0, 360], 
+              transition: {
+                x: { type: "spring", stiffness: 150, damping: 15 } as any,
+                y: { duration: 0.5, times: [0, 0.4, 1], ease: ["easeOut", "easeIn"] },
+                rotate: { duration: 0.5, ease: "linear" }
+              }
+            });
+          }
+        }, 120);
+        
+        await new Promise(r => setTimeout(r, 450));
+        if (!isMounted) return;
+        
+        if (!confettiFired) {
+          setConfettiFired(true);
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { x: 0.5, y: 0.45 },
+            colors: ["#ffd700", "#ff6b6b", "#4ecdc4", "#ffeaa7", "#c7b8ea", "#a8e6cf"],
+          });
+        }
+
+        // 둥실둥실 디폴트 아이들(Idle) 인터랙션 시작
+        [1, 2, 3, 4].forEach((rank) => {
+          controls[rank as 1|2|3|4].start({
+            y: [0, -5, 0],
+            rotate: [0, 2, -2, 0],
+            transition: {
+              duration: 2.5 + Math.random() * 0.5, // 각자 약간씩 다르게
+              ease: "easeInOut",
+              repeat: Infinity,
+              delay: Math.random() * 0.5
+            }
+          });
+        });
+      }
+    };
+
+    runSequence();
+    return () => { isMounted = false; };
   }, []);
 
-  // Prepare members with their target path index
-  const sorted = [...members].sort((a, b) => b.winRate - a.winRate);
-  const players = sorted.map((member, sortedIndex) => {
-    // Determine how many tiles they advance based on winRate (0 to 20)
-    let targetIndex = Math.round((member.winRate / 100) * (PATH.length - 1));
-    targetIndex = Math.max(0, Math.min(targetIndex, PATH.length - 1));
-
-    const rank = sortedIndex + 1;
-    const isLast = sortedIndex === sorted.length - 1;
-
-    // 순위별로 이동 속도에 차이를 둠 (1등이 가장 빠르고 꼴찌가 가장 느림)
-    const baseSpeeds = [0.26, 0.31, 0.35, 0.40];
-    const tileSpeed = baseSpeeds[Math.min(sortedIndex, baseSpeeds.length - 1)];
-
-    const pathSlice = PATH.slice(0, targetIndex + 1);
-    const offset = MEMBER_OFFSETS[member.color] || { x: 0, y: 0 };
-
-    // Create keyframes for the sliding animation
-    const xKeyframes = pathSlice.map((p, i) => 
-      p[0] * TILE_SIZE + (i === pathSlice.length - 1 ? offset.x : 0)
-    );
-    const yKeyframes = pathSlice.map((p, i) => 
-      p[1] * TILE_SIZE + (i === pathSlice.length - 1 ? offset.y : 0)
-    );
-
-    const finalX = xKeyframes[xKeyframes.length - 1];
-    const finalY = yKeyframes[yKeyframes.length - 1];
-
-    // For z-index in isometric view, lower Y + X means it's further "back"
-    // So z-index should be X + Y. We use the grid coordinate.
-    const zIndex = pathSlice[pathSlice.length - 1][0] + pathSlice[pathSlice.length - 1][1];
-
-    return {
-      ...member,
-      targetIndex,
-      xKeyframes,
-      yKeyframes,
-      finalX,
-      finalY,
-      pathLength: pathSlice.length,
-      zIndex,
-      rank,
-      isLast,
-      tileSpeed,
-    };
-  });
-
   return (
-    <div className="ranking-podium card theme-day">
-      <div className="podium-header">
-        <div className="title-wrapper">
-          <span className="grand-prix-logo">☀️ BMS Grand Prix</span>
-        </div>
+    <div className="podium-card">
+      <div className="podium-card__header">
+        <span className="podium-card__title">🏆 크루 랭킹</span>
+        <span className="podium-card__sub">승률 기준</span>
       </div>
 
-      <div className="isometric-scene">
-        <div className="isometric-board">
-          {/* Draw the track tiles */}
-          {PATH.map((coord, idx) => {
-            const isStart = idx === 0;
-            const isEnd = idx === PATH.length - 1;
-            const special = SPECIAL_TILES[idx];
-            
-            // 톤다운된 모노톤(연한 그레이/화이트) 두 가지 색상 교차
-            const tileColors = ["#ffffff", "#f5f6fa"];
-            const defaultColor = tileColors[idx % tileColors.length];
-            const tileColor = isStart 
-              ? "#dcdde1" 
-              : isEnd 
-              ? "#f39c12" 
-              : special 
-              ? special.color 
-              : defaultColor;
+      <div className="podium-stage">
+        {DISPLAY_ORDER.map((rankIdx) => {
+          const player = sorted[rankIdx];
+          if (!player) return null;
 
-            return (
-              <div
-                key={idx}
-                className={`board-tile ${isStart ? "tile-start" : ""} ${isEnd ? "tile-end" : ""} ${special ? "tile-special" : ""}`}
-                style={{
-                  left: coord[0] * TILE_SIZE,
-                  top: coord[1] * TILE_SIZE,
-                  width: TILE_SIZE,
-                  height: TILE_SIZE,
-                  "--tile-bg": tileColor,
-                } as any}
-              >
-                <div className="tile-inner">
-                  {isStart && <span className="tile-label">START</span>}
-                  {isEnd && <span className="tile-label">FINISH</span>}
-                  {special && <span className="tile-icon">{special.icon}</span>}
-                </div>
-              </div>
-            );
-          })}
+          const rank = rankIdx + 1;
+          const height = PODIUM_HEIGHTS[rankIdx];
+          const isFirst = rank === 1;
+          const isSecond = rank === 2;
 
-          {/* Draw the players */}
-          {players.map((player) => {
-            const hasArrived = arrivedIds.has(player.id);
-            const idleClass =
-              player.rank === 1 ? "car--bounce" :
-              player.rank === 2 ? "car--wobble" :
-              player.rank === 3 ? "car--float" :
-              "car--shake";
-
-            return (
+          return (
+            <div
+              key={player.id}
+              className={`podium-slot${isFirst ? " podium-slot--first" : ""}`}
+            >
               <motion.div
-                key={player.id}
-                className="meeple-wrapper"
-                style={{ zIndex: player.zIndex + 10, transformStyle: "preserve-3d" }} // Added preserve-3d to fix flat rendering
-                initial={{
-                  x: player.xKeyframes[0],
-                  y: player.yKeyframes[0],
-                  z: 10, // 타일(translateZ: 6px)보다 높은 위치에 띄움
-                }}
-                animate={
-                  animate
-                    ? {
-                        x: player.xKeyframes,
-                        y: player.yKeyframes,
-                        z: 10,
-                      }
-                    : {}
-                }
-                transition={{
-                  duration: player.pathLength * player.tileSpeed, // 각자 다른 속도로 이동
-                  ease: "linear",
-                }}
-                onAnimationComplete={() => {
-                  setArrivedIds((prev) => {
-                    const next = new Set(prev);
-                    next.add(player.id);
-                    
-                    // 1등 도착 시 폭죽 발사
-                    if (player.rank === 1 && !prev.has(player.id)) {
-                      confetti({
-                        particleCount: 150,
-                        spread: 80,
-                        origin: { y: 0.6 },
-                        colors: ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6']
-                      });
-                    }
-                    return next;
-                  });
-                }}
+                className={`podium-char${isSecond && is2ndCelebrating ? " podium-char--celebrate" : ""}`}
+                initial={{ x: -400, y: 0, opacity: 0 }}
+                animate={controls[rank as 1|2|3|4]}
+                onClick={() => navigate(`/mypage/${player.color}`)}
+                style={{ cursor: "pointer" }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {/* This inner div is rotated to stand up to the camera */}
-                <div className="meeple-sprite">
-                  {/* 정적 오프셋 래퍼: 이미지가 타일 중앙 위에 정확히 위치하도록 위로 올림 */}
-                  <div className="meeple-offset-wrapper">
-                    {/* 도착 후 대기(Idle) 애니메이션 래퍼 */}
-                    <div className={`meeple-idle-wrapper ${hasArrived ? idleClass : ""}`}>
-                      {/* 레이스 중 폴짝거리는 애니메이션 래퍼 */}
-                      <motion.div
-                        animate={animate && !hasArrived ? { y: [0, -15, 0] } : { y: 0 }}
-                        transition={{
-                          repeat: player.pathLength > 1 ? player.pathLength : 0,
-                          duration: player.tileSpeed, // 이동 속도에 맞춰 폴짝임
-                          ease: "easeInOut",
-                        }}
-                        className="meeple-img-container"
-                      >
-                        <img
-                          src={CHARACTER_IMAGES[player.color]}
-                          alt={player.name}
-                          className="meeple-img"
-                        />
-                        <div className="meeple-label" data-color={player.color}>
-                          <span className="name">{player.name}</span>
-                          <span className="rate">{player.winRate}%</span>
-                        </div>
+                {/* 퍼센티지: 머리 위로 뱃지 원복 (게이지는 수치가 낮을 때 비어보이므로 직관적인 타이포그라피 뱃지 유지) */}
+                <div className="podium-char__rate" data-color={player.color}>
+                  <span className="rate-label">WIN</span>
+                  <span className="rate-value">{player.winRate}%</span>
+                </div>
+                
+                <div className="podium-char__img-wrap">
+                  <img
+                    src={CHARACTER_IMAGES[player.color]}
+                    alt={player.name}
+                    className="podium-char__img"
+                  />
+                </div>
 
-                        {/* 꼴찌 연기 파티클 (도착 후) */}
-                        {player.isLast && hasArrived && (
-                          <span className="smoke-container" aria-hidden="true">
-                            <span className="smoke smoke--1">💦</span>
-                            <span className="smoke smoke--2">💦</span>
-                            <span className="smoke smoke--3">💦</span>
-                          </span>
-                        )}
-                      </motion.div>
-                    </div>
-                  </div>
+                {/* 닉네임: 발 아래에 유지 */}
+                <div className="podium-char__info">
+                  <span className="podium-char__name">{player.name}</span>
                 </div>
               </motion.div>
-            );
-          })}
-        </div>
+
+              <div
+                className="podium-block"
+                data-color={player.color}
+                style={{ height }}
+              >
+                <div className="podium-block__front">
+                  <span className="podium-block__rank">{rank}</span>
+                </div>
+                <div className="podium-block__side" />
+                <div className="podium-block__top" />
+              </div>
+            </div>
+          );
+        })}
+        <div className="podium-floor" />
       </div>
     </div>
   );
