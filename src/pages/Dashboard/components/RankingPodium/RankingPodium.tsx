@@ -70,9 +70,9 @@ export default function RankingPodium({ members }: RankingPodiumProps) {
         await new Promise(r => setTimeout(r, 300));
       }
 
-      // 2등 등장 -> 1등 자리로 (정확히 중앙인 -97px, 위로 -30px)
+      // 2등 등장 -> 1등 자리로 (X는 좀 더 우측으로, Y는 높이차 고려해 좀 더 아래로)
       if (sorted[1]) {
-        controls[2].start(walkAnim(-97, -30));
+        controls[2].start(walkAnim(-62, -4));
         await new Promise(r => setTimeout(r, 650)); 
         if (isMounted) setIs2ndCelebrating(true); 
         await new Promise(r => setTimeout(r, 1400));
@@ -209,7 +209,6 @@ export default function RankingPodium({ members }: RankingPodiumProps) {
             </div>
           );
         })}
-        <div className="podium-floor" />
       </div>
     </div>
   );
