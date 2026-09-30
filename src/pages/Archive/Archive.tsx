@@ -130,32 +130,6 @@ interface TimelineCardProps {
 function TimelineCard({ record, members, boardGames, isLast, isOverallFirst, isTarget, onEdit, onPhotoClick }: TimelineCardProps) {
   const [isOpen, setIsOpen] = useState(!!isOverallFirst || !!isTarget);
   
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const ignoreClick = useRef(false);
-
-  const handlePointerDown = (photos: string[], index: number) => {
-    longPressTimer.current = setTimeout(() => {
-      ignoreClick.current = true;
-      onPhotoClick(photos, index);
-    }, 450); // 450ms 꾹 누르면 사진 확대
-  };
-
-  const handlePointerUp = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
-
-  const handleCardClick = () => {
-    if (ignoreClick.current) {
-      // 꾹 눌러서 사진을 켰을 때 발생하는 click 이벤트 무시
-      setTimeout(() => { ignoreClick.current = false; }, 100);
-      return;
-    }
-    setIsOpen(!isOpen);
-  };
-  
   useEffect(() => {
     if (isTarget) {
       setIsOpen(true);
@@ -193,7 +167,7 @@ function TimelineCard({ record, members, boardGames, isLast, isOverallFirst, isT
       {/* ── 오른쪽 카드 ── */}
       <div 
         className={`timeline-card ${isTarget ? "timeline-card--target-highlight" : ""}`}
-        onClick={handleCardClick}
+        onClick={() => setIsOpen(!isOpen)}
         style={{ cursor: "pointer" }}
       >
         {/* 카드 헤더: 게임 수 + 수정버튼 */}
@@ -226,10 +200,7 @@ function TimelineCard({ record, members, boardGames, isLast, isOverallFirst, isT
               <div
                 key={i}
                 className="timeline-card__photo-wrap"
-                onPointerDown={() => handlePointerDown(photos, i)}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-                onContextMenu={(e) => e.preventDefault()} // 모바일 꾹 누르기 시 메뉴 방지
+                onDoubleClick={(e) => { e.stopPropagation(); onPhotoClick(photos, i); }}
               >
                 <img src={url} alt={`모임 인증샷 ${i + 1}`} loading="lazy" />
                 <div className="timeline-card__photo-overlay">
