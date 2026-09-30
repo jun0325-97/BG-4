@@ -225,7 +225,7 @@
     flex-direction: column;
     align-items: center;
     margin-top: 0.4rem;
-    background: #f4f4f5; // 배경과 동일하게 맞춰서 선 위를 덮음
+    background: transparent;
     padding: 2px 0;
     z-index: 2;
 
@@ -245,7 +245,7 @@
 
   &__line {
     position: absolute;
-    top: 40px; 
+    top: 76px; 
     bottom: -2rem; 
     left: 50%;
     transform: translateX(-50%);
@@ -449,9 +449,9 @@
   }
 
   &__thumb {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
     overflow: hidden;
     background: #f1f5f9;
     display: flex;
