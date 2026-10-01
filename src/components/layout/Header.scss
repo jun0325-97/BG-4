@@ -5,8 +5,11 @@
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 1.2rem 1.25rem 0.8rem;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   z-index: 10;
 
   .logo {

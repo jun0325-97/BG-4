@@ -8,7 +8,12 @@
 body {
   font-family: 'Montserrat', 'Paperlogy', "Comic Sans MS", "Nunito", "Quicksand", sans-serif;
   color: $color-text-main;
-  background-color: $color-background;
+  background-color: #fcfcfd;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(5, 140, 215, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(253, 90, 70, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 197, 103, 0.03) 0%, transparent 60%);
+  background-attachment: fixed;
   overscroll-behavior-y: none; /* 당겨서 새로고침 / 바운스 효과 방지 */
 }
 

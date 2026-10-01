@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, MessageSquare, User, Pencil, Dices, LayoutGrid, LayoutList } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, Pencil, Dices, LayoutGrid, LayoutList } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -71,43 +71,104 @@ export default function Library() {
   const [searchParams] = useSearchParams();
   const ownerFilterUrl = searchParams.get("owner");
 
-  const [filters, setFilters] = useState({
-    players: "any",
-    time: "any",
-    genre: "any",
-    owner: ownerFilterUrl || "any",
+  const [filters, setFilters] = useState<{
+    players: string[];
+    time: string[];
+    genre: string[];
+    owner: string[];
+  }>({
+    players: [],
+    time: [],
+    genre: [],
+    owner: ownerFilterUrl ? [ownerFilterUrl] : [],
   });
+
+  const toggleFilter = (category: keyof typeof filters, value: string) => {
+    setFilters((prev) => {
+      const current = prev[category];
+      if (current.includes(value)) {
+        return { ...prev, [category]: current.filter((v) => v !== value) };
+      } else {
+        return { ...prev, [category]: [...current, value] };
+      }
+    });
+    setCurrentPage(1);
+  };
 
   // 1. 검색어 및 필터링 (useMemo로 연산 최적화)
   const filteredGames = useMemo(() => {
     return boardGames.filter((game) => {
       if (searchTerm && !game.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
 
-      if (filters.owner !== "any") {
-        if (filters.owner === "gray") {
-          if (game.ownerId !== "cafe") return false;
-        } else {
-          const owner = members.find((m) => m.color === filters.owner);
-          if (owner && game.ownerId !== owner.id) return false;
-        }
+      if (filters.owner.length > 0) {
+        const ownerMatch = filters.owner.some((o) => {
+          if (o === "gray") return game.ownerId === "cafe";
+          const owner = members.find((m) => m.color === o);
+          return owner && game.ownerId === owner.id;
+        });
+        if (!ownerMatch) return false;
       }
 
-      if (filters.players !== "any") {
-        const pCount = parseInt(filters.players, 10);
-        if (pCount < game.minPlayers || pCount > game.maxPlayers) return false;
+      if (filters.players.length > 0) {
+        const playerMatch = filters.players.some((p) => {
+          if (p === "6+") return game.maxPlayers >= 6;
+          const pCount = parseInt(p, 10);
+          return pCount >= game.minPlayers && pCount <= game.maxPlayers;
+        });
+        if (!playerMatch) return false;
       }
 
-      if (filters.time !== "any") {
-        if (filters.time === "short" && game.playTimeMinutes > 30) return false;
-        if (filters.time === "medium" && (game.playTimeMinutes <= 30 || game.playTimeMinutes > 60)) return false;
-        if (filters.time === "long" && game.playTimeMinutes <= 60) return false;
+      if (filters.time.length > 0) {
+        const timeMatch = filters.time.some((t) => {
+          if (t === "short") return game.playTimeMinutes <= 30;
+          if (t === "medium") return game.playTimeMinutes > 30 && game.playTimeMinutes <= 60;
+          if (t === "long") return game.playTimeMinutes > 60;
+          return false;
+        });
+        if (!timeMatch) return false;
       }
 
-      if (filters.genre !== "any" && !game.genre.includes(filters.genre)) return false;
+      if (filters.genre.length > 0) {
+        const genreMatch = filters.genre.some((g) => game.genre.includes(g));
+        if (!genreMatch) return false;
+      }
 
       return true;
     });
   }, [searchTerm, filters, boardGames, members]);
+
+  const selectedGameStats = useMemo(() => {
+    if (!selectedGame) return null;
+    let totalPlays = 0;
+    const winsByMember: Record<string, number> = {};
+
+    records.forEach(rec => {
+      rec.playLogs.forEach(log => {
+        if (log.gameId === selectedGame.id) {
+          totalPlays++;
+          
+          if (log.resultType === "winner_only" || log.resultType === "ranked") {
+            const winners = log.results.filter(r => r.isWinner || r.rank === 1);
+            winners.forEach(w => {
+              winsByMember[w.memberId] = (winsByMember[w.memberId] || 0) + 1;
+            });
+          }
+        }
+      });
+    });
+
+    let bestPlayerName = "";
+    let maxWins = 0;
+    Object.entries(winsByMember).forEach(([memberId, wins]) => {
+      if (wins > maxWins) {
+        maxWins = wins;
+        const member = members.find(m => m.id === memberId);
+        if (member) bestPlayerName = member.name;
+      }
+    });
+
+    return { totalPlays, bestPlayerName };
+  }, [selectedGame, records, members]);
 
   // 2. 전체 페이지 수 계산
   const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE) || 1;
@@ -195,45 +256,57 @@ export default function Library() {
 
       {/* 다중 필터 옵션 영역 (isFilterOpen에 따라 노출) */}
       <div className={`filter-section ${isFilterOpen ? "open" : ""}`}>
-        <select value={filters.players} onChange={(e) => { setFilters({ ...filters, players: e.target.value }); setCurrentPage(1); }}>
-          <option value="any">인원 (전체)</option>
-          <option value="2">2인</option>
-          <option value="3">3인</option>
-          <option value="4">4인</option>
-          <option value="5">5인</option>
-          <option value="6">6인 이상</option>
-        </select>
+        <div className="filter-group">
+          <span className="filter-label">인원</span>
+          <div className="filter-chips">
+            {["2", "3", "4", "5", "6+"].map(p => (
+              <button key={p} className={`filter-chip ${filters.players.includes(p) ? 'active' : ''}`} onClick={() => toggleFilter("players", p)}>
+                {p === "6+" ? "6인 이상" : `${p}인`}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <select value={filters.time} onChange={(e) => { setFilters({ ...filters, time: e.target.value }); setCurrentPage(1); }}>
-          <option value="any">시간 (전체)</option>
-          <option value="short">30분 이하</option>
-          <option value="medium">30~60분</option>
-          <option value="long">60분 초과</option>
-        </select>
+        <div className="filter-group">
+          <span className="filter-label">시간</span>
+          <div className="filter-chips">
+            <button className={`filter-chip ${filters.time.includes("short") ? 'active' : ''}`} onClick={() => toggleFilter("time", "short")}>30분 이하</button>
+            <button className={`filter-chip ${filters.time.includes("medium") ? 'active' : ''}`} onClick={() => toggleFilter("time", "medium")}>30~60분</button>
+            <button className={`filter-chip ${filters.time.includes("long") ? 'active' : ''}`} onClick={() => toggleFilter("time", "long")}>60분 초과</button>
+          </div>
+        </div>
 
-        <select value={filters.genre} onChange={(e) => { setFilters({ ...filters, genre: e.target.value }); setCurrentPage(1); }}>
-          <option value="any">장르 (전체)</option>
-          <option value="엔진/덱빌딩">엔진/덱빌딩</option>
-          <option value="마피아/블러핑">마피아/블러핑</option>
-          <option value="전략/수싸움">전략/수싸움</option>
-          <option value="협력">협력</option>
-          <option value="파티">파티</option>
-        </select>
+        <div className="filter-group">
+          <span className="filter-label">장르</span>
+          <div className="filter-chips">
+            {["엔진/덱빌딩", "마피아/블러핑", "전략/수싸움", "협력", "파티"].map(g => (
+              <button key={g} className={`filter-chip ${filters.genre.includes(g) ? 'active' : ''}`} onClick={() => toggleFilter("genre", g)}>
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <select value={filters.owner} onChange={(e) => { setFilters({ ...filters, owner: e.target.value }); setCurrentPage(1); }}>
-          <option value="any">소유자 (전체)</option>
-          {members.map(m => (
-            <option key={m.id} value={m.color}>{m.name} 님</option>
-          ))}
-          <option value="gray">공용/카페</option>
-        </select>
+        <div className="filter-group">
+          <span className="filter-label">소유자</span>
+          <div className="filter-chips">
+            {members.map(m => (
+              <button key={m.id} className={`filter-chip ${filters.owner.includes(m.color) ? 'active' : ''}`} onClick={() => toggleFilter("owner", m.color)}>
+                {m.name}
+              </button>
+            ))}
+            <button className={`filter-chip ${filters.owner.includes("gray") ? 'active' : ''}`} onClick={() => toggleFilter("owner", "gray")}>
+              공용/카페
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* 리스트 컨트롤 (뷰 모드 토글 등) */}
       <div className="list-controls">
         <div className="list-controls__info">
-          {filters.owner !== "any"
-            ? `${filters.owner === "gray" ? "공용/카페" : members.find((m) => m.color === filters.owner)?.name}의 보드게임 총 ${filteredGames.length}개`
+          {filters.owner.length === 1
+            ? `${filters.owner[0] === "gray" ? "공용/카페" : members.find((m) => m.color === filters.owner[0])?.name}의 보드게임 총 ${filteredGames.length}개`
             : `총 ${filteredGames.length}개`}
         </div>
         <div className="view-toggle">
@@ -357,62 +430,57 @@ export default function Library() {
             </div>
 
             <div className="modal-body">
-              {selectedGame.imageUrl && (
-                <div className="modal-thumbnail">
-                  <img src={selectedGame.imageUrl} alt={selectedGame.name} />
-                </div>
-              )}
-
-              <div className="modal-info-list">
-                <div className="modal-genre-badge">
-                  <span className="badge">{selectedGame.genre}</span>
-                  {currentUser && (
-                    <div className="modal-genre-actions">
-                      <button
-                        className="modal-icon-btn"
-                        onClick={() => { setEditingGame(selectedGame); setSelectedGame(null); }}
-                        title="수정"
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        className="modal-icon-btn delete"
-                        onClick={() => handleDeleteGame(selectedGame.id)}
-                        title="삭제"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="detail-item">
-                  <Users size={20} />
-                  <span>
-                    {formatPlayers(selectedGame.minPlayers, selectedGame.maxPlayers)} 추천
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <Clock size={20} />
-                  <span>약 {formatTime(selectedGame.playTimeMinutes)} 소요</span>
-                </div>
-                <div className="detail-item">
-                  <User size={20} />
-                  <span>소유자: </span>
-                  <span className="owner-name">
-                    {selectedGame.ownerId === "cafe" 
-                      ? "공용/카페" 
-                      : members.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
-                  </span>
-                </div>
-
-                {selectedGame.description && (
-                  <div className="detail-item description-item">
-                    <MessageSquare size={20} />
-                    <span>{selectedGame.description}</span>
+              <div className="modal-thumbnail-wrapper">
+                {selectedGame.imageUrl ? (
+                  <img src={selectedGame.imageUrl} alt={selectedGame.name} className="modal-thumbnail" />
+                ) : (
+                  <div className="modal-thumbnail no-image">
+                    <ImageIcon size={48} />
                   </div>
                 )}
               </div>
+
+              <div className="modal-specs">
+                <span className="spec-badge">{selectedGame.genre}</span>
+                <span className="spec-text"><Users size={14} /> {formatPlayers(selectedGame.minPlayers, selectedGame.maxPlayers)}</span>
+                <span className="spec-text"><Clock size={14} /> {formatTime(selectedGame.playTimeMinutes)}</span>
+              </div>
+
+              <div className="modal-info-table">
+                <div className="info-row">
+                  <span className="info-label">크루 플레이</span>
+                  <span className="info-value">{selectedGameStats?.totalPlays || 0}회</span>
+                </div>
+                {selectedGameStats?.bestPlayerName && (
+                  <div className="info-row">
+                    <span className="info-label">{selectedGame.name}의 왕</span>
+                    <span className="info-value king-value">👑 {selectedGameStats.bestPlayerName}</span>
+                  </div>
+                )}
+                <div className="info-row">
+                  <span className="info-label">소유자</span>
+                  <span className="info-value">
+                    {selectedGame.ownerId === "cafe"
+                      ? "공용/카페"
+                      : members.find((m) => m.id === selectedGame.ownerId)?.name || "알 수 없음"}
+                  </span>
+                </div>
+              </div>
+
+              {selectedGame.description && (
+                <p className="modal-desc">{selectedGame.description}</p>
+              )}
+
+              {currentUser && currentUser.id === selectedGame.ownerId && (
+                <div className="modal-actions">
+                  <button className="action-btn" onClick={() => { setEditingGame(selectedGame); setSelectedGame(null); }}>
+                    <Pencil size={16} /> 수정
+                  </button>
+                  <button className="action-btn delete" onClick={() => handleDeleteGame(selectedGame.id)}>
+                    <Trash2 size={16} /> 삭제
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

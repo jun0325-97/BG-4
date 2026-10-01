@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
-import { Settings } from "lucide-react";
+import { Settings, ChevronRight } from "lucide-react";
 import {
   Radar,
   RadarChart,
@@ -467,7 +467,10 @@ export default function MyPage() {
           className="library-link-btn"
           onClick={() => navigate(`/library?owner=${member.color}`)}
         >
-          {member.name}님이 보유한 보드게임 보기
+          <span>{member.name}님이 보유한 보드게임 보기</span>
+          <div className="btn-icon">
+            <ChevronRight size={18} />
+          </div>
         </button>
       </section>
     </div>
