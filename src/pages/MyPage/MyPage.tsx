@@ -145,7 +145,7 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
     설계: "⚙️",
     심리: "🎭",
     논리: "🔍",
-    감각: "⚡",
+    감각: "🔔",
   };
 
   let bestGenre = "";
