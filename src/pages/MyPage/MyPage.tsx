@@ -15,6 +15,10 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { getTitleByRank } from "../../utils/getTitleByRank";
 import { getKoreanName } from "../../utils/getKoreanName";
 import { getDynamicMembers } from "../../utils/calculateWinRates";
+import PageTransition from "../../components/common/PageTransition";
+import CountUp from "../../components/common/CountUp";
+import ScrollReveal from "../../components/common/ScrollReveal";
+import { motion } from "framer-motion";
 import "./MyPage.scss";
 
 import imgRed from "../../assets/images/img-red-1.png";
@@ -325,31 +329,63 @@ export default function MyPage() {
   };
 
   return (
-    <div className="mypage-container">
-      {/* 💡 세련된 가로형 프로필 헤더 */}
-      <header className="mypage-header-sleek" data-color={member.color}>
-        <div className="avatar-area">
-          <img src={CHARACTER_IMAGES[member.color]} alt={member.name} className="character-img" />
+    <PageTransition>
+      <div className="mypage-container">
+      {/* 🍏 1단계: 애플 카드 스타일 프로필 헤더 */}
+      <header className="mypage-header-apple" data-color={member.color}>
+        <div className="header-top">
+          <motion.div
+            className="avatar-area"
+            whileTap={{ scale: 0.85, y: 5 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <img src={CHARACTER_IMAGES[member.color]} alt={member.name} className="character-img" />
+          </motion.div>
+
+          <div className="info-area">
+            <div className="badges-row">
+              <span className="title" data-color={member.color}>{title}</span>
+              {stats.genreTitle && (
+                <span className="genre-title" data-color={member.color}>{stats.genreTitle}</span>
+              )}
+              {specialBadges.map((badge) => (
+                <span key={badge.key} className="special-badge" data-color={member.color}>
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+            <h1 className="name">{member.name}</h1>
+          </div>
         </div>
 
-        <div className="info-area">
-          <div className="badges-row">
-            <span className="title" data-color={member.color}>{title}</span>
-            {stats.genreTitle && (
-              <span className="genre-title" data-color={member.color}>{stats.genreTitle}</span>
-            )}
-            {specialBadges.map((badge) => (
-              <span key={badge.key} className="special-badge" data-color={member.color}>
-                {badge.label}
-              </span>
-            ))}
+        {/* 헤더 내부에 통합된 깔끔한 스탯 스트립 */}
+        <div className="header-stats-strip">
+          <div className="stat-item">
+            <span className="stat-label">종합 승률</span>
+            <div className="stat-value highlight">
+              <CountUp end={stats.overallWinRate} suffix="%" />
+            </div>
           </div>
-          <h1 className="name">{member.name}</h1>
+          <div className="stat-divider" />
+          <div className="stat-item">
+            <span className="stat-label">총 플레이</span>
+            <div className="stat-value">
+              <CountUp end={stats.totalPlays} suffix="판" />
+            </div>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item">
+            <span className="stat-label">최대 연승</span>
+            <div className="stat-value nemesis">
+              <CountUp end={stats.maxStreak} suffix="연승" />
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* 🌟 장르별 승률 레이더 차트 */}
-      <section className="chart-section">
+      {/* 🌟 장르별 승률 레이더 차트 (위젯) */}
+      <ScrollReveal>
+      <section className="chart-section-ios">
         <h2 className="section-title">장르별 승률 분석</h2>
         {stats.totalPlays === 0 ? (
           <div className="chart-empty">
@@ -403,20 +439,12 @@ export default function MyPage() {
           </>
         )}
       </section>
+      </ScrollReveal>
 
-      {/* 기본 & 추가 스탯 영역 그룹화 */}
-      <div className="stats-grid">
-        <div className="stat-box">
-          <span className="label">종합 승률</span>
-          <span className="value highlight-win">{stats.overallWinRate}%</span>
-        </div>
-        <div className="stat-box">
-          <span className="label">최대 연승</span>
-          <span className="value nemesis-value">{stats.maxStreak}연승</span>
-        </div>
-      </div>
+      {/* 기본 스탯 영역은 헤더로 통합되었으므로 삭제됨 (stats-grid) */}
 
-      <div className="stat-box full-width favorite-game-card">
+      <ScrollReveal delay={0.1}>
+      <div className="ios-widget-card favorite-game-widget">
         <div className="favorite-game-header">
           <span className="label">최애 게임</span>
           {isMe && (
@@ -458,11 +486,13 @@ export default function MyPage() {
           </div>
         )}
       </div>
+      </ScrollReveal>
 
 
 
       {/* 💡 새로 추가된: 내 책장 보기 버튼 */}
-      <section className="action-section">
+      <ScrollReveal delay={0.2}>
+      <section className="action-section-ios">
         <button
           className="library-link-btn"
           onClick={() => navigate(`/library?owner=${member.color}`)}
@@ -473,6 +503,8 @@ export default function MyPage() {
           </div>
         </button>
       </section>
-    </div>
+      </ScrollReveal>
+      </div>
+    </PageTransition>
   );
 }

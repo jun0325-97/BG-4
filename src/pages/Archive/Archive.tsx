@@ -6,6 +6,7 @@ import { useStore } from "../../store/useStore";
 import { Edit2, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import RecordRegistrationModal from "../../components/common/RecordRegistrationModal";
 import { GatheringRecord } from "../../types";
+import PageTransition from "../../components/common/PageTransition";
 import "./Archive.scss";
 
 
@@ -436,7 +437,8 @@ export default function Archive() {
   }, [groupedByMonth]);
 
   return (
-    <div className="archive-container">
+    <PageTransition>
+      <div className="archive-container">
       <h1 className="page-title">게임 다이어리</h1>
 
       {/* ── 연도 탭: 2개 이상 연도일 때만 표시 ── */}
@@ -522,6 +524,7 @@ export default function Archive() {
           onClose={() => setLightbox(null)}
         />
       )}
-    </div>
+      </div>
+    </PageTransition>
   );
 }

@@ -10,6 +10,7 @@ import { BoardGame } from "../../types";
 import { getKoreanName } from "../../utils/getKoreanName";
 import GameRegistrationModal from "../../components/common/GameRegistrationModal";
 import GamePickerModal from "../../components/common/GamePickerModal";
+import PageTransition from "../../components/common/PageTransition";
 import "./Library.scss";
 
 // 리스트 뷰 스켈레톤 카드
@@ -226,7 +227,8 @@ export default function Library() {
   };
 
   return (
-    <div className="library-container">
+    <PageTransition>
+      <div className="library-container">
       <div className="page-title-row">
         <h1 className="page-title">보드게임 책장</h1>
         <button className="roulette-btn" onClick={() => setIsPickerModalOpen(true)} title="오늘 뭐 할까?">
@@ -500,6 +502,7 @@ export default function Library() {
         isOpen={isPickerModalOpen}
         onClose={() => setIsPickerModalOpen(false)}
       />
-    </div>
+      </div>
+    </PageTransition>
   );
 }

@@ -6,6 +6,7 @@ import RankingPodium from "./components/RankingPodium/RankingPodium";
 import RecentGatherings from "./components/RecentGatherings/RecentGatherings";
 import MemberCards from "./components/MemberCards/MemberCards";
 import DashboardSkeleton from "./components/DashboardSkeleton/DashboardSkeleton";
+import PageTransition from "../../components/common/PageTransition";
 import { getDynamicMembers } from "../../utils/calculateWinRates";
 
 export default function Dashboard() {
@@ -20,7 +21,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="dashboard-container">
+    <PageTransition>
+      <div className="dashboard-container">
       {/* 🏎️ 히어로: 레이스트랙 랭킹 */}
       <section className="race-section--hero">
         <RankingPodium members={dynamicMembers} />
@@ -40,6 +42,7 @@ export default function Dashboard() {
       <section className="member-section">
         <MemberCards members={dynamicMembers} />
       </section>
-    </div>
+      </div>
+    </PageTransition>
   );
 }
