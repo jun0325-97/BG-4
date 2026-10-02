@@ -1,5 +1,6 @@
 // src/pages/MyPage/MyPage.scss
 
+@use "sass:color";
 @use "../../styles/variables" as *;
 
 .mypage-container {
@@ -19,7 +20,6 @@
   background-color: #ffffff;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.03);
-  overflow: hidden;
 
   // 부드러운 글래스모피즘 그라데이션 배경
   &::before {
@@ -97,20 +97,76 @@
 
     .title {
       @extend %badge-base;
-      &[data-color="red"]    { background-color: rgba($color-red, 0.1);    color: darken(#ff5757, 10%); }
-      &[data-color="blue"]   { background-color: rgba($color-blue, 0.1);   color: darken(#5271ff, 10%); }
-      &[data-color="green"]  { background-color: rgba($color-green, 0.15); color: darken(#7ed957, 20%); }
-      &[data-color="yellow"] { background-color: rgba($color-yellow, 0.25); color: darken(#c8a000, 5%); }
+      &[data-color="red"]    { background-color: rgba($color-red, 0.1);    color: color.adjust(#ff5757, $lightness: -10%); }
+      &[data-color="blue"]   { background-color: rgba($color-blue, 0.1);   color: color.adjust(#5271ff, $lightness: -10%); }
+      &[data-color="green"]  { background-color: rgba($color-green, 0.15); color: color.adjust(#7ed957, $lightness: -20%); }
+      &[data-color="yellow"] { background-color: rgba($color-yellow, 0.25); color: color.adjust(#c8a000, $lightness: -5%); }
     }
     
     .genre-title {
       @extend %badge-base;
     }
     
-    .special-badge {
-      @extend %badge-base;
-      background-color: #fef08a; // 칭호용 특별 컬러
-      color: #854d0e;
+    .special-badge-wrap {
+      position: relative;
+      display: inline-block;
+      
+      .special-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        cursor: help;
+        @extend %badge-base;
+        background: linear-gradient(135deg, #334155, #1e293b); // 프리미엄 다크톤
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        letter-spacing: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .special-badge-tooltip {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%) translateY(5px);
+        width: max-content;
+        max-width: 220px;
+        background-color: #1e293b;
+        color: #f8fafc;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.4;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+        pointer-events: none;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        word-break: keep-all;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border-width: 5px;
+          border-style: solid;
+          border-color: #1e293b transparent transparent transparent;
+        }
+      }
+
+      // 모바일(터치) 및 데스크톱(마우스 오버) 모두 대응
+      &:hover .special-badge-tooltip,
+      &:active .special-badge-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
     }
 
     .name {

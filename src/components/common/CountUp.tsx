@@ -22,7 +22,9 @@ export default function CountUp({
   const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (hasAnimated.current) return;
+    // end 값이 변경되면 애니메이션 다시 시작하도록 초기화
+    hasAnimated.current = false;
+    setCount(0);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -39,13 +41,15 @@ export default function CountUp({
 
             if (progress < 1) {
               requestAnimationFrame(animate);
+            } else {
+              setCount(end);
             }
           };
 
           requestAnimationFrame(animate);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.1 }
     );
 
     if (ref.current) observer.observe(ref.current);
