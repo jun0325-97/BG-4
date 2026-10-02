@@ -638,12 +638,12 @@ export default function MyPage() {
         ) : (
           <>
             <div className="radar-wrapper">
-              <ResponsiveContainer width="100%" height={250}>
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={stats.radar}>
+              <ResponsiveContainer width="100%" aspect={1.3}>
+                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={stats.radar}>
                   <PolarGrid stroke="#eeeeee" />
                   <PolarAngleAxis
                     dataKey="genre"
-                    tick={{ fill: "#1a1a1a", fontSize: 13, fontWeight: 900 }}
+                    tick={{ fill: "#1a1a1a", fontSize: 12, fontWeight: 800 }}
                   />
                   <Radar
                     name={member.name}
