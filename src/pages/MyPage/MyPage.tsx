@@ -365,14 +365,18 @@ function calculateSpecialBadges(
   // 동점자 발생 시 공식 종합 승률이 가장 '낮은' 사람에게 우선권을 주는 유틸리티
   const getOverallRate = (id: string) => members.find(m => m.id === id)?.winRate || 0;
 
-  const isTop = (scoreMap: { id: string, score: number }[], minVal = 0) => {
-    const valid = scoreMap.filter(x => x.score > minVal);
-    if (valid.length === 0) return false;
+  const getTopId = (scoreMap: { id: string, score: number }[], minVal = 0, excludeIds: string[] = []) => {
+    const valid = scoreMap.filter(x => x.score > minVal && !excludeIds.includes(x.id));
+    if (valid.length === 0) return null;
     const maxScore = Math.max(...valid.map(x => x.score));
     const topPlayers = valid.filter(x => x.score === maxScore);
     // 동점 시 승률 오름차순 정렬 (승률 낮은 사람이 1순위)
     topPlayers.sort((a, b) => getOverallRate(a.id) - getOverallRate(b.id));
-    return topPlayers[0].id === memberId;
+    return topPlayers[0].id;
+  };
+
+  const isTop = (scoreMap: { id: string, score: number }[], minVal = 0) => {
+    return getTopId(scoreMap, minVal) === memberId;
   };
 
   const isBottom = (scoreMap: { id: string, score: number }[]) => {
@@ -385,17 +389,22 @@ function calculateSpecialBadges(
   };
 
   // 1. 콩진호
-  if (isTop(members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank2 || 0 })), 1)) {
+  const kongMap = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank2 || 0 }));
+  const kongId = getTopId(kongMap, 1);
+  if (kongId === memberId) {
     badges.push({ key: "kong", emoji: "🥈", label: "콩진호", tooltip: "우승 문턱에서 미끄러진 횟수 크루 1위. 2인자도 아무나 하는 건 아닙니다." });
   }
 
-  // 2. 스위스 (2~3등 횟수 합이 가장 많은 사람)
+  // 2. 스위스 (2~3등 횟수 합이 가장 많은 사람, 단 콩진호 제외)
   const rank1List = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank1 || 0 }));
   const rank4List = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank4 || 0 }));
   const midRankList = members.map(m => ({ id: m.id, score: (memberStats[m.id]?.rank2 || 0) + (memberStats[m.id]?.rank3 || 0) }));
   
   let hasSwiss = false;
-  if (myStat.totalPlays >= 5 && isTop(midRankList, 0)) {
+  const swissExcludeIds = kongId ? [kongId] : [];
+  const swissId = getTopId(midRankList, 0, swissExcludeIds);
+  
+  if (myStat.totalPlays >= 5 && swissId === memberId) {
     hasSwiss = true;
     badges.push({ key: "swiss", emoji: "🕊️", label: "스위스", tooltip: "2등과 3등을 가장 많이 기록했습니다. 완벽한 평화주의자이자 중립국." });
   }
