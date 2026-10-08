@@ -229,9 +229,285 @@ function calculateMemberStats(memberId: string, records: any[], boardGames: any[
   };
 }
 
+// ── 특별 뱃지 계산 (전체 멤버 비교 기반, 단독 1위만 부여) ─────────────────────────
+interface SpecialBadge {
+  key: string;
+  emoji: string;
+  label: string;
+  tooltip: string;
+}
 
+function calculateSpecialBadges(
+  memberId: string,
+  members: any[],
+  boardGames: any[],
+  records: any[]
+): SpecialBadge[] {
+  const badges: SpecialBadge[] = [];
+  
+  if (members.length === 0 || records.length === 0) return badges;
 
+  const memberStats: Record<string, {
+    rank1: number, rank2: number, rank3: number, rank4: number,
+    totalPlays: number, shortPlays: number, shortWins: number,
+    longPlays: number, longWins: number, partyPlays: number,
+    partyWins: number, strategyPlays: number, strategyWins: number,
+    firstGameWins: number, gameWins: Record<string, number>
+  }> = {};
 
+  const playerStates: Record<string, {
+    currentStreak: number, lastRank: number,
+    streakBreaks: number, closerWins: number, underdogWins: number, giantKiller: number
+  }> = {};
+
+  members.forEach(m => {
+    memberStats[m.id] = { rank1: 0, rank2: 0, rank3: 0, rank4: 0, totalPlays: 0, shortPlays: 0, shortWins: 0, longPlays: 0, longWins: 0, partyPlays: 0, partyWins: 0, strategyPlays: 0, strategyWins: 0, firstGameWins: 0, gameWins: {} };
+    playerStates[m.id] = { currentStreak: 0, lastRank: 0, streakBreaks: 0, closerWins: 0, underdogWins: 0, giantKiller: 0 };
+  });
+
+  const GENRE_MAPPING: Record<string, string> = {
+    "전략/수싸움": "전략", "엔진/덱빌딩": "설계", "마피아/블러핑": "심리",
+    "테마/머더미스터리": "심리", "방탈출/추리": "논리", "퍼즐/타일놓기": "논리",
+    "파티/순발력": "감각", "카드게임": "감각",
+  };
+
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // 전체 1위(보겜의 왕) 찾기 (자이언트 킬러 계산용 - 공식 승률 기반)
+  const maxOverallRate = Math.max(...members.map(m => m.winRate || 0));
+  const theKing = members.find(m => (m.winRate || 0) === maxOverallRate)?.id;
+
+  sortedRecords.forEach(rec => {
+    const dailyLogs = rec.playLogs.filter((log: any) => log.resultType !== "no_result");
+    
+    dailyLogs.forEach((log: any, index: number) => {
+      const game = boardGames.find(g => g.id === log.gameId);
+      if (!game) return;
+
+      const duration = log.durationMinutes || 0;
+      const cat = GENRE_MAPPING[game.genre];
+      const isParty = cat === "감각";
+      const isStrategy = cat === "전략" || cat === "논리";
+      const isLastGameOfDay = (index === dailyLogs.length - 1);
+      const isFirstGameOfDay = (index === 0);
+
+      let anyOtherPlayerHadStreak = false;
+      let theKingPlayed = false;
+      let theKingWon = false;
+
+      members.forEach(m => {
+        if (playerStates[m.id].currentStreak >= 2) anyOtherPlayerHadStreak = true;
+      });
+
+      const participants = log.participatingMembers || members.map((m: any) => m.id);
+      if (theKing && participants.includes(theKing)) theKingPlayed = true;
+
+      participants.forEach((pid: string) => {
+        if (!memberStats[pid]) return;
+        const stat = memberStats[pid];
+        stat.totalPlays++;
+        
+        const myResult = log.results.find((r: any) => r.memberId === pid);
+        let isWin = false;
+        let rank = 4;
+
+        if (log.resultType === "ranked" && myResult?.rank) {
+          rank = myResult.rank;
+          if (rank === 1) { stat.rank1++; isWin = true; }
+          else if (rank === 2) stat.rank2++;
+          else if (rank === 3) stat.rank3++;
+          else if (rank >= 4) stat.rank4++;
+        } else if (log.resultType === "winner_only") {
+          if (myResult?.isWinner) { stat.rank1++; isWin = true; rank = 1; }
+          else { stat.rank4++; rank = 4; }
+        }
+
+        if (pid === theKing && isWin) theKingWon = true;
+
+        if (isWin) {
+          if (!stat.gameWins[game.id]) stat.gameWins[game.id] = 0;
+          stat.gameWins[game.id]++;
+        }
+
+        if (duration <= 30) { stat.shortPlays++; if (isWin) stat.shortWins++; }
+        if (duration >= 60) { stat.longPlays++; if (isWin) stat.longWins++; }
+        if (isParty) { stat.partyPlays++; if (isWin) stat.partyWins++; }
+        if (isStrategy) { stat.strategyPlays++; if (isWin) stat.strategyWins++; }
+
+        const pState = playerStates[pid];
+        if (isWin) {
+          if (anyOtherPlayerHadStreak && pState.currentStreak < 2) pState.streakBreaks++;
+          if (pState.lastRank === 4) pState.underdogWins++;
+          if (isLastGameOfDay) pState.closerWins++;
+          if (isFirstGameOfDay) stat.firstGameWins++;
+          pState.currentStreak++;
+        } else {
+          pState.currentStreak = 0;
+        }
+        pState.lastRank = rank;
+      });
+
+      if (theKingPlayed && !theKingWon) {
+        participants.forEach((pid: string) => {
+          const res = log.results.find((r:any) => r.memberId === pid);
+          if (res && (res.rank === 1 || res.isWinner) && pid !== theKing) {
+            playerStates[pid].giantKiller++;
+          }
+        });
+      }
+    });
+  });
+
+  const getWinRate = (wins: number, plays: number) => plays >= 3 ? wins / plays : -1;
+  const myStat = memberStats[memberId];
+  if (!myStat || myStat.totalPlays === 0) return badges;
+
+  // 동점자 발생 시 공식 종합 승률이 가장 '낮은' 사람에게 우선권을 주는 유틸리티
+  const getOverallRate = (id: string) => members.find(m => m.id === id)?.winRate || 0;
+
+  const isTop = (scoreMap: { id: string, score: number }[], minVal = 0) => {
+    const valid = scoreMap.filter(x => x.score > minVal);
+    if (valid.length === 0) return false;
+    const maxScore = Math.max(...valid.map(x => x.score));
+    const topPlayers = valid.filter(x => x.score === maxScore);
+    // 동점 시 승률 오름차순 정렬 (승률 낮은 사람이 1순위)
+    topPlayers.sort((a, b) => getOverallRate(a.id) - getOverallRate(b.id));
+    return topPlayers[0].id === memberId;
+  };
+
+  const isBottom = (scoreMap: { id: string, score: number }[]) => {
+    if (scoreMap.length === 0) return false;
+    const minScore = Math.min(...scoreMap.map(x => x.score));
+    const bottomPlayers = scoreMap.filter(x => x.score === minScore);
+    // 동점 시 승률 오름차순 정렬 (승률 낮은 사람이 1순위)
+    bottomPlayers.sort((a, b) => getOverallRate(a.id) - getOverallRate(b.id));
+    return bottomPlayers[0].id === memberId;
+  };
+
+  // 1. 콩진호
+  if (isTop(members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank2 || 0 })), 1)) {
+    badges.push({ key: "kong", emoji: "🥈", label: "콩진호", tooltip: "우승 문턱에서 미끄러진 횟수 크루 1위. 2인자도 아무나 하는 건 아닙니다." });
+  }
+
+  // 2. 스위스 (최소 1등 & 최소 4등 - 승률 낮은 자 우선)
+  const rank1List = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank1 || 0 }));
+  const rank4List = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank4 || 0 }));
+  let hasSwiss = false;
+  if (myStat.totalPlays >= 5 && isBottom(rank1List) && isBottom(rank4List)) {
+    hasSwiss = true;
+    badges.push({ key: "swiss", emoji: "🕊️", label: "스위스", tooltip: "1등도 가장 안 하고 꼴등도 가장 안 합니다. 완벽한 중립국 포지션." });
+  }
+
+  // 3. 주사위가 버린 자 (승률 단독 꼴찌)
+  const partyRates = members.map(m => ({ id: m.id, score: getWinRate(memberStats[m.id]?.partyWins||0, memberStats[m.id]?.partyPlays||0) })).filter(x => x.score >= 0);
+  if (partyRates.length > 0) {
+    const minParty = Math.min(...partyRates.map(x => x.score));
+    const bottoms = partyRates.filter(x => x.score === minParty);
+    if (minParty < 0.25 && bottoms.length === 1 && bottoms[0].id === memberId) {
+      badges.push({ key: "dice-cursed", emoji: "🎲", label: "주사위가 버린 자", tooltip: "파티/주사위 게임 승률 단독 최하위. 주사위 신에게 버림받았습니다." });
+    }
+  }
+
+  // 4. 후반 캐리형
+  if (isTop(members.map(m => ({ id: m.id, score: getWinRate(memberStats[m.id]?.longWins||0, memberStats[m.id]?.longPlays||0) })), 0.29)) {
+    badges.push({ key: "late-carry", emoji: "⏱️", label: "후반 캐리형", tooltip: "플레이 타임 60분 이상 장기전 승률 1위. 시간이 지날수록 강해집니다." });
+  }
+
+  // 5. 모 아니면 도
+  if (isTop(rank1List, 1) && isTop(rank4List, 1)) {
+    badges.push({ key: "rollercoaster", emoji: "🎢", label: "모 아니면 도", tooltip: "1등 횟수 1위, 꼴등 횟수도 1위! 중간이 없는 상남자/상여자." });
+  }
+
+  // 6. 인간 알파고
+  if (isTop(members.map(m => ({ id: m.id, score: getWinRate(memberStats[m.id]?.strategyWins||0, memberStats[m.id]?.strategyPlays||0) })), 0.29)) {
+    badges.push({ key: "alphago", emoji: "🤖", label: "인간 알파고", tooltip: "전략/논리 장르 승률 1위. 기계 같은 두뇌의 소유자." });
+  }
+
+  // 7. 초반 러쉬형
+  if (isTop(members.map(m => ({ id: m.id, score: getWinRate(memberStats[m.id]?.shortWins||0, memberStats[m.id]?.shortPlays||0) })), 0.29)) {
+    badges.push({ key: "early-rush", emoji: "⚡", label: "초반 러쉬형", tooltip: "30분 이하 단기전 승률 1위. 빠른 눈치로 초반 멘탈을 털어버립니다." });
+  }
+
+  // 8. 모임의 예능캐
+  if (isTop(partyRates, 0.29)) {
+    badges.push({ key: "entertainer", emoji: "🎭", label: "모임의 예능캐", tooltip: "파티 게임 승률 1위. 복잡한 룰보다 텐션으로 승부합니다." });
+  }
+
+  // 9. 막타 장인
+  if (isTop(members.map(m => ({ id: m.id, score: playerStates[m.id].closerWins })), 0)) {
+    badges.push({ key: "closer", emoji: "🌙", label: "막타 장인", tooltip: "그날 모임의 '마지막 게임' 1등 횟수 1위. 집에 가기 전 집중력 최고조." });
+  }
+
+  // 10. 고춧가루 부대
+  if (isTop(members.map(m => ({ id: m.id, score: playerStates[m.id].streakBreaks })), 0)) {
+    badges.push({ key: "streak-breaker", emoji: "🌶️", label: "고춧가루 부대", tooltip: "남의 연승을 뺏어온 횟수 1위. 누군가 잘 나가는 꼴을 못 봅니다." });
+  }
+
+  // 11. 언더독
+  if (isTop(members.map(m => ({ id: m.id, score: playerStates[m.id].underdogWins })), 0)) {
+    badges.push({ key: "underdog", emoji: "🔥", label: "언더독", tooltip: "꼴찌 직후 바로 1등으로 역전한 횟수 1위. 무서운 반전 매력." });
+  }
+
+  // 12. 낭만 합격 (스위스 제외 1등 단독 꼴찌)
+  if (!hasSwiss && myStat.totalPlays >= 5 && isBottom(rank1List)) {
+    badges.push({ key: "romanticist", emoji: "💖", label: "낭만 합격", tooltip: "1등 횟수 최하위. 승리 따위는 세속적인 욕심일 뿐인 진정한 낭만파." });
+  }
+
+  // 👑 신규 1. 조커 (한 우물 장인)
+  let bestGameScore = 0;
+  Object.values(myStat.gameWins).forEach(wins => { if (wins > bestGameScore) bestGameScore = wins; });
+
+  if (bestGameScore >= 3) { // 한 게임에서 최소 3번은 1등 해야 인정
+    const maxWinsInThatGame = Math.max(...members.map(m => {
+       let hw = 0;
+       Object.keys(myStat.gameWins).forEach(gId => {
+         if (myStat.gameWins[gId] === bestGameScore) {
+           const theirWin = memberStats[m.id]?.gameWins[gId] || 0;
+           if(theirWin > hw) hw = theirWin;
+         }
+       });
+       return hw;
+    }));
+    // 내가 그 게임에서 단독 1위여야 함 (동점일 경우 승률 낮은 사람 우선)
+    let topGameMasters = members.filter(m => {
+       let hw = 0;
+       Object.keys(myStat.gameWins).forEach(gId => {
+         if (myStat.gameWins[gId] === bestGameScore) {
+           const theirWin = memberStats[m.id]?.gameWins[gId] || 0;
+           if(theirWin > hw) hw = theirWin;
+         }
+       });
+       return hw === maxWinsInThatGame;
+    });
+    if (topGameMasters.length > 1) {
+       topGameMasters.sort((a, b) => getOverallRate(a.id) - getOverallRate(b.id));
+    }
+    if (topGameMasters.length > 0 && topGameMasters[0].id === memberId) {
+       badges.push({ key: "joker", emoji: "🃏", label: "히든 조커", tooltip: "특정 게임 하나에서만큼은 1등 횟수 1위입니다. 한 우물 장인." });
+    }
+  }
+
+  // 👑 신규 2. 자이언트 킬러
+  if (theKing !== memberId && isTop(members.map(m => ({ id: m.id, score: playerStates[m.id].giantKiller })), 0)) {
+    badges.push({ key: "giant-killer", emoji: "🗡️", label: "자이언트 킬러", tooltip: "크루 종합 승률 1위를 상대로 가장 많이 1등을 뺏어온 1등 담당 일진." });
+  }
+
+  // 👑 신규 3. 첫 판의 지배자 (퍼스트 블러드)
+  if (isTop(members.map(m => ({ id: m.id, score: memberStats[m.id].firstGameWins })), 0)) {
+    badges.push({ key: "first-blood", emoji: "⏱️", label: "첫 판의 지배자", tooltip: "모임의 그날 '첫 게임' 1등 횟수 1위. 시작부터 기선을 제압합니다." });
+  }
+
+  // 👑 신규 4. 다크호스
+  // 종합 승률은 꼴찌인데 특정 장르 1개에서 1등인 사람
+  const minOfficialRate = Math.min(...members.map(m => m.winRate || 0));
+  const isBottomWinRate = (members.find(m => m.id === memberId)?.winRate || 0) === minOfficialRate;
+  
+  if (isBottomWinRate && (isTop(partyRates, 0.25) || isTop(members.map(m => ({ id: m.id, score: getWinRate(memberStats[m.id]?.strategyWins||0, memberStats[m.id]?.strategyPlays||0) })), 0.25))) {
+    badges.push({ key: "dark-horse", emoji: "🌪️", label: "다크호스", tooltip: "종합 승률은 낮지만 특정 장르에서만큼은 1위! 방심하면 당합니다." });
+  }
+
+  return badges;
+}
 
 // 차트 색상을 멤버 고유색에 맞추기 위한 매핑
 const THEME_COLORS = {
@@ -256,6 +532,10 @@ export default function MyPage() {
 
   const dynamicMembers = useMemo(() => getDynamicMembers(members, records), [members, records]);
 
+  const specialBadges = useMemo(
+    () => member ? calculateSpecialBadges(member.id, dynamicMembers, boardGames, records) : [],
+    [member?.id, dynamicMembers, boardGames, records]
+  );
 
   if (!member || !stats) return <Navigate to="/" replace />;
 
@@ -304,7 +584,6 @@ export default function MyPage() {
               {stats.genreTitle && (
                 <span className="genre-title" data-color={member.color}>{stats.genreTitle}</span>
               )}
-              {/* 임시 비활성화: 언제든 다시 기능 살릴 수 있도록 주석 처리만 해둠
               {specialBadges.map((badge) => (
                 <div key={badge.key} className="special-badge-wrap">
                   <span className="special-badge" data-color={member.color}>
@@ -313,7 +592,6 @@ export default function MyPage() {
                   <div className="special-badge-tooltip">{badge.tooltip}</div>
                 </div>
               ))}
-              */}
             </div>
             <h1 className="name">{member.name}</h1>
           </div>
