@@ -273,23 +273,124 @@
     color: $color-text-main;
   }
 
-  .add-log-btn {
+  .play-logs-header-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    font-family: inherit;
-    background-color: $color-blue;
-    color: #fff;
-    border: 1.5px solid $color-border;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: opacity 0.15s;
+    gap: 8px;
 
-    &:hover {
-      opacity: 0.85;
+    .reorder-mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      font-family: inherit;
+      background-color: #f1f1f1;
+      color: $color-text-main;
+      border: 1.5px solid $color-border;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.15s, background-color 0.15s;
+
+      &:hover {
+        opacity: 0.85;
+      }
+
+      &.active {
+        background-color: $color-yellow;
+      }
+    }
+
+    .add-log-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      font-family: inherit;
+      background-color: $color-blue;
+      color: #fff;
+      border: 1.5px solid $color-border;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+}
+
+// ── 순서 편집 모드 (Drag and Drop) ───────────────────────────
+.sortable-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sortable-play-log-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #fff;
+  @include retro-border;
+  border-radius: 8px;
+  padding: 10px 12px;
+  position: relative;
+  z-index: 1;
+
+  &.dragging {
+    @include retro-shadow;
+    background-color: #fafafa;
+    border-color: $color-blue;
+  }
+
+  .drag-handle {
+    background: none;
+    border: none;
+    cursor: grab;
+    color: $color-text-sub;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    touch-action: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .sortable-item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+
+    .log-num {
+      font-size: 0.7rem;
+      font-weight: 900;
+      background: #d5d5d5;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .game-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: $color-text-main;
+    }
+
+    .participant-info {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: $color-text-sub;
+      margin-left: auto;
     }
   }
 }
@@ -412,39 +513,7 @@
         }
       }
 
-      .order-actions {
-        display: flex;
-        align-items: center;
-        background: rgba($color-border, 0.1);
-        border: 1px solid $color-border;
-        border-radius: 6px;
-        overflow: hidden;
 
-        .move-log-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 3px 6px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: $color-text-main;
-          transition: background 0.15s, opacity 0.15s;
-
-          &:hover:not(:disabled) {
-            background: rgba($color-border, 0.2);
-          }
-
-          &:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-          }
-
-          &:first-child {
-            border-right: 1px solid $color-border;
-          }
-        }
-      }
 
       .remove-log-btn {
         display: flex;

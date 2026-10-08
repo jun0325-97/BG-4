@@ -124,6 +124,7 @@ async function insertRecord(record: GatheringRecord): Promise<void> {
   if (recErr) throw recErr;
 
   // 2. play_logs 삽입
+  let index = 0;
   for (const log of record.playLogs) {
     const { error: logErr } = await supabase
       .from('play_logs')
@@ -134,7 +135,9 @@ async function insertRecord(record: GatheringRecord): Promise<void> {
         result_type: log.resultType,
         duration_minutes: log.durationMinutes,
         participating_members: log.participatingMembers ?? null,
+        created_at: new Date(Date.now() + index).toISOString(),
       });
+    index++;
     if (logErr) throw logErr;
 
     // 3. player_results 삽입
@@ -177,6 +180,7 @@ async function upsertRecord(record: GatheringRecord): Promise<void> {
   if (recErr) throw recErr;
 
   // play_logs + player_results 재삽입
+  let index = 0;
   for (const log of record.playLogs) {
     const { error: logErr } = await supabase
       .from('play_logs')
@@ -187,7 +191,9 @@ async function upsertRecord(record: GatheringRecord): Promise<void> {
         result_type: log.resultType,
         duration_minutes: log.durationMinutes,
         participating_members: log.participatingMembers ?? null,
+        created_at: new Date(Date.now() + index).toISOString(),
       });
+    index++;
     if (logErr) throw logErr;
 
     if (log.results.length > 0) {
@@ -273,7 +279,8 @@ export const useStore = create<AppState>((set, get) => ({
     const { data: logData, error: logErr } = await supabase
       .from('play_logs')
       .select('*')
-      .in('gathering_record_id', recIds);
+      .in('gathering_record_id', recIds)
+      .order('created_at', { ascending: true });
     if (logErr) throw logErr;
 
     const logIds = (logData ?? []).map((l) => l.id);

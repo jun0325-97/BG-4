@@ -1,12 +1,29 @@
 // src/components/common/RecordRegistrationModal.tsx
 
 import { useState, useMemo, useRef } from "react";
-import { X, Plus, Trash2, Users, Image as ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
+import { X, Plus, Trash2, Users, Image as ImageIcon, ListOrdered } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
 import { supabase } from "../../utils/supabase";
 import { GatheringRecord, PlayLog, PlayerResult, Member } from "../../types";
 import imageCompression from "browser-image-compression";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortablePlayLogItem from "./SortablePlayLogItem";
 import "./RecordRegistrationModal.scss";
 
 interface RecordRegistrationModalProps {
@@ -82,8 +99,38 @@ export default function RecordRegistrationModal({
   );
   // 클릭한 로그 인덱스에 대해 참여멤버 피커 열림
   const [openParticipantPicker, setOpenParticipantPicker] = useState<number | null>(null);
-  // 새 업이트 카드로 자동 스크롤 용 ref
+  // 새 업데이트 카드로 자동 스크롤 용 ref
   const newLogRef = useRef<HTMLDivElement>(null);
+
+  // ── 드래그 앤 드롭 상태 ────────────────────────────────
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      }
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      }
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setPlayLogs((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -140,23 +187,7 @@ export default function RecordRegistrationModal({
     setPlayLogs((prev) => prev.filter((_, i) => i !== logIndex));
   };
 
-  // ── 게임 순서 변경 ───────────────────────────────────────
-  const handleMoveLog = (logIndex: number, direction: 'up' | 'down') => {
-    setPlayLogs((prev) => {
-      const newLogs = [...prev];
-      const targetIndex = direction === 'up' ? logIndex - 1 : logIndex + 1;
-      
-      // 범위 체크
-      if (targetIndex < 0 || targetIndex >= newLogs.length) return newLogs;
-      
-      // 스왑
-      const temp = newLogs[logIndex];
-      newLogs[logIndex] = newLogs[targetIndex];
-      newLogs[targetIndex] = temp;
-      
-      return newLogs;
-    });
-  };
+
 
   // ── 참여 멤버 토글 ───────────────────────────────────────
   const handleToggleMember = (logIndex: number, memberId: string) => {
@@ -374,17 +405,56 @@ export default function RecordRegistrationModal({
           <div className="play-logs-section">
             <div className="play-logs-header">
               <span className="play-logs-title">플레이한 게임</span>
-              <button
-                type="button"
-                className="add-log-btn"
-                onClick={handleAddLog}
-              >
-                <Plus size={14} /> 게임 추가
-              </button>
+              <div className="play-logs-header-actions">
+                {playLogs.length > 1 && (
+                  <button
+                    type="button"
+                    className={`reorder-mode-btn ${isReorderMode ? 'active' : ''}`}
+                    onClick={() => setIsReorderMode(!isReorderMode)}
+                  >
+                    <ListOrdered size={14} /> {isReorderMode ? "편집 완료" : "순서 편집"}
+                  </button>
+                )}
+                {!isReorderMode && (
+                  <button
+                    type="button"
+                    className="add-log-btn"
+                    onClick={handleAddLog}
+                  >
+                    <Plus size={14} /> 게임 추가
+                  </button>
+                )}
+              </div>
             </div>
 
-            {playLogs.map((log, logIndex) => {
-              const selectedGame = boardGames.find((g) => g.id === log.gameId);
+            {isReorderMode ? (
+              <div className="sortable-list-container">
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={playLogs.map(log => log.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {playLogs.map((log, index) => (
+                      <SortablePlayLogItem
+                        key={log.id}
+                        id={log.id}
+                        log={log}
+                        index={index}
+                        boardGames={boardGames}
+                        members={members}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              </div>
+            ) : (
+              <>
+                {playLogs.map((log, logIndex) => {
+                  const selectedGame = boardGames.find((g) => g.id === log.gameId);
               // 마지막 카드에만 ref 연결
               const isLast = logIndex === playLogs.length - 1;
               return (
@@ -432,28 +502,7 @@ export default function RecordRegistrationModal({
                         )}
                       </div>
 
-                      {playLogs.length > 1 && (
-                        <div className="order-actions">
-                          <button
-                            type="button"
-                            className="move-log-btn"
-                            onClick={() => handleMoveLog(logIndex, 'up')}
-                            disabled={logIndex === 0}
-                            title="위로 이동"
-                          >
-                            <ArrowUp size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            className="move-log-btn"
-                            onClick={() => handleMoveLog(logIndex, 'down')}
-                            disabled={logIndex === playLogs.length - 1}
-                            title="아래로 이동"
-                          >
-                            <ArrowDown size={14} />
-                          </button>
-                        </div>
-                      )}
+
 
                       {playLogs.length > 1 && (
                         <button
@@ -552,6 +601,8 @@ export default function RecordRegistrationModal({
                 </div>
               );
             })}
+            </>
+          )}
           </div>
 
           {/* 메모 */}
