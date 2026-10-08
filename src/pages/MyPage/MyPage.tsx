@@ -389,13 +389,15 @@ function calculateSpecialBadges(
     badges.push({ key: "kong", emoji: "🥈", label: "콩진호", tooltip: "우승 문턱에서 미끄러진 횟수 크루 1위. 2인자도 아무나 하는 건 아닙니다." });
   }
 
-  // 2. 스위스 (최소 1등 & 최소 4등 - 승률 낮은 자 우선)
+  // 2. 스위스 (2~3등 횟수 합이 가장 많은 사람)
   const rank1List = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank1 || 0 }));
   const rank4List = members.map(m => ({ id: m.id, score: memberStats[m.id]?.rank4 || 0 }));
+  const midRankList = members.map(m => ({ id: m.id, score: (memberStats[m.id]?.rank2 || 0) + (memberStats[m.id]?.rank3 || 0) }));
+  
   let hasSwiss = false;
-  if (myStat.totalPlays >= 5 && isBottom(rank1List) && isBottom(rank4List)) {
+  if (myStat.totalPlays >= 5 && isTop(midRankList, 0)) {
     hasSwiss = true;
-    badges.push({ key: "swiss", emoji: "🕊️", label: "스위스", tooltip: "1등도 가장 안 하고 꼴등도 가장 안 합니다. 완벽한 중립국 포지션." });
+    badges.push({ key: "swiss", emoji: "🕊️", label: "스위스", tooltip: "2등과 3등을 가장 많이 기록했습니다. 완벽한 평화주의자이자 중립국." });
   }
 
   // 3. 주사위가 버린 자 (승률 단독 꼴찌)
@@ -428,9 +430,9 @@ function calculateSpecialBadges(
     badges.push({ key: "early-rush", emoji: "⚡", label: "초반 러쉬형", tooltip: "30분 이하 단기전 승률 1위. 빠른 눈치로 초반 멘탈을 털어버립니다." });
   }
 
-  // 8. 모임의 예능캐
+  // 8. 파티피플
   if (isTop(partyRates, 0.29)) {
-    badges.push({ key: "entertainer", emoji: "🎭", label: "모임의 예능캐", tooltip: "파티 게임 승률 1위. 복잡한 룰보다 텐션으로 승부합니다." });
+    badges.push({ key: "entertainer", emoji: "🪩", label: "파티피플", tooltip: "파티 게임 승률 1위. 복잡한 룰보다 텐션으로 승부합니다." });
   }
 
   // 9. 막타 장인
