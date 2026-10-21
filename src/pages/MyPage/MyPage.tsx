@@ -596,7 +596,7 @@ export default function MyPage() {
                 <span className="genre-title" data-color={member.color}>{stats.genreTitle}</span>
               )}
               {specialBadges.map((badge) => (
-                <div key={badge.key} className="special-badge-wrap">
+                <div key={badge.key} className="special-badge-wrap" tabIndex={0}>
                   <span className="special-badge" data-color={member.color}>
                     {badge.emoji} {badge.label}
                   </span>
@@ -646,8 +646,8 @@ export default function MyPage() {
         ) : (
           <>
             <div className="radar-wrapper">
-              <ResponsiveContainer width="100%" aspect={1.3}>
-                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={stats.radar}>
+              <ResponsiveContainer width="100%" height={260}>
+                <RadarChart cx="50%" cy="50%" outerRadius="60%" data={stats.radar}>
                   <PolarGrid stroke="#eeeeee" />
                   <PolarAngleAxis
                     dataKey="genre"

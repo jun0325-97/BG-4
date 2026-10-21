@@ -39,9 +39,10 @@ html {
   position: relative;
 }
 
-/* 🧱 모든 페이지의 공통 여백 (상단, 좌우, 하단 바텀탭 영역 확보 + iOS 하단 홈바 대응) */
 .main-content {
+  position: relative;
+  z-index: 15;
   padding: 1.25rem 1rem calc(72px + env(safe-area-inset-bottom)) 1rem;
-  overflow-x: hidden; /* 가로 스크롤 방지, 세로는 정상 스크롤되도록 */
+  overflow-x: clip; /* 가로 스크롤 방지 및 상단 툴팁/팝오버가 잘리지 않도록 clip 적용 */
 }
 
