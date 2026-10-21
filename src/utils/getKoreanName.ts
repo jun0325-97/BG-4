@@ -6,6 +6,7 @@ const NAME_MAP: Record<string, string> = {
   yoonhyuk: "윤혁",
   gayoung: "가영",
   youngjun: "영준",
+  guest: "게스트",
 };
 
 export function getKoreanName(username: string): string {

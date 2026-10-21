@@ -1,8 +1,6 @@
-// src/pages/Library/Library.tsx
-
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, Pencil, Dices, LayoutGrid, LayoutList } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, Pencil, Dices, LayoutGrid, LayoutList, Calculator } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -10,6 +8,7 @@ import { BoardGame } from "../../types";
 import { getKoreanName } from "../../utils/getKoreanName";
 import GameRegistrationModal from "../../components/common/GameRegistrationModal";
 import GamePickerModal from "../../components/common/GamePickerModal";
+import ScoreSheetModal from "../../components/common/ScoreSheetModal";
 import PageTransition from "../../components/common/PageTransition";
 import "./Library.scss";
 
@@ -63,6 +62,8 @@ export default function Library() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isPickerModalOpen, setIsPickerModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isScoreSheetOpen, setIsScoreSheetOpen] = useState(false);
+  const [scoreSheetGameName, setScoreSheetGameName] = useState("");
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
@@ -473,6 +474,21 @@ export default function Library() {
                 <p className="modal-desc">{selectedGame.description}</p>
               )}
 
+              {/* 실시간 종이 점수 계산기 바로가기 */}
+              <div className="modal-tool-actions">
+                <button
+                  type="button"
+                  className="tool-score-btn"
+                  onClick={() => {
+                    setScoreSheetGameName(selectedGame.name);
+                    setIsScoreSheetOpen(true);
+                  }}
+                >
+                  <Calculator size={16} />
+                  <span>이 게임 점수 계산기 열기</span>
+                </button>
+              </div>
+
               {currentUser && currentUser.id === selectedGame.ownerId && (
                 <div className="modal-actions">
                   <button className="action-btn" onClick={() => { setEditingGame(selectedGame); setSelectedGame(null); }}>
@@ -501,6 +517,13 @@ export default function Library() {
       <GamePickerModal
         isOpen={isPickerModalOpen}
         onClose={() => setIsPickerModalOpen(false)}
+      />
+
+      {/* 실시간 점수 계산기 모달 */}
+      <ScoreSheetModal
+        isOpen={isScoreSheetOpen}
+        onClose={() => setIsScoreSheetOpen(false)}
+        initialGameName={scoreSheetGameName}
       />
       </div>
     </PageTransition>

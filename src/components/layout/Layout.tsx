@@ -8,6 +8,8 @@ import BottomSheet from "../common/BottomSheet";
 import GameRegistrationModal from "../common/GameRegistrationModal";
 import RecordRegistrationModal from "../common/RecordRegistrationModal";
 import QuickPlayLogModal from "../common/QuickPlayLogModal";
+import ScoreSheetModal from "../common/ScoreSheetModal";
+import TurnTimerModal from "../common/TurnTimerModal";
 import { Gamepad2, PenLine, Trophy } from "lucide-react";
 
 export default function Layout() {
@@ -15,6 +17,8 @@ export default function Layout() {
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isQuickPlayLogOpen, setIsQuickPlayLogOpen] = useState(false);
+  const [isScoreSheetOpen, setIsScoreSheetOpen] = useState(false);
+  const [isTurnTimerOpen, setIsTurnTimerOpen] = useState(false);
 
   const handleOpenGameModal = () => {
     setIsBottomSheetOpen(false);
@@ -31,9 +35,20 @@ export default function Layout() {
     setIsQuickPlayLogOpen(true);
   };
 
+  const handleOpenScoreSheet = () => {
+    setIsScoreSheetOpen(true);
+  };
+
+  const handleOpenTurnTimer = () => {
+    setIsTurnTimerOpen(true);
+  };
+
   return (
     <div className="layout-wrapper">
-      <Header />
+      <Header
+        onOpenScoreSheet={handleOpenScoreSheet}
+        onOpenTurnTimer={handleOpenTurnTimer}
+      />
 
       <main className="main-content">
         <Outlet />
@@ -48,17 +63,26 @@ export default function Layout() {
         <div className="bottom-sheet-menu">
           <button className="menu-item" onClick={handleOpenRecordModal}>
             <PenLine size={20} />
-            <span>새로운 기록 추가</span>
+            <div className="menu-item-text">
+              <span>새로운 모임 기록</span>
+              <small>날짜, 사진, 플레이 로그 전체 등록</small>
+            </div>
           </button>
 
           <button className="menu-item" onClick={handleOpenQuickPlayLog}>
             <Trophy size={20} />
-            <span>게임 결과 추가</span>
+            <div className="menu-item-text">
+              <span>게임 결과 추가</span>
+              <small>최근 모임에 빠른 1판 결과 추가</small>
+            </div>
           </button>
 
           <button className="menu-item" onClick={handleOpenGameModal}>
             <Gamepad2 size={20} />
-            <span>새로운 게임 등록</span>
+            <div className="menu-item-text">
+              <span>새로운 게임 등록</span>
+              <small>보드게임 책장에 신규 타이틀 추가</small>
+            </div>
           </button>
         </div>
       </BottomSheet>
@@ -76,6 +100,16 @@ export default function Layout() {
       <QuickPlayLogModal
         isOpen={isQuickPlayLogOpen}
         onClose={() => setIsQuickPlayLogOpen(false)}
+      />
+
+      <ScoreSheetModal
+        isOpen={isScoreSheetOpen}
+        onClose={() => setIsScoreSheetOpen(false)}
+      />
+
+      <TurnTimerModal
+        isOpen={isTurnTimerOpen}
+        onClose={() => setIsTurnTimerOpen(false)}
       />
     </div>
   );

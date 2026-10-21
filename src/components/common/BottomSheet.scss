@@ -75,34 +75,63 @@
 .bottom-sheet-menu {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  padding: 1rem 0;
+  gap: 0.75rem;
+  padding: 0.4rem 0 1rem;
 
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 1.2rem;
+    gap: 14px;
+    padding: 1.05rem 1.25rem;
     background-color: #fff;
     @include retro-border;
-    font-size: 1.1rem;
-    font-weight: 800;
     font-family: inherit;
     color: $color-text-main;
     cursor: pointer;
     @include retro-shadow;
+    border-radius: 18px;
+    transition: all 0.15s ease;
 
     svg {
-      color: $color-text-sub;
+      flex-shrink: 0;
     }
 
-    // 두 번째 버튼(게임 등록)은 배경색을 살짝 다르게 줘서 포인트를 줄 수도 있어!
+    .menu-item-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+
+      span {
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: $color-text-main;
+      }
+
+      small {
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: #888;
+        margin-top: 2px;
+      }
+    }
+
+    &:nth-child(1) {
+      background: linear-gradient(135deg, rgba($color-red, 0.06), #ffffff);
+      border-color: rgba($color-red, 0.15);
+      svg { color: $color-red; }
+    }
+
     &:nth-child(2) {
-      background-color: rgba($color-blue, 0.1); // 블루톤
+      background: linear-gradient(135deg, rgba($color-blue, 0.06), #ffffff);
+      border-color: rgba($color-blue, 0.15);
+      svg { color: $color-blue; }
     }
 
     &:nth-child(3) {
-      background-color: rgba($color-yellow, 0.18); // 옐로우톤
+      background: linear-gradient(135deg, rgba($color-green, 0.06), #ffffff);
+      border-color: rgba($color-green, 0.15);
+      svg { color: $color-green; }
     }
   }
 }

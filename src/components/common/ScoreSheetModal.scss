@@ -1,0 +1,461 @@
+// src/components/common/ScoreSheetModal.scss
+@use "../../styles/variables" as *;
+
+.scoresheet-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.scoresheet-modal {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.scoresheet-header {
+  padding: 1.2rem 1.5rem 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f2;
+
+  .header-title-box {
+    .header-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: $color-blue;
+      background: rgba($color-blue, 0.1);
+      padding: 3px 8px;
+      border-radius: 12px;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: $color-text-main;
+      margin: 0;
+    }
+  }
+
+  .close-btn {
+    background: #f4f4f6;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: #e6e6e9;
+      color: #111;
+    }
+  }
+}
+
+.scoresheet-body {
+  padding: 1.2rem 1.5rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
+  }
+}
+
+/* 1. 게임 템플릿 선택 칩 */
+.template-selector {
+  .template-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .template-chip {
+    padding: 0.45rem 0.85rem;
+    background: #f5f5f7;
+    border: 1.5px solid transparent;
+    border-radius: 20px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #555;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #ebebee;
+    }
+
+    &.active {
+      background: #1a1a1a;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .template-desc {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 6px;
+  }
+}
+
+/* 2. 참여 멤버 선택 칩 */
+.members-selector {
+  .members-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .member-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.4rem 0.75rem;
+    border-radius: 18px;
+    background: #f7f7f9;
+    border: 1.5px solid #eaeaea;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+
+      &[data-color="red"] { background: $color-red; }
+      &[data-color="blue"] { background: $color-blue; }
+      &[data-color="green"] { background: $color-green; }
+      &[data-color="yellow"] { background: $color-yellow; }
+    }
+
+    &.selected {
+      background: #ffffff;
+      border-color: #1a1a1a;
+      color: #1a1a1a;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+
+      .check-icon {
+        color: #1a1a1a;
+      }
+    }
+  }
+}
+
+/* 3. 점수표 테이블 */
+.sheet-table-wrapper {
+  background: #fbfbfd;
+  border: 1px solid #e8e8ec;
+  border-radius: 18px;
+  overflow-x: auto;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.sheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.85rem;
+
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ededf2;
+  }
+
+  thead {
+    background: #f4f4f7;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    th {
+      font-weight: 800;
+      color: #555;
+    }
+
+    .th-item {
+      text-align: left;
+      min-width: 130px;
+      padding-left: 14px;
+    }
+
+    .th-player {
+      min-width: 76px;
+
+      .player-th-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .p-name {
+        font-size: 0.88rem;
+        font-weight: 900;
+        color: #111;
+      }
+
+      .p-rank-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: #e8e8ec;
+        color: #666;
+
+        &.rank-1 {
+          background: #ffe066;
+          color: #7a5800;
+        }
+      }
+    }
+  }
+
+  tbody {
+    .td-label {
+      text-align: left;
+      padding-left: 14px;
+
+      .item-label-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .item-icon {
+          font-size: 1rem;
+        }
+
+        .label-text {
+          display: flex;
+          flex-direction: column;
+
+          .name {
+            font-weight: 800;
+            color: #222;
+          }
+
+          .hint {
+            font-size: 0.66rem;
+            color: #999;
+          }
+        }
+
+        .btn-del-item {
+          margin-left: auto;
+          background: none;
+          border: none;
+          color: #ccc;
+          cursor: pointer;
+          padding: 2px;
+          &:hover { color: $color-red; }
+        }
+      }
+    }
+
+    .td-input {
+      .score-cell-input {
+        width: 100%;
+        max-width: 65px;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 800;
+        font-family: inherit;
+        padding: 6px 4px;
+        border: 1.5px solid #e0e0e5;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #111;
+        transition: all 0.15s;
+
+        &:focus {
+          outline: none;
+          border-color: $color-blue;
+          box-shadow: 0 0 0 3px rgba($color-blue, 0.15);
+        }
+
+        &::placeholder {
+          color: #bbb;
+          font-weight: 400;
+        }
+      }
+    }
+
+    .td-add-custom {
+      text-align: center;
+      padding: 10px;
+
+      .add-item-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #ffffff;
+        border: 1.5px dashed #ccc;
+        border-radius: 10px;
+        padding: 5px 12px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #666;
+        cursor: pointer;
+        &:hover {
+          border-color: $color-blue;
+          color: $color-blue;
+        }
+      }
+    }
+  }
+
+  tfoot {
+    background: #f8f8fb;
+    font-weight: 900;
+
+    .td-total-label {
+      text-align: left;
+      padding-left: 14px;
+      color: #111;
+      font-size: 0.92rem;
+    }
+
+    .td-total-val {
+      font-size: 1.05rem;
+      color: #333;
+
+      &.is-winner {
+        color: $color-red;
+        background: rgba($color-red, 0.05);
+
+        .total-number {
+          font-weight: 900;
+        }
+      }
+    }
+  }
+}
+
+/* 4. 기록 연동 섹션 */
+.sheet-save-section {
+  background: #f7f7f9;
+  border-radius: 18px;
+  padding: 1rem 1.2rem;
+  border: 1px solid #ebebee;
+
+  .save-options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .reset-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #888;
+      cursor: pointer;
+
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+
+  .save-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .target-record-select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      border: 1.5px solid #ddd;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: #ffffff;
+      color: #222;
+      outline: none;
+
+      &:focus {
+        border-color: $color-blue;
+      }
+    }
+
+    .btn-commit-record {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, #1a1a1a, #333);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      svg {
+        color: #ffde59;
+      }
+    }
+  }
+}

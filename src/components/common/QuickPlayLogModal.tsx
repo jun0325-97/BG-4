@@ -1,6 +1,7 @@
 // src/components/common/QuickPlayLogModal.tsx
 
 import { useState, useMemo, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Search, Check, Trophy } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -22,6 +23,7 @@ function formatDateLabel(dateStr: string) {
 }
 
 export default function QuickPlayLogModal({ isOpen, onClose }: Props) {
+  const navigate = useNavigate();
   const { records, members, boardGames, updateRecord } = useStore();
   const { showAlert } = useAlertStore();
 
@@ -167,6 +169,7 @@ export default function QuickPlayLogModal({ isOpen, onClose }: Props) {
       });
       showAlert("게임 결과가 추가되었습니다! 🎉", "success");
       onClose();
+      navigate(`/archive?id=${selectedRecord.id}`);
     } catch (err: any) {
       showAlert(`저장 실패: ${err.message}`, "error");
     } finally {

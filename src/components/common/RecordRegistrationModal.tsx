@@ -1,6 +1,7 @@
 // src/components/common/RecordRegistrationModal.tsx
 
 import { useState, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Plus, Trash2, Users, Image as ImageIcon, ListOrdered } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -55,6 +56,7 @@ export default function RecordRegistrationModal({
 }: RecordRegistrationModalProps) {
   const { members, boardGames, addRecord, updateRecord, deleteRecord } = useStore();
   const { showAlert, showConfirm } = useAlertStore();
+  const navigate = useNavigate();
 
   const isEditMode = !!editRecord;
 
@@ -268,6 +270,7 @@ export default function RecordRegistrationModal({
         await updateRecord(updated);
         showAlert("기록이 수정되었습니다!", "success");
         onClose();
+        navigate(`/archive?id=${updated.id}`);
       } else {
         const newRecord: GatheringRecord = {
           id: `r-${Date.now()}`,
@@ -285,6 +288,8 @@ export default function RecordRegistrationModal({
         setMemo("");
         setPhotoSlots([]);
         setPlayLogs([emptyLog(members)]);
+        onClose();
+        navigate(`/archive?id=${newRecord.id}`);
       }
     } catch (err: any) {
       console.error("Record registration error:", err);

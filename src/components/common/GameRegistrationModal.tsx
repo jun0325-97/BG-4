@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Image as ImageIcon, Trash2, Search } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function GameRegistrationModal({ isOpen, onClose, editGame }: Props) {
+  const navigate = useNavigate();
   const { members, addGame, updateGame, deleteGame } = useStore();
   const { showAlert, showConfirm } = useAlertStore();
   const isEditMode = !!editGame;
@@ -153,6 +155,7 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
         await updateGame(gameData);
         showAlert(`'${name}' 수정 완료!`, "success");
         onClose();
+        navigate("/library");
       } else {
         await addGame(gameData);
         showAlert(`'${name}' 등록 완료!`, "success");
@@ -166,6 +169,8 @@ export default function GameRegistrationModal({ isOpen, onClose, editGame }: Pro
         setImageFile(null);
         setImageUrl("");
         setDescription("");
+        onClose();
+        navigate("/library");
       }
     } catch (err: any) {
       console.error("Game registration error:", err);
