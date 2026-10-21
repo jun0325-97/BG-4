@@ -259,14 +259,14 @@
 
   /* 아바타 래퍼 */
   .profile-avatar-wrap {
-    width: 54px;
-    height: 54px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
     background: var(--profile-bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     transition: transform 0.2s ease;
     border: 1.5px solid rgba(0, 0, 0, 0.04);
   }
@@ -283,19 +283,11 @@
   }
 
   .profile-name {
-    font-size: 1.05rem;
+    font-size: 1.08rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 2px;
+    margin: 0;
     letter-spacing: -0.01em;
-  }
-
-  .profile-role {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--profile-color);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
   }
 }
 
@@ -309,7 +301,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: #ffffff;
   border: 2px solid #eef2f6;
   border-radius: 16px;
@@ -360,22 +352,11 @@
     box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
   }
 
-  .guest-info {
-    display: flex;
-    flex-direction: column;
-  }
-
   .guest-name {
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 1px;
     letter-spacing: -0.01em;
-  }
-
-  .guest-desc {
-    font-size: 0.74rem;
-    color: #64748b;
   }
 
   .profile-radio {

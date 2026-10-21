@@ -14,7 +14,6 @@ import imgYellow from "../../assets/images/img-yellow-2.png";
 interface ProfileItem {
   id: string;
   name: string;
-  role: string;
   color: string;
   bgColor: string;
   glowColor: string;
@@ -25,7 +24,6 @@ const CREW_PROFILES: ProfileItem[] = [
   {
     id: "youngjun",
     name: "영준",
-    role: "Red Crew",
     color: "#fd5a46",
     bgColor: "rgba(253, 90, 70, 0.1)",
     glowColor: "rgba(253, 90, 70, 0.22)",
@@ -34,7 +32,6 @@ const CREW_PROFILES: ProfileItem[] = [
   {
     id: "gayoung",
     name: "가영",
-    role: "Blue Crew",
     color: "#058cd7",
     bgColor: "rgba(5, 140, 215, 0.1)",
     glowColor: "rgba(5, 140, 215, 0.22)",
@@ -43,7 +40,6 @@ const CREW_PROFILES: ProfileItem[] = [
   {
     id: "yoonhyuk",
     name: "윤혁",
-    role: "Green Crew",
     color: "#00995e",
     bgColor: "rgba(0, 153, 94, 0.1)",
     glowColor: "rgba(0, 153, 94, 0.22)",
@@ -52,7 +48,6 @@ const CREW_PROFILES: ProfileItem[] = [
   {
     id: "hansol",
     name: "한솔",
-    role: "Yellow Crew",
     color: "#e69b00",
     bgColor: "rgba(255, 197, 103, 0.16)",
     glowColor: "rgba(255, 197, 103, 0.28)",
@@ -63,7 +58,6 @@ const CREW_PROFILES: ProfileItem[] = [
 const GUEST_PROFILE: ProfileItem = {
   id: "guest",
   name: "게스트",
-  role: "Guest Mode",
   color: "#6366f1",
   bgColor: "rgba(99, 102, 241, 0.1)",
   glowColor: "rgba(99, 102, 241, 0.2)",
@@ -208,9 +202,8 @@ export default function Login() {
                         />
                       </div>
 
-                      {/* 이름 & 역할 */}
+                      {/* 이름 */}
                       <span className="profile-name">{profile.name}</span>
-                      <span className="profile-role">{profile.role}</span>
                     </button>
                   );
                 })}
@@ -237,10 +230,7 @@ export default function Login() {
                     <div className="guest-avatar-icon">
                       <Sparkles size={18} />
                     </div>
-                    <div className="guest-info">
-                      <span className="guest-name">게스트 (Guest)</span>
-                      <span className="guest-desc">기록 둘러보기 및 방문자 모드</span>
-                    </div>
+                    <span className="guest-name">게스트 (Guest)</span>
                   </div>
 
                   <span className={`profile-radio ${selectedProfileId === GUEST_PROFILE.id ? "checked" : ""}`}>
