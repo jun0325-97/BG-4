@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, Pencil, Dices, LayoutGrid, LayoutList, Calculator } from "lucide-react";
+import { Search, X, Users, Clock, Image as ImageIcon, SlidersHorizontal, Trash2, Pencil, Dices, LayoutGrid, LayoutList } from "lucide-react";
+// import { Calculator } from "lucide-react"; // [점수 계산기 기능] 추후 작업 시 주석 해제
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAlertStore } from "../../store/useAlertStore";
@@ -8,7 +9,7 @@ import { BoardGame } from "../../types";
 import { getKoreanName } from "../../utils/getKoreanName";
 import GameRegistrationModal from "../../components/common/GameRegistrationModal";
 import GamePickerModal from "../../components/common/GamePickerModal";
-import ScoreSheetModal from "../../components/common/ScoreSheetModal";
+// import ScoreSheetModal from "../../components/common/ScoreSheetModal"; // [점수 계산기 기능] 추후 작업 시 주석 해제
 import PageTransition from "../../components/common/PageTransition";
 import "./Library.scss";
 
@@ -62,8 +63,8 @@ export default function Library() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isPickerModalOpen, setIsPickerModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [isScoreSheetOpen, setIsScoreSheetOpen] = useState(false);
-  const [scoreSheetGameName, setScoreSheetGameName] = useState("");
+  // const [isScoreSheetOpen, setIsScoreSheetOpen] = useState(false); // [점수 계산기 기능] 추후 작업 시 주석 해제
+  // const [scoreSheetGameName, setScoreSheetGameName] = useState("");
 
   const currentUsername = user?.email?.split("@")[0] || "";
   const currentKoreanName = getKoreanName(currentUsername);
@@ -474,7 +475,7 @@ export default function Library() {
                 <p className="modal-desc">{selectedGame.description}</p>
               )}
 
-              {/* 실시간 종이 점수 계산기 바로가기 */}
+              {/* [점수 계산기 기능] 추후 작업 시 주석 해제
               <div className="modal-tool-actions">
                 <button
                   type="button"
@@ -488,6 +489,7 @@ export default function Library() {
                   <span>이 게임 점수 계산기 열기</span>
                 </button>
               </div>
+              */}
 
               {currentUser && currentUser.id === selectedGame.ownerId && (
                 <div className="modal-actions">
@@ -519,12 +521,13 @@ export default function Library() {
         onClose={() => setIsPickerModalOpen(false)}
       />
 
-      {/* 실시간 점수 계산기 모달 */}
+      {/* [점수 계산기 기능] 추후 작업 시 주석 해제
       <ScoreSheetModal
         isOpen={isScoreSheetOpen}
         onClose={() => setIsScoreSheetOpen(false)}
         initialGameName={scoreSheetGameName}
       />
+      */}
       </div>
     </PageTransition>
   );

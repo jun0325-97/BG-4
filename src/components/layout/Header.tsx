@@ -1,7 +1,8 @@
 // src/components/layout/Header.tsx
 
 import { Link } from "react-router-dom";
-import { Calculator, Timer } from "lucide-react";
+// import { Calculator } from "lucide-react"; // [점수 계산기 기능] 추후 고도화 작업 시 주석 해제
+import { Timer } from "lucide-react";
 import "./Header.scss";
 
 interface HeaderProps {
@@ -9,7 +10,7 @@ interface HeaderProps {
   onOpenTurnTimer?: () => void;
 }
 
-export default function Header({ onOpenScoreSheet, onOpenTurnTimer }: HeaderProps) {
+export default function Header({ onOpenTurnTimer }: HeaderProps) {
   return (
     <header className="global-header">
       <div className="logo">
@@ -20,6 +21,7 @@ export default function Header({ onOpenScoreSheet, onOpenTurnTimer }: HeaderProp
       </div>
 
       <div className="header-actions">
+        {/* [점수 계산기 기능] 추후 작업 시 주석 해제
         <button
           type="button"
           className="header-tool-btn"
@@ -30,6 +32,7 @@ export default function Header({ onOpenScoreSheet, onOpenTurnTimer }: HeaderProp
           <Calculator size={15} />
           <span>점수판</span>
         </button>
+        */}
 
         <button
           type="button"

@@ -8,7 +8,7 @@ import BottomSheet from "../common/BottomSheet";
 import GameRegistrationModal from "../common/GameRegistrationModal";
 import RecordRegistrationModal from "../common/RecordRegistrationModal";
 import QuickPlayLogModal from "../common/QuickPlayLogModal";
-import ScoreSheetModal from "../common/ScoreSheetModal";
+// import ScoreSheetModal from "../common/ScoreSheetModal"; // [점수 계산기 기능] 추후 작업 시 주석 해제
 import TurnTimerModal from "../common/TurnTimerModal";
 import { Gamepad2, PenLine, Trophy } from "lucide-react";
 
@@ -17,7 +17,7 @@ export default function Layout() {
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isQuickPlayLogOpen, setIsQuickPlayLogOpen] = useState(false);
-  const [isScoreSheetOpen, setIsScoreSheetOpen] = useState(false);
+  // const [isScoreSheetOpen, setIsScoreSheetOpen] = useState(false); // [점수 계산기 기능] 추후 작업 시 주석 해제
   const [isTurnTimerOpen, setIsTurnTimerOpen] = useState(false);
 
   const handleOpenGameModal = () => {
@@ -35,9 +35,11 @@ export default function Layout() {
     setIsQuickPlayLogOpen(true);
   };
 
+  /* [점수 계산기 기능] 추후 작업 시 주석 해제
   const handleOpenScoreSheet = () => {
     setIsScoreSheetOpen(true);
   };
+  */
 
   const handleOpenTurnTimer = () => {
     setIsTurnTimerOpen(true);
@@ -46,7 +48,7 @@ export default function Layout() {
   return (
     <div className="layout-wrapper">
       <Header
-        onOpenScoreSheet={handleOpenScoreSheet}
+        // onOpenScoreSheet={handleOpenScoreSheet}
         onOpenTurnTimer={handleOpenTurnTimer}
       />
 
@@ -102,10 +104,12 @@ export default function Layout() {
         onClose={() => setIsQuickPlayLogOpen(false)}
       />
 
+      {/* [점수 계산기 기능] 추후 작업 시 주석 해제
       <ScoreSheetModal
         isOpen={isScoreSheetOpen}
         onClose={() => setIsScoreSheetOpen(false)}
       />
+      */}
 
       <TurnTimerModal
         isOpen={isTurnTimerOpen}
