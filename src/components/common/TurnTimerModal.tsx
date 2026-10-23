@@ -11,7 +11,6 @@ import {
   FastForward,
   Timer,
 } from "lucide-react";
-import { useStore } from "../../store/useStore";
 import {
   playTurnPassSound,
   playWarningBeep,
@@ -19,18 +18,6 @@ import {
   triggerHaptic,
 } from "../../utils/soundEffects";
 import "./TurnTimerModal.scss";
-
-import imgRed from "../../assets/images/img-red-1.png";
-import imgBlue from "../../assets/images/img-blue-1.png";
-import imgGreen from "../../assets/images/img-green-1.png";
-import imgYellow from "../../assets/images/img-yellow-1.png";
-
-const CHARACTER_IMAGES: Record<string, string> = {
-  red: imgRed,
-  blue: imgBlue,
-  green: imgGreen,
-  yellow: imgYellow,
-};
 
 interface TurnTimerModalProps {
   isOpen: boolean;
@@ -40,13 +27,11 @@ interface TurnTimerModalProps {
 const TURN_PRESETS = [30, 45, 60, 90, 120, 180];
 
 export default function TurnTimerModal({ isOpen, onClose }: TurnTimerModalProps) {
-  const { members } = useStore();
-
   const [isMuted, setIsMuted] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [turnLimitSec, setTurnLimitSec] = useState<number>(60);
   const [turnRemainingSec, setTurnRemainingSec] = useState<number>(60);
-  const [currentMemberIndex, setCurrentMemberIndex] = useState<number>(0);
+  const [turnNumber, setTurnNumber] = useState<number>(1);
   const [isTimeOut, setIsTimeOut] = useState(false);
 
   // 모달 열릴 때 초기화
@@ -85,21 +70,30 @@ export default function TurnTimerModal({ isOpen, onClose }: TurnTimerModalProps)
 
   if (!isOpen) return null;
 
-  const currentMember = members[currentMemberIndex] || members[0];
-
-  // ── 다음 턴 넘기기 ────────────────────────────────────────────
-  const handleNextTurn = () => {
-    playTurnPassSound(isMuted);
-    setCurrentMemberIndex((prev) => (prev + 1) % members.length);
-    setTurnRemainingSec(turnLimitSec);
-    setIsTimeOut(false);
+  // ── 재생 / 일시정지 토글 ─────────────────────────────────────
+  const handleTogglePlay = () => {
+    triggerHaptic(15);
+    setIsRunning((prev) => !prev);
   };
 
-  // ── 턴 타이머 리셋 ───────────────────────────────────────────
+  // ── 다음 턴 넘기기 (시간 리셋 & 턴 카운트업) ─────────────────
+  const handleNextTurn = () => {
+    playTurnPassSound(isMuted);
+    triggerHaptic(25);
+    setTurnNumber((prev) => prev + 1);
+    setTurnRemainingSec(turnLimitSec);
+    setIsTimeOut(false);
+    if (!isRunning) {
+      setIsRunning(true);
+    }
+  };
+
+  // ── 전체 리셋 ───────────────────────────────────────────────
   const handleReset = () => {
     triggerHaptic(20);
     setIsRunning(false);
     setTurnRemainingSec(turnLimitSec);
+    setTurnNumber(1);
     setIsTimeOut(false);
   };
 
@@ -112,6 +106,7 @@ export default function TurnTimerModal({ isOpen, onClose }: TurnTimerModalProps)
 
   const progressPercent = Math.max(0, (turnRemainingSec / turnLimitSec) * 100);
   const isUrgent = turnRemainingSec <= 10 && turnRemainingSec > 0;
+  const isPaused = !isRunning && turnRemainingSec > 0 && turnRemainingSec < turnLimitSec;
 
   return (
     <div className="turntimer-overlay" onClick={onClose}>
@@ -149,6 +144,7 @@ export default function TurnTimerModal({ isOpen, onClose }: TurnTimerModalProps)
                   setTurnRemainingSec(sec);
                   setIsRunning(false);
                   setIsTimeOut(false);
+                  setTurnNumber(1);
                 }}
               >
                 {sec >= 60 ? `${sec / 60}분` : `${sec}초`}
@@ -156,62 +152,78 @@ export default function TurnTimerModal({ isOpen, onClose }: TurnTimerModalProps)
             ))}
           </div>
 
-          {/* 메인 인터랙티브 링 영역 (탭하면 턴 넘김) */}
+          {/* 메인 서클: 탭하여 일시정지 / 계속하기 토글 */}
           <div
             className={`timer-tap-area ${isUrgent ? "urgent-pulse" : ""} ${isTimeOut ? "timeout-shake" : ""}`}
-            onClick={isRunning ? handleNextTurn : () => setIsRunning(true)}
-            data-color={currentMember.color}
+            onClick={handleTogglePlay}
+            title={isRunning ? "탭하여 일시정지" : "탭하여 시작"}
           >
             <div className="circular-progress">
               <svg viewBox="0 0 120 120" className="progress-ring">
                 <circle className="progress-ring__bg" cx="60" cy="60" r="52" />
                 <circle
-                  className="progress-ring__bar"
+                  className={`progress-ring__bar ${isUrgent ? "urgent" : ""}`}
                   cx="60"
                   cy="60"
                   r="52"
                   strokeDasharray={326.7}
                   strokeDashoffset={326.7 * (1 - progressPercent / 100)}
-                  data-color={currentMember.color}
                 />
               </svg>
 
               <div className="timer-inner-content">
-                <div className="member-avatar-wrap" data-color={currentMember.color}>
-                  <img
-                    src={CHARACTER_IMAGES[currentMember.color]}
-                    alt={currentMember.name}
-                    className="member-avatar"
-                  />
+                {/* 턴 뱃지 */}
+                <div className={`turn-badge ${isUrgent ? "urgent" : ""}`}>
+                  <span className="turn-label">TURN</span>
+                  <span className="turn-number">#{turnNumber}</span>
                 </div>
 
-                <span className="member-name-label">{currentMember.name}의 턴!</span>
+                {/* 카운트다운 숫자 */}
                 <div className={`countdown-number ${isUrgent ? "urgent" : ""}`}>
                   {isTimeOut ? "타임오버!" : formatTime(turnRemainingSec)}
                 </div>
 
-                <span className="tap-hint">
-                  {isRunning ? "화면 탭 시 다음 사람으로 턴 넘김 ➔" : "탭하여 타이머 시작 ▶"}
-                </span>
+                {/* 상태 힌트 */}
+                <div className="tap-hint">
+                  {!isRunning ? (
+                    <span className="hint-paused">
+                      {isPaused ? "일시정지 중 ⏸" : "탭하여 시작 ▶"}
+                    </span>
+                  ) : (
+                    <span>탭하여 일시정지 ⏸</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* 하단 제어 버튼 */}
-          <div className="timer-controls">
-            <button className="control-btn" onClick={handleReset} title="리셋">
-              <RotateCcw size={18} />
-            </button>
-
+          {/* ── 하단 컨트롤: [일시정지] 와 [다음 턴 넘김] 명확한 분리 ── */}
+          <div className="timer-dual-controls">
+            {/* 1턴 초기화 리셋 버튼 */}
             <button
-              className={`control-btn play-btn ${isRunning ? "pause" : "play"}`}
-              onClick={() => setIsRunning(!isRunning)}
+              className="control-icon-btn"
+              onClick={handleReset}
+              title="1턴부터 초기화"
             >
-              {isRunning ? <Pause size={24} /> : <Play size={24} className="play-icon-offset" />}
+              <RotateCcw size={17} />
             </button>
 
-            <button className="control-btn" onClick={handleNextTurn} title="다음 턴 넘기기">
+            {/* 일시정지 / 계속하기 버튼 */}
+            <button
+              className={`action-btn pause-btn ${!isRunning ? "is-paused" : ""}`}
+              onClick={handleTogglePlay}
+            >
+              {isRunning ? <Pause size={17} /> : <Play size={17} />}
+              <span>{isRunning ? "일시정지" : "계속하기"}</span>
+            </button>
+
+            {/* 다음 턴 넘김 메인 액션 버튼 */}
+            <button
+              className="action-btn next-turn-btn"
+              onClick={handleNextTurn}
+            >
               <FastForward size={18} />
+              <span>다음 턴 넘김</span>
             </button>
           </div>
         </div>

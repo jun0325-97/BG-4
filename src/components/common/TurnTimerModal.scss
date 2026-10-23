@@ -4,8 +4,9 @@
 .turntimer-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -15,15 +16,15 @@
 }
 
 .turntimer-modal {
-  background: #16161a;
+  background: #14161d;
   color: #ffffff;
   width: 100%;
-  max-width: 480px;
+  max-width: 440px;
   border-radius: 28px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -31,7 +32,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 1.4rem;
+  padding: 1.1rem 1.4rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   .timer-title-box {
@@ -44,7 +45,7 @@
     }
 
     .title-text {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 900;
       color: #ffffff;
       margin: 0;
@@ -98,7 +99,7 @@
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #888;
+    color: #94a3b8;
     font-size: 0.8rem;
     font-weight: 800;
     cursor: pointer;
@@ -113,7 +114,7 @@
       background: $color-blue;
       color: #fff;
       border-color: transparent;
-      box-shadow: 0 0 14px rgba($color-blue, 0.4);
+      box-shadow: 0 0 14px rgba($color-blue, 0.45);
     }
   }
 }
@@ -127,7 +128,7 @@
 
 .timer-tap-area {
   width: 100%;
-  max-width: 320px;
+  max-width: 310px;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -137,14 +138,14 @@
   margin: 1.2rem 0;
   position: relative;
   border-radius: 50%;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
 
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
   }
 
   &.urgent-pulse {
-    animation: urgentGlow 1s infinite alternate;
+    animation: urgentGlow 0.9s infinite alternate;
   }
 
   &.timeout-shake {
@@ -157,7 +158,7 @@
     box-shadow: 0 0 20px rgba(253, 90, 70, 0.2);
   }
   to {
-    box-shadow: 0 0 50px rgba(253, 90, 70, 0.6);
+    box-shadow: 0 0 50px rgba(253, 90, 70, 0.65);
   }
 }
 
@@ -190,12 +191,13 @@
       fill: none;
       stroke-width: 8;
       stroke-linecap: round;
-      transition: stroke-dashoffset 0.8s ease;
+      stroke: $color-blue;
+      transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease;
 
-      &[data-color="red"] { stroke: $color-red; }
-      &[data-color="blue"] { stroke: $color-blue; }
-      &[data-color="green"] { stroke: $color-green; }
-      &[data-color="yellow"] { stroke: $color-yellow; }
+      &.urgent {
+        stroke: $color-red;
+        filter: drop-shadow(0 0 8px rgba($color-red, 0.85));
+      }
     }
   }
 
@@ -206,94 +208,154 @@
     align-items: center;
     justify-content: center;
 
-    .member-avatar-wrap {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      padding: 4px;
-      margin-bottom: 6px;
-      background: rgba(255, 255, 255, 0.1);
+    // 턴 카운터 뱃지
+    .turn-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 8px;
+      transition: all 0.25s ease;
 
-      &[data-color="red"] { border: 2px solid $color-red; }
-      &[data-color="blue"] { border: 2px solid $color-blue; }
-      &[data-color="green"] { border: 2px solid $color-green; }
-      &[data-color="yellow"] { border: 2px solid $color-yellow; }
+      .turn-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #94a3b8;
+        letter-spacing: 0.08em;
+      }
 
-      .member-avatar {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+      .turn-number {
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: $color-blue;
+        letter-spacing: -0.02em;
+        transition: color 0.25s ease;
+      }
+
+      &.urgent {
+        background: rgba($color-red, 0.15);
+        border-color: rgba($color-red, 0.4);
+
+        .turn-number {
+          color: $color-red;
+        }
       }
     }
 
-    .member-name-label {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #ccc;
-      letter-spacing: 0.5px;
-    }
-
     .countdown-number {
-      font-size: 3.2rem;
+      font-size: 3.4rem;
       font-weight: 900;
-      letter-spacing: -1px;
+      letter-spacing: -1.5px;
       color: #ffffff;
-      margin: 4px 0;
+      margin: 2px 0 6px;
       font-variant-numeric: tabular-nums;
+      line-height: 1;
 
       &.urgent {
         color: $color-red;
-        text-shadow: 0 0 20px rgba($color-red, 0.8);
+        text-shadow: 0 0 24px rgba($color-red, 0.85);
       }
     }
 
     .tap-hint {
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      color: #777;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 10px;
+      border-radius: 12px;
+      letter-spacing: -0.01em;
     }
   }
 }
 
-.timer-controls {
+.timer-dual-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 0.5rem;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 0.6rem;
 
-  .control-btn {
-    width: 48px;
-    height: 48px;
+  .control-icon-btn {
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.08);
-    border: none;
-    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    flex-shrink: 0;
     transition: all 0.15s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.18);
-      transform: scale(1.06);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      transform: scale(1.05);
     }
 
-    &.play-btn {
-      width: 64px;
-      height: 64px;
-      background: #ffffff;
-      color: #111;
-      box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
-
-      .play-icon-offset {
-        margin-left: 3px;
-      }
-
-      &:hover {
-        background: #f0f0f0;
-        transform: scale(1.08);
-      }
+    &:active {
+      transform: scale(0.95);
     }
   }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 50px;
+    border-radius: 25px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+    user-select: none;
+
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+
+  .pause-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    &.is-paused {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.25);
+    }
+  }
+
+  .next-turn-btn {
+    flex: 1.4;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+
+    &:hover {
+      background: linear-gradient(135deg, #0369a1, #075985);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.55);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
